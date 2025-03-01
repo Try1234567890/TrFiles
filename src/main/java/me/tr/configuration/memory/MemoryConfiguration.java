@@ -1,13 +1,12 @@
 package me.tr.configuration.memory;
 
 import me.tr.configuration.Configuration;
-import me.tr.configuration.Options;
 
 import java.util.Map;
 
 public class MemoryConfiguration extends MemorySection implements Configuration {
     protected Configuration defaults;
-    protected MemoryConfigurationOptions options;
+    protected MemoryOptions options;
 
     @Override
     public void addDefault(String path, Object value) {
@@ -40,17 +39,17 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
         return this.defaults;
     }
 
-    @Override
-    public Options options() {
-        if (options == null) {
-            options = new MemoryConfigurationOptions(this);
-        }
-        return options;
-    }
-
     public MemoryConfiguration() {}
 
     public MemoryConfiguration(Configuration defaults) {
         this.defaults = defaults;
+    }
+
+    @Override
+    public MemoryOptions options() {
+        if (options == null) {
+            options = new MemoryOptions(this);
+        }
+        return options;
     }
 }

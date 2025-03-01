@@ -1,8 +1,10 @@
 package me.tr.configuration.file;
 
+import me.tr.configuration.Section;
 import me.tr.configuration.memory.MemoryConfiguration;
 
 import java.io.*;
+import java.util.Map;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
 
@@ -26,6 +28,18 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             writer.write(data);
         } catch (IOException e) {
             // todo logger
+        }
+    }
+
+    protected void convertMapsToSections(Map<?, ?> input, Section section) {
+        for (Map.Entry<?, ?> entry : input.entrySet()) {
+            String key = entry.getKey().toString();
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                convertMapsToSections((Map<?, ?>) value, section.createSection(key));
+            } else {
+                section.set(key, value);
+            }
         }
     }
 

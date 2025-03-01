@@ -12,7 +12,7 @@ import java.util.List;
 public interface Section {
     public Set<String> getKeys(boolean recursive);
 
-    public Set<Object> getValues(boolean recursive);
+    public Map<String, Object> getValues(boolean recursive);
 
     public boolean contains(String path);
 

@@ -2,6 +2,7 @@ package me.tr.configuration.file.yaml;
 
 import me.tr.configuration.Section;
 import me.tr.configuration.file.FileConfiguration;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
@@ -9,13 +10,12 @@ import java.io.File;
 import java.util.Map;
 
 public class YamlConfiguration extends FileConfiguration {
-    private final Yaml yaml = new Yaml();
-    private final String BLANK_FILE = "{}\n";
+    private Yaml yaml = new Yaml();
 
 
     @Override
     protected String saveToString() {
-        return yaml.dump(map.toString());
+        return yaml.dump(getValues(true));
     }
 
     @Override
@@ -36,17 +36,18 @@ public class YamlConfiguration extends FileConfiguration {
         return;
     }
 
-    protected void convertMapsToSections(Map<?, ?> input, Section section) {
-        for (Map.Entry<?, ?> entry : input.entrySet()) {
-            String key = entry.getKey().toString();
-            Object value = entry.getValue();
-            if (value instanceof Map) {
-                convertMapsToSections((Map<?, ?>) value, section.createSection(key));
-            } else {
-                section.set(key, value);
-            }
-        }
+    private YamlConfiguration(File file, DumperOptions options) {
+        options.setDefaultFlowStyle(options.getDefaultFlowStyle());
+        options.setIndent(options.getIndent());
+        yaml = new Yaml(options);
+        load(file);
     }
+
+    private YamlConfiguration(File file) {
+        load(file);
+    }
+
+    private YamlConfiguration() {}
 
     public static YamlConfiguration loadConfiguration(File file) {
         YamlConfiguration config = new YamlConfiguration();
@@ -59,5 +60,9 @@ public class YamlConfiguration extends FileConfiguration {
         return loadConfiguration(new File(file));
     }
 
+    @Override
+    public YamlOptions options() {
+        return new YamlOptions(this);
+    }
 
 }

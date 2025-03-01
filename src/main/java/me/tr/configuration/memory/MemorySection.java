@@ -72,10 +72,28 @@ public class MemorySection implements Section {
     }
 
     @Override
-    public Set<Object> getValues(boolean recursive) {
-        Set<Object> output = new HashSet<>();
-        for (String key : getKeys(recursive)) {
-            output.add(map.get(key));
+    public Map<String, Object> getValues(boolean recursive) {
+        Map<String, Object> output = new LinkedHashMap<>();
+        for (String key : map.keySet()) {
+            Object value = map.get(key);
+            if (value instanceof Section subSection && recursive) {
+                output.put(key, convertSectionToMap(subSection));
+            } else {
+                output.put(key, value);
+            }
+        }
+        return output;
+    }
+
+    private Map<String, Object> convertSectionToMap(Section section) {
+        Map<String, Object> output = new LinkedHashMap<>();
+        for (String key : section.getKeys(true)) {
+            Object value = section.get(key);
+            if (value instanceof Section subSection) {
+                output.put(key, convertSectionToMap(subSection));
+            } else {
+                output.put(key, value);
+            }
         }
         return output;
     }
@@ -112,7 +130,7 @@ public class MemorySection implements Section {
         if (section == this) {
             return map.get(key);
         }
-        return section.get(key, null);
+        return section.get(key);
     }
 
     @Override
