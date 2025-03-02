@@ -43,8 +43,19 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         }
     }
 
+    protected abstract String buildHeader();
+
+    protected abstract String buildFooter();
 
     protected abstract String saveToString();
 
     protected abstract void loadFromString(String contents);
+
+    @Override
+    public FileOptions options() {
+        if (options == null) {
+            options = new FileOptions(this);
+        }
+        return (FileOptions) options;
+    }
 }

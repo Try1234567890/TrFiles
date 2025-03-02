@@ -1,5 +1,9 @@
 package me.tr.configuration;
 
+/**
+ * Various settings for controlling the input and output of a {@link
+ * Configuration}
+ */
 public class Options {
     private char pathSeparator = '.';
     private boolean copyDefault = false;
@@ -30,10 +34,4 @@ public class Options {
         this.copyDefault = copyDefault;
         return this;
     }
-
-
-
-
-
-
 }
