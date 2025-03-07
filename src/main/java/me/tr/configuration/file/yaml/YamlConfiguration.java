@@ -15,15 +15,8 @@ public class YamlConfiguration extends FileConfiguration {
     private DumperOptions yamlOptions;
     private Yaml yaml;
 
-    public YamlConfiguration() {
-        this.yamlOptions = new DumperOptions();
-        this.yaml = new Yaml(yamlOptions);
-    }
-
     @Override
     protected String saveToString() {
-        this.yamlOptions = loadOptions();
-        this.yaml = new Yaml(yamlOptions);
         String header = buildHeader();
         String footer = buildFooter();
         String dump = yaml.dump(getValues(true));
@@ -56,17 +49,28 @@ public class YamlConfiguration extends FileConfiguration {
         }
     }
 
-    private YamlConfiguration(File file, DumperOptions options) {
-        this();
+    public YamlConfiguration(File file, DumperOptions options) {
         options.setDefaultFlowStyle(options.getDefaultFlowStyle());
         options.setIndent(options.getIndent());
         yaml = new Yaml(options);
         loadConfiguration(file);
     }
 
-    private YamlConfiguration(File file) {
-        this();
+    public YamlConfiguration() {
+        yamlOptions = new DumperOptions();
+        yamlOptions.setDefaultFlowStyle(options().flowStyle());
+        yamlOptions.setIndent(options().indent());
+        yaml = new Yaml(yamlOptions);
+    }
+
+    public YamlConfiguration(File file) {
         loadConfiguration(file);
+    }
+
+
+
+    public static YamlConfiguration loadConfiguration(String file) {
+        return loadConfiguration(new File(file));
     }
 
     public static YamlConfiguration loadConfiguration(File file) {
@@ -98,24 +102,11 @@ public class YamlConfiguration extends FileConfiguration {
         return sb.toString();
     }
 
-    public static YamlConfiguration loadConfiguration(String file) {
-        return loadConfiguration(new File(file));
-    }
-
     @Override
     public YamlOptions options() {
         if (options == null) {
             options = new YamlOptions(this);
         }
         return (YamlOptions) options;
-    }
-
-    private DumperOptions loadOptions() {
-        if (yamlOptions == null) {
-            yamlOptions = new DumperOptions();
-        }
-        yamlOptions.setIndent(options().indent());
-        yamlOptions.setDefaultFlowStyle(options().flowStyle());
-        return yamlOptions;
     }
 }

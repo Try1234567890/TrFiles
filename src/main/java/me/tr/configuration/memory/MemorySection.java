@@ -59,23 +59,26 @@ public class MemorySection implements Section {
 
 
     @Override
-    public Set<String> getKeys(boolean recursive) {
-        Set<String> output = new HashSet<>();
+    public List<String> getKeys(boolean recursive) {
+        List<String> output = new ArrayList<>();
+        System.out.println(map);
         for (String key : map.keySet()) {
             output.add(key);
             Object keyValue = map.get(key);
-            if (keyValue instanceof Section section && (recursive)) {
+            if (keyValue instanceof Section section && recursive) {
                 output.addAll(section.getKeys(true));
             }
         }
+        System.out.println(output);
         return output;
     }
 
     @Override
     public Map<String, Object> getValues(boolean recursive) {
         Map<String, Object> output = new LinkedHashMap<>();
-        for (String key : map.keySet()) {
-            Object value = map.get(key);
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
             if (value instanceof Section subSection && recursive) {
                 output.put(key, convertSectionToMap(subSection));
             } else {
@@ -84,10 +87,10 @@ public class MemorySection implements Section {
         }
         return output;
     }
-
+    
     private Map<String, Object> convertSectionToMap(Section section) {
         Map<String, Object> output = new LinkedHashMap<>();
-        for (String key : section.getKeys(true)) {
+        for (String key : section.getKeys(false)) {
             Object value = section.get(key);
             if (value instanceof Section subSection) {
                 output.put(key, convertSectionToMap(subSection));
@@ -191,15 +194,18 @@ public class MemorySection implements Section {
         }
         final char separator = root.options().pathSeparator();
         Section section = this;
-        int separatorIndex = -1;
-        int separatorLength;
-        while ((separatorIndex = path.indexOf(separator, separatorLength = separatorIndex + 1)) != -1) {
-            Section subSection = section.getSection(path.substring(separatorIndex));
-            if (subSection != null) {
+        int separatorIndex = -1, lengthBeforeSeparator;
+        while ((separatorIndex = path.indexOf(separator, lengthBeforeSeparator = separatorIndex + 1)) != -1) {
+            String node = path.substring(lengthBeforeSeparator, separatorIndex);
+            Section subSection = section.getSection(node);
+            if (subSection == null) {
+                section = section.createSection(node);
+            } else {
                 section = subSection;
             }
         }
-        String key = path.substring(separatorLength);
+
+        String key = path.substring(lengthBeforeSeparator);
         if (section == this) {
             Section result = new MemorySection(this, key);
             map.put(key, result);
@@ -617,7 +623,7 @@ public class MemorySection implements Section {
      * root {@link Configuration}.
      *
      * @param section Section to create a path for.
-     * @param key Name of the specified section.
+     * @param key     Name of the specified section.
      * @return Full path of the section from its root.
      */
     public static String createPath(Section section, String key) {
@@ -628,8 +634,8 @@ public class MemorySection implements Section {
      * Creates a relative path to the given {@link Section} from
      * the given relative section.
      *
-     * @param section Section to create a path for.
-     * @param key Name of the specified section.
+     * @param section    Section to create a path for.
+     * @param key        Name of the specified section.
      * @param relativeTo Section to create the path relative to.
      * @return Full path of the section from its root.
      */

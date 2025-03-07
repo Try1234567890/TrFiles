@@ -10,7 +10,7 @@ import java.util.List;
  * Represents a section of a {@link Configuration}
  */
 public interface Section {
-    public Set<String> getKeys(boolean recursive);
+    public List<String> getKeys(boolean recursive);
 
     public Map<String, Object> getValues(boolean recursive);
 
