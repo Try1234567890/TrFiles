@@ -108,7 +108,9 @@ public class FileManager {
     public @Nullable File createFile(File file) {
         if (file.exists()) return file;
         try {
-            if (file.createNewFile()) return file;
+            createDirectory(file.getPath());
+            if (file.createNewFile())
+                return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -117,5 +119,22 @@ public class FileManager {
 
     public @Nullable File createFile(String file) {
         return createFile(new File(file));
+    }
+
+    public void createDirectory(String path) {
+        int separatorIndex = -1, lengthBeforeSeparator;
+        String currentPath = "";
+        while ((separatorIndex = path.indexOf(File.separator, lengthBeforeSeparator = separatorIndex + 1)) != -1) {
+            String dir = path.substring(lengthBeforeSeparator, separatorIndex);
+            currentPath += dir + File.separator;
+            File file = new File(currentPath);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        }
+    }
+
+    public void createDirectory(File path) {
+        createDirectory(path.getPath());
     }
 }
