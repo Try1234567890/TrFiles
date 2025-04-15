@@ -9,6 +9,9 @@ import org.yaml.snakeyaml.error.YAMLException;
 import java.io.File;
 import java.util.Map;
 
+/**
+ * This class represents the extension of FileConfiguration File for YAML.
+ */
 public class YamlConfiguration extends FileConfiguration {
     private final String BLANK_FILE = "{}\n";
     private final String COMMENT_PREFIX = "# ";
@@ -49,14 +52,23 @@ public class YamlConfiguration extends FileConfiguration {
         }
     }
 
+    @Override
+    protected void reload(File file) {
+        map.clear();
+        loadConfiguration(file);
+    }
+
+    @Override
+    protected void reload() {
+        reload(getFile());
+    }
+
     public YamlConfiguration(File file, DumperOptions options) {
-        options.setDefaultFlowStyle(options.getDefaultFlowStyle());
-        options.setIndent(options.getIndent());
         yaml = new Yaml(options);
         loadConfiguration(file);
     }
 
-    public YamlConfiguration() {
+    protected YamlConfiguration() {
         yamlOptions = new DumperOptions();
         yamlOptions.setDefaultFlowStyle(options().flowStyle());
         yamlOptions.setIndent(options().indent());
@@ -66,7 +78,6 @@ public class YamlConfiguration extends FileConfiguration {
     public YamlConfiguration(File file) {
         loadConfiguration(file);
     }
-
 
 
     public static YamlConfiguration loadConfiguration(String file) {
