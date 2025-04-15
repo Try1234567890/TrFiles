@@ -12,6 +12,7 @@ public class MemorySection implements Section {
     protected final Map<String, Object> map = new LinkedHashMap<>();
     private final Configuration root;
     private final Section parent;
+    private final String fullPath;
     private final String currentPath;
     public final String name;
 
@@ -21,8 +22,9 @@ public class MemorySection implements Section {
         }
         this.currentPath = path;
         this.parent = parent;
-        this.name = createPath(parent, path);
+        this.fullPath = createPath(parent, path);
         this.root = parent.getRoot();
+        this.name = currentPath.substring(currentPath.lastIndexOf(root.options().pathSeparator()) + 1);
     }
 
 
@@ -32,6 +34,7 @@ public class MemorySection implements Section {
         }
         this.currentPath = "";
         this.name = "";
+        this.fullPath = "";
         this.parent = null;
         this.root = (Configuration) this;
     }
@@ -57,11 +60,14 @@ public class MemorySection implements Section {
         return parent;
     }
 
+    @Override
+    public String getFullPath() {
+        return fullPath;
+    }
 
     @Override
     public List<String> getKeys(boolean recursive) {
         List<String> output = new ArrayList<>();
-        System.out.println(map);
         for (String key : map.keySet()) {
             output.add(key);
             Object keyValue = map.get(key);
@@ -69,7 +75,6 @@ public class MemorySection implements Section {
                 output.addAll(section.getKeys(true));
             }
         }
-        System.out.println(output);
         return output;
     }
 
@@ -87,7 +92,7 @@ public class MemorySection implements Section {
         }
         return output;
     }
-    
+
     private Map<String, Object> convertSectionToMap(Section section) {
         Map<String, Object> output = new LinkedHashMap<>();
         for (String key : section.getKeys(false)) {
@@ -162,10 +167,10 @@ public class MemorySection implements Section {
         int separatorIndex = -1, separatorLength;
         Section section = this;
         while ((separatorIndex = path.indexOf(separator, separatorLength = separatorIndex + 1)) != -1) {
-            section = section.getSection(path.substring(separatorLength, separatorIndex));
-            if (section == null) {
-                return;
-            }
+            String sectionKey = path.substring(separatorLength, separatorIndex);
+            section = section.getSection(sectionKey);
+            if (section == null)
+                section = createSection(sectionKey);
         }
         String key = path.substring(separatorLength);
         if (section == this) {
@@ -283,6 +288,24 @@ public class MemorySection implements Section {
     public boolean isDouble(String path) {
         Object val = get(path);
         return val instanceof Double;
+    }
+
+    @Override
+    public float getFloat(String path) {
+        Object val = get(path);
+        return val instanceof Float ? (Float) val : -1;
+    }
+
+    @Override
+    public float getFloat(String path, float def) {
+        Object val = get(path);
+        return val instanceof Float ? (Float) val : def;
+    }
+
+    @Override
+    public boolean isFloat(String path) {
+        Object val = get(path);
+        return val instanceof Float;
     }
 
     @Override
