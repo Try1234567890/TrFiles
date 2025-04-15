@@ -1,11 +1,22 @@
 package me.tr.configuration;
 
+import me.tr.configuration.file.FileConfiguration;
+
+import java.io.File;
 import java.util.Map;
 
 /**
  * Represents a source of configurable options and settings
  */
 public interface Configuration extends Section {
+
+    public void setFile(File file);
+
+    public File getFile();
+
+    public FileConfiguration getFileConfiguration();
+
+    public void setFileConfiguration(FileConfiguration config);
 
     public void addDefault(String path, Object value);
 

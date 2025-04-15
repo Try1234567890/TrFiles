@@ -1,12 +1,36 @@
 package me.tr.configuration.memory;
 
 import me.tr.configuration.Configuration;
+import me.tr.configuration.file.FileConfiguration;
 
+import java.io.File;
 import java.util.Map;
 
 public class MemoryConfiguration extends MemorySection implements Configuration {
+    protected File file;
+    protected FileConfiguration config;
     protected Configuration defaults;
     protected MemoryOptions options;
+
+    @Override
+    public void setFile(File file) {
+        this.file = file;
+    }
+
+    @Override
+    public File getFile() {
+        return file;
+    }
+
+    @Override
+    public FileConfiguration getFileConfiguration() {
+        return config;
+    }
+
+    @Override
+    public void setFileConfiguration(FileConfiguration config) {
+        this.config = config;
+    }
 
     @Override
     public void addDefault(String path, Object value) {
