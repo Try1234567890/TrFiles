@@ -3,112 +3,119 @@ package me.tr.configuration;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.Set;
 import java.util.List;
 
 /**
  * Represents a section of a {@link Configuration}
  */
 public interface Section {
-    public List<String> getKeys(boolean recursive);
+    List<String> getKeys(boolean recursive);
 
-    public Map<String, Object> getValues(boolean recursive);
+    Map<String, Object> getValues(boolean recursive);
 
-    public boolean contains(String path);
+    boolean contains(String path);
 
-    public boolean isSet(String path);
+    boolean isSet(String path);
 
-    public String getCurrentPath();
+    String getCurrentPath();
 
-    public String getName();
+    String getName();
 
-    public Configuration getRoot();
+    Configuration getRoot();
 
-    public Section getParent();
+    Section getParent();
 
-    public Object get(String path);
+    String getFullPath();
 
-    public Object get(String path, Object def);
+    Object get(String path);
 
-    public void set(String path, Object value);
+    Object get(String path, Object def);
 
-    public Section createSection(String path);
+    void set(String path, Object value);
 
-    public Section createSection(String path, Map<String, Object> map);
+    Section createSection(String path);
 
-    public String getString(String path);
+    Section createSection(String path, Map<String, Object> map);
 
-    public String getString(String path, String def);
+    String getString(String path);
 
-    public boolean isString(String path);
+    String getString(String path, String def);
 
-    public int getInt(String path);
+    boolean isString(String path);
 
-    public int getInt(String path, int def);
+    int getInt(String path);
 
-    public boolean isInt(String path);
+    int getInt(String path, int def);
 
-    public boolean getBoolean(String path);
+    boolean isInt(String path);
 
-    public boolean getBoolean(String path, boolean def);
+    boolean getBoolean(String path);
 
-    public boolean isBoolean(String path);
+    boolean getBoolean(String path, boolean def);
 
-    public double getDouble(String path);
+    boolean isBoolean(String path);
 
-    public double getDouble(String path, double def);
+    double getDouble(String path);
 
-    public boolean isDouble(String path);
+    double getDouble(String path, double def);
 
-    public long getLong(String path);
+    boolean isDouble(String path);
 
-    public long getLong(String path, long def);
+    float getFloat(String path);
 
-    public boolean isLong(String path);
+    float getFloat(String path, float def);
 
-    public BigInteger getBigInteger(String path);
+    boolean isFloat(String path);
 
-    public BigInteger getBigInteger(String path, BigInteger def);
+    long getLong(String path);
 
-    public boolean isBigInteger(String path);
+    long getLong(String path, long def);
 
-    public BigDecimal getBigDecimal(String path);
+    boolean isLong(String path);
 
-    public BigDecimal getBigDecimal(String path, BigDecimal def);
+    BigInteger getBigInteger(String path);
 
-    public boolean isBigDecimal(String path);
+    BigInteger getBigInteger(String path, BigInteger def);
 
-    public List<?> getList(String path);
+    boolean isBigInteger(String path);
 
-    public List<?> getList(String path, List<?> def);
+    BigDecimal getBigDecimal(String path);
 
-    public boolean isList(String path);
+    BigDecimal getBigDecimal(String path, BigDecimal def);
 
-    public List<String> getStringList(String path);
+    boolean isBigDecimal(String path);
 
-    public List<Integer> getIntegerList(String path);
+    List<?> getList(String path);
 
-    public List<Boolean> getBooleanList(String path);
+    List<?> getList(String path, List<?> def);
 
-    public List<Double> getDoubleList(String path);
+    boolean isList(String path);
 
-    public List<Float> getFloatList(String path);
+    List<String> getStringList(String path);
 
-    public List<Long> getLongList(String path);
+    List<Integer> getIntegerList(String path);
 
-    public List<Byte> getByteList(String path);
+    List<Boolean> getBooleanList(String path);
 
-    public List<Character> getCharacterList(String path);
+    List<Double> getDoubleList(String path);
 
-    public List<Short> getShortList(String path);
+    List<Float> getFloatList(String path);
 
-    public List<BigInteger> getBigIntegerList(String path);
+    List<Long> getLongList(String path);
 
-    public List<BigDecimal> getBigDecimalList(String path);
+    List<Byte> getByteList(String path);
 
-    public Section getSection(String path);
+    List<Character> getCharacterList(String path);
 
-    public boolean isSection(String path);
+    List<Short> getShortList(String path);
 
-    public void addDefault(String path, Object value);
+    List<BigInteger> getBigIntegerList(String path);
+
+    List<BigDecimal> getBigDecimalList(String path);
+
+    Section getSection(String path);
+
+    boolean isSection(String path);
+
+    void addDefault(String path, Object value);
 }
