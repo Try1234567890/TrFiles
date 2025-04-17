@@ -52,17 +52,6 @@ public class YamlConfiguration extends FileConfiguration {
         }
     }
 
-    @Override
-    protected void reload(File file) {
-        map.clear();
-        loadConfiguration(file);
-    }
-
-    @Override
-    protected void reload() {
-        reload(getFile());
-    }
-
     public YamlConfiguration(File file, DumperOptions options) {
         yaml = new Yaml(options);
         loadConfiguration(file);

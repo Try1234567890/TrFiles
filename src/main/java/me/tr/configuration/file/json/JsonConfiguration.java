@@ -83,16 +83,6 @@ public class JsonConfiguration extends FileConfiguration {
         return config;
     }
 
-    public void reload(File file) {
-        map.clear();
-        loadConfiguration(file);
-    }
-
-    @Override
-    protected void reload() {
-        reload(getFile());
-    }
-
     public static JsonConfiguration loadConfiguration(String file) {
         return loadConfiguration(new File(file));
     }
