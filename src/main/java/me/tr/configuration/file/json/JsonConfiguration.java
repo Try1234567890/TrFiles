@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import me.tr.configuration.file.FileConfiguration;
-import me.tr.general.utilities.FileUtilities;
+import me.tr.general.utility.FileUtility;
 
 import java.io.File;
 import java.util.Map;
@@ -75,7 +75,7 @@ public class JsonConfiguration extends FileConfiguration {
     }
 
     public static JsonConfiguration loadConfiguration(File file) {
-        if (!FileUtilities.isJson(file)) {
+        if (!FileUtility.isJson(file)) {
             throw new IllegalArgumentException("File is not a JSON file: " + file.getName());
         }
         JsonConfiguration config = new JsonConfiguration();

@@ -3,9 +3,9 @@ package me.tr.general;
 import me.tr.configuration.file.FileConfiguration;
 import me.tr.configuration.file.json.JsonConfiguration;
 import me.tr.configuration.file.yaml.YamlConfiguration;
-import me.tr.general.utilities.ComparingMode;
-import me.tr.general.utilities.FileUtilities;
-import me.tr.general.utilities.Validate;
+import me.tr.general.utility.ComparingMode;
+import me.tr.general.utility.FileUtility;
+import me.tr.general.utility.Validate;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -46,7 +46,7 @@ public class FileManager {
     public @Nullable InputStream getFileInJar(File jar, File pathIntoJar) {
         Validate.notNull(jar.exists(), "Jar file at path " + jar + " doesn't exist");
         Validate.checkIf(jar.isFile(), "Object found at path " + jar + " is not a file.");
-        Validate.checkIf(FileUtilities.isJar(jar), "File found at path " + jar + " is not a .jar file.");
+        Validate.checkIf(FileUtility.isJar(jar), "File found at path " + jar + " is not a .jar file.");
         try {
             JarFile jarFile = new JarFile(jar);
             JarEntry jarEntry = jarFile.getJarEntry(pathIntoJar.getPath());
@@ -126,9 +126,8 @@ public class FileManager {
 
     /**
      * Loads a file from the specified JAR file by params
-     * and delegating to {@link #loadFileFromJar(String, String, String)}.
-     * <p>
-     * <b>{@code This method search file into jar as the same path of the file to write contents.}</b>
+     * and delegating to {@link #loadFileFromJar(String, String, String)}
+     * and using as the path to search into jar the same as file to write contents in.
      *
      * @param file      The file to write the contents into (if found in the jar).
      * @param pathToJar The JAR file to search inside.
@@ -145,11 +144,10 @@ public class FileManager {
 
     /**
      * Loads a file from the specified JAR file from params
-     * and delegating to {@link #loadFileFromJar(File, File, File)}.
-     * <p>
-     * <b>{@code This method search file into jar as the same path of the file to write contents.}</b>
+     * and delegating to {@link #loadFileFromJar(File, File, File)}
+     * and using as the path to search into jar the same as file to write contents in.
      *
-     * @param file      The file to write the contents into (if found in the jar).
+     * @param file      The file to write the contents into.
      * @param pathToJar The JAR file to search inside.
      * @return The loaded {@link FileConfiguration}, or {@code null} if loading fails.
      * @throws NullPointerException If the specified JAR file is not found.
@@ -202,16 +200,11 @@ public class FileManager {
         if (!file.exists()) {
             createDirectory(file);
             createFile(file);
-            File jar = getFile(pathToJar);
-            if (jar == null) {
-                throw new NullPointerException("Jar file not found. Make sure jar file contains \"" + pathToJar.getName() + "\" in its name.");
-            }
-            InputStream is = getFileInJar(jar, pathIntoJar);
-            if (is != null) {
+            InputStream is = getFileInJar(pathToJar, pathIntoJar);
+            if (is != null)
                 saveFile(is, file.getPath());
-            }
         }
-        String extension = FileUtilities.getExtension(file);
+        String extension = FileUtility.getExtension(file);
         return switch (extension) {
             case "yml", "yaml" -> YamlConfiguration.loadConfiguration(file);
             case "json" -> JsonConfiguration.loadConfiguration(file);
@@ -222,77 +215,93 @@ public class FileManager {
 
     /**
      * Retrieves a file from the specified directory.
-     * Delegates to {@link #getFile(File, ComparingMode)}, by creating a new file with the
+     * Delegates to {@link #getFileInFiles(File, String, ComparingMode)}, by creating a new file with the
      * string path and using {@link ComparingMode#EQUALS} as the comparison mode.
+     * <p>
+     * If you want to get any supported file, don't insert the extension at the end of the file name.
+     * </p>
      *
      * @param path The path to the directory to search the file in.
+     * @param name File name to search for.
      * @return {@link File} If the file is found, else if directory not contains files or files is not found {@code null}
      * @throws NullPointerException     If the specified path doesn't exist.
      * @throws IllegalArgumentException If the object at specified path is not a directory.
      */
-    public @Nullable File getFile(String path) {
-        return getFile(new File(path), ComparingMode.EQUALS);
+    public @Nullable File getFileInFiles(String path, String name) {
+        return getFileInFiles(new File(path), name, ComparingMode.EQUALS);
     }
 
     /**
      * Retrieves a file from the specified directory.
-     * Delegates to {@link #getFile(File, ComparingMode)}, by creating a new file with the
+     * Delegates to {@link #getFileInFiles(File, String, ComparingMode)}, by creating a new file with the
      * string path.
+     * <p>
+     * If you want to get any supported file, don't insert the extension at the end of the file name.
+     * </p>
      *
      * @param path The path to the directory to search the file in.
+     * @param name File name to search for.
      * @return {@link File} If the file is found, else if directory not contains files or files is not found {@code null}
      * @throws NullPointerException     If the specified path doesn't exist.
      * @throws IllegalArgumentException If the object at specified path is not a directory.
      */
-    public @Nullable File getFile(String path, ComparingMode comparingMode) {
-        return getFile(new File(path), comparingMode);
+    public @Nullable File getFileInFiles(String path, String name, ComparingMode comparingMode) {
+        return getFileInFiles(new File(path), name, comparingMode);
     }
 
     /**
      * Retrieves a file from the specified directory.
-     * Delegates to {@link #getFile(File, ComparingMode)}, using {@link ComparingMode#EQUALS} as the comparison mode.
+     * Delegates to {@link #getFileInFiles(File, String, ComparingMode)}, using {@link ComparingMode#EQUALS} as the comparison mode.
+     * <p>
+     * If you want to get any supported file, don't insert the extension at the end of the file name.
+     * </p>
      *
      * @param path The path to the directory to search the file in.
+     * @param name File name tro search for.
      * @return {@link File} If the file is found, else if directory not contains files or files is not found {@code null}
      * @throws NullPointerException     If the specified path doesn't exist.
      * @throws IllegalArgumentException If the object at specified path is not a directory.
      */
-    public @Nullable File getFile(File path) {
-        return getFile(path, ComparingMode.EQUALS);
+    public @Nullable File getFileInFiles(File path, String name) {
+        return getFileInFiles(path, name, ComparingMode.EQUALS);
     }
 
     /**
      * Retrieves a file from the specified directory.
      * This method cycle all file in the directory and check single file depending on {@link ComparingMode}
+     * <p>
+     * If you want to get any supported file, don't insert the extension at the end of the file name.
+     * </p>
      *
      * @param path          The path to the directory to search the file in.
+     * @param name          File name to search for.
      * @param comparingMode Comparing mode used to compare each file name and searched file name.
      * @return {@link File} If the file is found, else if directory not contains files or files is not found {@code null}
      * @throws NullPointerException     If the specified path doesn't exist.
      * @throws IllegalArgumentException If the object at specified path is not a directory.
      */
-    public @Nullable File getFile(File path, ComparingMode comparingMode) {
+    public @Nullable File getFileInFiles(File path, String name, ComparingMode comparingMode) {
         Validate.notNull(path.exists(), "File at path " + path.getPath() + " doesn't exists.");
         Validate.checkIf(path.isDirectory(), "Object at path " + path.getPath() + " is not a directory.");
         File[] files = path.listFiles();
         if (files == null)
             return null;
+        if (FileUtility.hasFileExtension(name))
+            name = FileUtility.getFileNameWithoutExtension(name);
         for (File file : files) {
+            String currentFileName = FileUtility.getFileNameWithoutExtension(file.getName());
             switch (comparingMode) {
-                case EQUALS_IGNORE_CASE:
-                    if (file.getName().equalsIgnoreCase(path.getName())) {
+                case EQUALS:
+                    if (name.equals(currentFileName))
                         return file;
-                    }
                     break;
                 case CONTAINS:
-                    if (file.getName().contains(path.getName())) {
+                    if (name.contains(currentFileName))
                         return file;
-                    }
                     break;
                 default:
-                    if (file.getName().equals(path.getName())) {
+                    if (name.equalsIgnoreCase(currentFileName))
                         return file;
-                    }
                     break;
             }
         }

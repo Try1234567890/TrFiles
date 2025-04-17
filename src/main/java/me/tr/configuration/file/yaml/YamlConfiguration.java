@@ -1,7 +1,7 @@
 package me.tr.configuration.file.yaml;
 
 import me.tr.configuration.file.FileConfiguration;
-import me.tr.general.utilities.FileUtilities;
+import me.tr.general.utility.FileUtility;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -85,7 +85,7 @@ public class YamlConfiguration extends FileConfiguration {
     }
 
     public static YamlConfiguration loadConfiguration(File file) {
-        if (!FileUtilities.isYaml(file)) {
+        if (!FileUtility.isYaml(file)) {
             throw new IllegalArgumentException("File is not a YAML file: " + file.getName());
         }
         YamlConfiguration config = new YamlConfiguration();
