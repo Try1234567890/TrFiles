@@ -156,9 +156,9 @@ public abstract class FileConfiguration extends MemoryConfiguration {
 
     protected static @Nullable FileConfiguration loadConfigByExtension(File file) {
         return switch (FileUtility.getExtension(file)) {
-            case "json" -> new JsonConfiguration(file);
-            case "xml" -> new XMLConfiguration(file);
-            case "yaml", "yml" -> new YamlConfiguration(file);
+            case "json" -> JsonConfiguration.loadConfiguration(file);
+            case "xml" -> XMLConfiguration.loadConfiguration(file);
+            case "yaml", "yml" -> YamlConfiguration.loadConfiguration(file);
             default -> null;
         };
     }
