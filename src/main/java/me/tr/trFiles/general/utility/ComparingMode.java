@@ -1,4 +1,4 @@
-package me.tr.general.utility;
+package me.tr.trFiles.general.utility;
 
 /*
  * This enum contains all ComparingMode that can be used to compare Strings.

@@ -1,10 +1,10 @@
-package me.tr.configuration.file.json;
+package me.tr.trFiles.configuration.file.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import me.tr.configuration.file.FileConfiguration;
-import me.tr.general.utility.FileUtility;
+import me.tr.trFiles.configuration.file.FileConfiguration;
+import me.tr.trFiles.general.utility.FileUtility;
 
 import java.io.File;
 import java.util.Map;
@@ -15,21 +15,6 @@ import java.util.Map;
 public class JsonConfiguration extends FileConfiguration {
     private final Gson gson;
 
-    /**
-     * @return <b>{@code NOTHING, JSON NOT SUPPORT COMMENTS}</b>
-     */
-    @Override
-    public String buildHeader() {
-        return "";
-    }
-
-    /**
-     * @return <b>{@code NOTHING, JSON NOT SUPPORT COMMENTS}</b>
-     */
-    @Override
-    public String buildFooter() {
-        return "";
-    }
 
     @Override
     protected String saveToString() {
@@ -54,6 +39,7 @@ public class JsonConfiguration extends FileConfiguration {
         }
     }
 
+
     public JsonConfiguration(File file) {
         GsonBuilder jsonBuilder = new GsonBuilder();
         if (options().prettyPrinting()) {
@@ -74,6 +60,10 @@ public class JsonConfiguration extends FileConfiguration {
         gson = jsonBuilder.create();
     }
 
+    public static JsonConfiguration loadConfiguration(String file) {
+        return loadConfiguration(new File(file));
+    }
+
     public static JsonConfiguration loadConfiguration(File file) {
         if (!FileUtility.isJson(file)) {
             throw new IllegalArgumentException("File is not a JSON file: " + file.getName());
@@ -83,9 +73,6 @@ public class JsonConfiguration extends FileConfiguration {
         return config;
     }
 
-    public static JsonConfiguration loadConfiguration(String file) {
-        return loadConfiguration(new File(file));
-    }
 
     @Override
     public JsonOptions options() {
@@ -93,5 +80,22 @@ public class JsonConfiguration extends FileConfiguration {
             options = new JsonOptions(this);
         }
         return (JsonOptions) options;
+    }
+
+
+    /**
+     * @return <b>{@code NOTHING, JSON NOT SUPPORT COMMENTS}</b>
+     */
+    @Override
+    public String buildHeader() {
+        return "";
+    }
+
+    /**
+     * @return <b>{@code NOTHING, JSON NOT SUPPORT COMMENTS}</b>
+     */
+    @Override
+    public String buildFooter() {
+        return "";
     }
 }

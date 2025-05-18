@@ -1,6 +1,6 @@
-package me.tr.configuration.memory;
+package me.tr.trFiles.configuration.memory;
 
-import me.tr.configuration.Options;
+import me.tr.trFiles.configuration.Options;
 
 public class MemoryOptions extends Options {
 

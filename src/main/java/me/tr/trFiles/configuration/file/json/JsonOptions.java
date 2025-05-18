@@ -1,7 +1,7 @@
-package me.tr.configuration.file.json;
+package me.tr.trFiles.configuration.file.json;
 
-import me.tr.configuration.file.FileOptions;
-import me.tr.configuration.memory.MemoryConfiguration;
+import me.tr.trFiles.configuration.file.FileOptions;
+import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
 public class JsonOptions extends FileOptions {
     private boolean prettyPrinting = true;

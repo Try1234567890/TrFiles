@@ -1,16 +1,23 @@
-package me.tr.configuration.file;
+package me.tr.trFiles.configuration.file;
 
-import me.tr.configuration.Section;
-import me.tr.configuration.file.json.JsonConfiguration;
-import me.tr.configuration.file.yaml.YamlConfiguration;
-import me.tr.configuration.memory.MemoryConfiguration;
-import me.tr.general.utility.FileUtility;
-import me.tr.general.utility.Validate;
+import me.tr.trFiles.TrFiles;
+import me.tr.trFiles.configuration.Section;
+import me.tr.trFiles.configuration.file.json.JsonConfiguration;
+import me.tr.trFiles.configuration.file.xml.XMLConfiguration;
+import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
+import me.tr.trFiles.configuration.memory.MemoryConfiguration;
+import me.tr.trFiles.general.utility.FileUtility;
+import me.tr.trFiles.general.utility.Validate;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
+    protected final TrFiles main = TrFiles.getInstance();
+    protected final String BLANK_FILE = "{}\n";
 
     /**
      * Load {@link FileConfiguration} from a file.
@@ -103,61 +110,12 @@ public abstract class FileConfiguration extends MemoryConfiguration {
 
     protected abstract void loadFromString(String contents);
 
-    /**
-     * Reload {@link FileConfiguration} by deleting all data and loading again
-     * from the specified {@link File}.
-     *
-     * @param file The file to reload from.
-     */
-    protected void reload(File file) {
-        map.clear();
-        loadConfiguration(file);
-    }
-
-    /**
-     * Reload {@link FileConfiguration} by calling {@link #reload(File)},
-     * used file is the same used to load this {@code FileConfiguration}
-     */
-    protected void reload() {
-        reload(getFile());
-    }
-
-    /**
-     * Load a {@link FileConfiguration} by creating a new file
-     * using the string file parameter and delegate to {@link #loadConfiguration(File)}
-     *
-     * @param file String path to file to load {@link FileConfiguration} from.
-     * @return Loaded {@link FileConfiguration} if no error occurs, otherwise null.
-     * @throws IllegalArgumentException if the file hasn't an extension or is not supported.
-     * @see JsonConfiguration#loadConfiguration(File)
-     * @see YamlConfiguration#loadConfiguration(File)
-     * @see #loadConfiguration(File)
-     */
-    public static FileConfiguration loadConfiguration(String file) {
-        return loadConfiguration(new File(file));
-    }
-
-    /**
-     * Load a {@link FileConfiguration} from a file by
-     * automatically detect which one supported file is
-     * by getting extension and load the correlated one.
-     *
-     * @param file File to load {@link FileConfiguration} from.
-     * @return Loaded {@link FileConfiguration} if no error occurs, otherwise null.
-     * @throws IllegalArgumentException if the file hasn't an extension or is not supported.
-     * @see JsonConfiguration#loadConfiguration(File)
-     * @see YamlConfiguration#loadConfiguration(File)
-     * @see #loadConfiguration(String)
-     */
-    public static FileConfiguration loadConfiguration(File file) {
-        Validate.checkIf(FileUtility.hasFileExtension(file), "File " + file.getName() + " not contains an extension");
-        Validate.checkIf(FileUtility.isSupportedExtension(file), "File " + file.getName() + " is not supported");
-        String extension = FileUtility.getExtension(file);
-        if ("json".equalsIgnoreCase(extension)) {
-            return JsonConfiguration.loadConfiguration(file);
-        } else {
-            return YamlConfiguration.loadConfiguration(file);
-        }
+    protected String build(String headerOrFooter) {
+        String[] lines = headerOrFooter.split("\n");
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines)
+            sb.append(options().commentPrefix()).append(line).append("\n").append(options().commentSuffix());
+        return sb.toString();
     }
 
 
@@ -167,5 +125,60 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             options = new FileOptions(this);
         }
         return (FileOptions) options;
+    }
+
+
+    public static FileConfiguration loadConfiguration(File file) {
+        Validate.notNull(file != null, "File cannot be null.");
+        Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
+        if (FileUtility.hasFileExtension(file)) {
+            return loadConfigByExtension(file);
+        } else {
+            return loadConfigWithoutExtension(file);
+        }
+    }
+
+    protected static FileConfiguration loadConfigWithoutExtension(File file) {
+        File parent = file.getParentFile();
+        Validate.notNull(parent != null, "Parent directory cannot be null.");
+        Validate.checkIf(parent.exists(), "Folder at " + parent.getPath() + " does not exist.");
+        Validate.checkIf(parent.isDirectory(), "Object at " + parent.getPath() + " is not a directory.");
+        File[] files = parent.listFiles();
+        Validate.notNull(files != null, "Files at " + parent.getPath() + " cannot be null.");
+        Optional<File> optFile = Arrays.stream(files)
+                .filter(f -> f.getName().equals(file.getName()))
+                .findFirst();
+        if (optFile.isEmpty()) {
+            throw new RuntimeException("File at " + file.getName() + " not found into " + parent.getPath());
+        }
+        return loadConfigByExtension(optFile.get());
+    }
+
+    protected static @Nullable FileConfiguration loadConfigByExtension(File file) {
+        return switch (FileUtility.getExtension(file)) {
+            case "json" -> new JsonConfiguration(file);
+            case "xml" -> new XMLConfiguration(file);
+            case "yaml", "yml" -> new YamlConfiguration(file);
+            default -> null;
+        };
+    }
+
+    /**
+     * Reload {@link FileConfiguration} by deleting all data and loading again
+     * from the specified {@link File}.
+     *
+     * @param file The file to reload from.
+     */
+    public void reload(File file) {
+        map.clear();
+        loadConfiguration(file);
+    }
+
+    /**
+     * Reload {@link FileConfiguration} by calling {@link #reload(File)},
+     * used file is the same used to load this {@code FileConfiguration}
+     */
+    public void reload() {
+        reload(getFile());
     }
 }

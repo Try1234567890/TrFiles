@@ -1,4 +1,4 @@
-package me.tr.general.utility;
+package me.tr.trFiles.general.utility;
 
 /**
  * This class contains methods to check some conditions

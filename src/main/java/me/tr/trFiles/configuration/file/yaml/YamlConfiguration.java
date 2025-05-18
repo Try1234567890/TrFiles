@@ -1,7 +1,7 @@
-package me.tr.configuration.file.yaml;
+package me.tr.trFiles.configuration.file.yaml;
 
-import me.tr.configuration.file.FileConfiguration;
-import me.tr.general.utility.FileUtility;
+import me.tr.trFiles.configuration.file.FileConfiguration;
+import me.tr.trFiles.general.utility.FileUtility;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -13,8 +13,6 @@ import java.util.Map;
  * This class represents the extension of FileConfiguration File for YAML.
  */
 public class YamlConfiguration extends FileConfiguration {
-    private final String BLANK_FILE = "{}\n";
-    private final String COMMENT_PREFIX = "# ";
     private DumperOptions yamlOptions;
     private Yaml yaml;
 
@@ -52,6 +50,7 @@ public class YamlConfiguration extends FileConfiguration {
         }
     }
 
+
     public YamlConfiguration(File file, DumperOptions options) {
         yaml = new Yaml(options);
         loadConfiguration(file);
@@ -82,6 +81,7 @@ public class YamlConfiguration extends FileConfiguration {
         return config;
     }
 
+
     @Override
     protected String buildHeader() {
         String header = options().header();
@@ -94,13 +94,6 @@ public class YamlConfiguration extends FileConfiguration {
         return build(footer);
     }
 
-    private String build(String headerOrFooter) {
-        String[] lines = headerOrFooter.split("\n");
-        StringBuilder sb = new StringBuilder();
-        for (String line : lines)
-            sb.append(COMMENT_PREFIX).append(line).append("\n");
-        return sb.toString();
-    }
 
     @Override
     public YamlOptions options() {

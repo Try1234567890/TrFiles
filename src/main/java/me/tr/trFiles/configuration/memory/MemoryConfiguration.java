@@ -1,7 +1,7 @@
-package me.tr.configuration.memory;
+package me.tr.trFiles.configuration.memory;
 
-import me.tr.configuration.Configuration;
-import me.tr.configuration.file.FileConfiguration;
+import me.tr.trFiles.configuration.Configuration;
+import me.tr.trFiles.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.util.Map;

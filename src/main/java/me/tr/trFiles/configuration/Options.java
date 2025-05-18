@@ -1,4 +1,4 @@
-package me.tr.configuration;
+package me.tr.trFiles.configuration;
 
 /**
  * Various settings for controlling the input and output of a {@link

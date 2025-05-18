@@ -1,4 +1,4 @@
-package me.tr.configuration;
+package me.tr.trFiles.configuration;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

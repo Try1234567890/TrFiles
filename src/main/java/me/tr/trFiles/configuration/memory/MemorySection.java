@@ -1,12 +1,15 @@
-package me.tr.configuration.memory;
+package me.tr.trFiles.configuration.memory;
 
-import me.tr.configuration.Configuration;
-import me.tr.configuration.Section;
+import me.tr.trFiles.configuration.Configuration;
+import me.tr.trFiles.configuration.Section;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MemorySection implements Section {
     protected final Map<String, Object> map = new LinkedHashMap<>();
@@ -14,7 +17,7 @@ public class MemorySection implements Section {
     private final Section parent;
     private final String fullPath;
     private final String currentPath;
-    public final String name;
+    private final String name;
 
     protected MemorySection(Section parent, String path) {
         if (parent == null || path == null) {

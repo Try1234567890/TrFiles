@@ -1,10 +1,11 @@
-package me.tr.configuration.file.yaml;
+package me.tr.trFiles.configuration.file.yaml;
 
-import me.tr.configuration.file.FileOptions;
-import me.tr.configuration.memory.MemoryConfiguration;
+import me.tr.trFiles.configuration.file.FileOptions;
+import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import org.yaml.snakeyaml.DumperOptions;
 
 public class YamlOptions extends FileOptions {
+    private final String commentPrefix = "# ";
     private int intent = 2;
     private DumperOptions.FlowStyle flowStyle = DumperOptions.FlowStyle.BLOCK;
     private boolean copyHeader = false;
@@ -14,6 +15,7 @@ public class YamlOptions extends FileOptions {
 
     protected YamlOptions(MemoryConfiguration configuration) {
         super(configuration);
+        super.commentPrefix(commentPrefix);
     }
 
     public int indent() {
@@ -72,5 +74,9 @@ public class YamlOptions extends FileOptions {
     public YamlOptions copyFooter(boolean copyFooter) {
         this.copyFooter = copyFooter;
         return this;
+    }
+
+    public String commentPrefix() {
+        return commentPrefix;
     }
 }
