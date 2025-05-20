@@ -5,9 +5,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import me.tr.trFiles.configuration.file.FileConfiguration;
 import me.tr.trFiles.general.utility.FileUtility;
+import me.tr.trFiles.general.utility.Validate;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
+import java.util.jar.JarFile;
 
 /**
  * This class represents the extension of FileConfiguration File for JSON.
@@ -23,10 +26,10 @@ public class JsonConfiguration extends FileConfiguration {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void loadFromString(String contents) {
+    protected JsonConfiguration loadFromString(String contents) {
         if (contents.isEmpty()) {
             map.clear();
-            return;
+            return this;
         }
         Map<String, Object> fileMap;
         try {
@@ -37,6 +40,31 @@ public class JsonConfiguration extends FileConfiguration {
         if (fileMap != null) {
             convertMapsToSections(fileMap, this);
         }
+        return this;
+    }
+
+    public static JsonConfiguration loadFromJar(JarFile jar, File intoJar) {
+        Validate.checkIf(FileUtility.isJson(intoJar), "File to search is not a JSON file. Use FileConfiguration#loadFromJar instead.");
+        JsonConfiguration config = new JsonConfiguration();
+        config.loadFromString(getFileIntoJarToString(jar, intoJar));
+        return config;
+    }
+
+    public static JsonConfiguration loadFromJar(JarFile jar, String intoJar) {
+        return loadFromJar(jar, main.getFileManager().getFileFromString(intoJar));
+    }
+
+    public static JsonConfiguration loadFromJar(File jar, File intoJar) {
+        Validate.checkIf(FileUtility.getExtension(jar).equals("jar"), "The specified file (" + jar.getPath() + ") is not a .jar file");
+        try {
+            return loadFromJar(new JarFile(jar), intoJar);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while creating new JarFile instance with " + jar.getPath() + " file.", e);
+        }
+    }
+
+    public static JsonConfiguration loadFromJar(String jar, String intoJar) {
+        return loadFromJar(main.getFileManager().getFileFromString(jar), main.getFileManager().getFileFromString(intoJar));
     }
 
 
@@ -61,7 +89,7 @@ public class JsonConfiguration extends FileConfiguration {
     }
 
     public static JsonConfiguration loadConfiguration(String file) {
-        return loadConfiguration(new File(file));
+        return loadConfiguration(main.getFileManager().getFileFromString(file));
     }
 
     public static JsonConfiguration loadConfiguration(File file) {

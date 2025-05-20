@@ -11,12 +11,13 @@ import me.tr.trFiles.general.utility.Validate;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
-    protected final TrFiles main = TrFiles.getInstance();
+    protected static final TrFiles main = TrFiles.getInstance();
     protected final String BLANK_FILE = "{}\n";
 
     /**
@@ -102,13 +103,32 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         }
     }
 
+    protected static String getFileIntoJarToString(JarFile jar, File intoJar) {
+        Validate.notNull(jar != null, "Jar file cannot be null");
+        ZipEntry entry = jar.getEntry(intoJar.getName());
+        if (entry == null) {
+            throw new NullPointerException("File " + intoJar.getPath() + " doesn't exist into " + jar.getName());
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry)))) {
+            StringBuilder contents = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                contents.append(line).append("\n");
+            }
+            return contents.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Error while reading file " + intoJar.getPath() + " into " + jar.getName(), e);
+        }
+    }
+
     protected abstract String buildHeader();
 
     protected abstract String buildFooter();
 
     protected abstract String saveToString();
 
-    protected abstract void loadFromString(String contents);
+    protected abstract FileConfiguration loadFromString(String contents);
+
 
     protected String build(String headerOrFooter) {
         String[] lines = headerOrFooter.split("\n");
@@ -127,17 +147,66 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return (FileOptions) options;
     }
 
+    public static @Nullable FileConfiguration loadFromJar(JarFile jar, File intoJar) {
+        FileConfiguration config = null;
+        if (FileUtility.hasFileExtension(intoJar)) {
+            return switch (FileUtility.getExtension(intoJar.getName())) {
+                case "yaml", "yml" -> YamlConfiguration.loadFromJar(jar, intoJar);
+                case "json" -> JsonConfiguration.loadFromJar(jar, intoJar);
+                case "xml" -> XMLConfiguration.loadFromJar(jar, intoJar);
+                default ->
+                        throw new IllegalStateException("Extension " + FileUtility.getExtension(intoJar.getName()) + " of " + intoJar.getPath() + " is not supported");
+            };
+        } else {
+            // todo finishing
+        }
+        return config;
+    }
 
+    public static FileConfiguration loadFromJar(JarFile jar, String intoJar) {
+        return loadFromJar(jar, main.getFileManager().getFileFromString(intoJar));
+    }
+
+    public static FileConfiguration loadFromJar(File jar, File intoJar) {
+        Validate.checkIf(FileUtility.getExtension(jar).equals("jar"), "The specified file (" + jar.getPath() + ") is not a .jar file");
+        try {
+            return loadFromJar(new JarFile(jar), intoJar);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while creating new JarFile instance with " + jar.getPath() + " file.", e);
+        }
+    }
+
+    public static FileConfiguration loadFromJar(String jar, String intoJar) {
+        return loadFromJar(main.getFileManager().getFileFromString(jar), main.getFileManager().getFileFromString(intoJar));
+    }
+
+    /**
+     * Loads a new {@link FileConfiguration} from the specified file.
+     * <p>
+     * If the provided file does not have an extension, this method attempts to auto-detect
+     * the correct file by searching for a matching file name in the parent directory.
+     *
+     * @param file The file to load the {@link FileConfiguration} from.
+     * @return The loaded {@link FileConfiguration} instance.
+     * @throws IllegalArgumentException if the specified path does not point to a valid file.
+     * @throws NullPointerException     if the file or required objects are null or do not exist.
+     */
     public static FileConfiguration loadConfiguration(File file) {
         Validate.notNull(file != null, "File cannot be null.");
-        Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
         if (FileUtility.hasFileExtension(file)) {
+            Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
             return loadConfigByExtension(file);
         } else {
             return loadConfigWithoutExtension(file);
         }
     }
 
+    /**
+     * Load a new {@link FileConfiguration} from the specified file without extension.
+     *
+     * @param file The file to load the {@link FileConfiguration} from.
+     * @return The loaded {@link FileConfiguration} instance.
+     */
     protected static FileConfiguration loadConfigWithoutExtension(File file) {
         File parent = file.getParentFile();
         Validate.notNull(parent != null, "Parent directory cannot be null.");
@@ -146,20 +215,29 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         File[] files = parent.listFiles();
         Validate.notNull(files != null, "Files at " + parent.getPath() + " cannot be null.");
         Optional<File> optFile = Arrays.stream(files)
-                .filter(f -> f.getName().equals(file.getName()))
+                .filter(File::isFile)
+                .filter(f -> FileUtility.getFileNameWithoutExtension(f.getName()).equals(file.getName()))
                 .findFirst();
         if (optFile.isEmpty()) {
-            throw new RuntimeException("File at " + file.getName() + " not found into " + parent.getPath());
+            throw new NullPointerException("File at " + file.getName() + " not found into " + parent.getPath());
         }
         return loadConfigByExtension(optFile.get());
     }
 
-    protected static @Nullable FileConfiguration loadConfigByExtension(File file) {
+    /**
+     * Load a new {@link FileConfiguration} from the specified file.
+     *
+     * @param file The file to load the {@link FileConfiguration} from.
+     * @return The loaded {@link FileConfiguration} instance.
+     * @throws IllegalStateException if the file extension is not recognized
+     */
+    protected static FileConfiguration loadConfigByExtension(File file) {
         return switch (FileUtility.getExtension(file)) {
             case "json" -> JsonConfiguration.loadConfiguration(file);
             case "xml" -> XMLConfiguration.loadConfiguration(file);
             case "yaml", "yml" -> YamlConfiguration.loadConfiguration(file);
-            default -> null;
+            default ->
+                    throw new IllegalStateException("Extension " + FileUtility.getExtension(file.getName()) + " of " + file.getPath() + " is not supported");
         };
     }
 
@@ -169,16 +247,19 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      *
      * @param file The file to reload from.
      */
-    public void reload(File file) {
+    public FileConfiguration reload(File file) {
         map.clear();
-        loadConfiguration(file);
+        setFile(file);
+        FileConfiguration config = loadConfiguration(file);
+        setFileConfiguration(config);
+        return config;
     }
 
     /**
      * Reload {@link FileConfiguration} by calling {@link #reload(File)},
      * used file is the same used to load this {@code FileConfiguration}
      */
-    public void reload() {
-        reload(getFile());
+    public FileConfiguration reload() {
+        return reload(getFile());
     }
 }
