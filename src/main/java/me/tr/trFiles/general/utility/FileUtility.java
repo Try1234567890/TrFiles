@@ -1,6 +1,11 @@
 package me.tr.trFiles.general.utility;
 
+import me.tr.trFiles.configuration.file.json.JsonConfiguration;
+import me.tr.trFiles.configuration.file.xml.XMLConfiguration;
+import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
+
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Utility file class
@@ -18,15 +23,17 @@ public class FileUtility {
      * @return {@code true} if the file has an extension, otherwise {@code false}
      * @see #hasFileExtension(File)
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static boolean hasFileExtension(String name) {
-        if (!name.contains("."))
-            return false;
-        try {
-            name.substring(name.lastIndexOf(".") + 1);
-            return true;
-        } catch (IndexOutOfBoundsException e) {
-            return false;
+        int index = name.lastIndexOf(".");
+        if (index != -1) {
+            try {
+                name.charAt(index + 1);
+                return true;
+            } catch (IndexOutOfBoundsException ignored) {
+            }
         }
+        return false;
     }
 
     /**
@@ -83,11 +90,13 @@ public class FileUtility {
      * fileName by {@code .} and getting last part.
      *
      * @param fileName File name to get extension.
-     * @return Extension got (without {@code .} at start)
+     * @return If a supported extension is found, return extension (without {@code .} at start), otherwise an empty string.
      */
     public static String getExtension(String fileName) {
-        String[] parts = fileName.split("\\.");
-        return parts[parts.length - 1];
+        if (!hasFileExtension(fileName))
+            return "";
+        int index = fileName.lastIndexOf('.');
+        return fileName.substring(index + 1);
     }
 
     /**
@@ -109,8 +118,7 @@ public class FileUtility {
      * @return {@code true} if the file is a YAML file, otherwise {@code false}.
      */
     public static boolean isYaml(String fileName) {
-        return getExtension(fileName).equalsIgnoreCase("yaml")
-                || getExtension(fileName).equalsIgnoreCase("yml");
+        return Arrays.stream(YamlConfiguration.FILE_EXTENSIONS).anyMatch(getExtension(fileName)::equalsIgnoreCase);
     }
 
     /**
@@ -132,7 +140,7 @@ public class FileUtility {
      * @return {@code true} if the file is a JSON file, otherwise {@code false}.
      */
     public static boolean isJson(String fileName) {
-        return getExtension(fileName).equalsIgnoreCase("json");
+        return Arrays.stream(JsonConfiguration.FILE_EXTENSIONS).anyMatch(getExtension(fileName)::equalsIgnoreCase);
     }
 
     /**
@@ -154,7 +162,7 @@ public class FileUtility {
      * @return {@code true} if the file is an XML file, otherwise {@code false}.
      */
     public static boolean isXML(String fileName) {
-        return getExtension(fileName).equalsIgnoreCase("xml");
+        return Arrays.stream(XMLConfiguration.FILE_EXTENSIONS).anyMatch(getExtension(fileName)::equalsIgnoreCase);
     }
 
     /**
