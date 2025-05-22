@@ -10,24 +10,24 @@ import java.util.Map;
  */
 public interface Configuration extends Section {
 
-    public void setFile(File file);
+    void setFile(File file);
 
-    public File getFile();
+    File getFile();
 
-    public FileConfiguration getFileConfiguration();
+    FileConfiguration getFileConfiguration();
 
-    public void setFileConfiguration(FileConfiguration config);
+    void setFileConfiguration(FileConfiguration config);
 
-    public void addDefault(String path, Object value);
+    void addDefault(String path, Object value);
 
-    public void addDefaults(Map<String, Object> defaults);
+    void addDefaults(Map<String, Object> defaults);
 
-    public void addDefaults(Configuration defaults);
+    void addDefaults(Configuration defaults);
 
-    public void setDefaults(Configuration defaults);
+    void setDefaults(Configuration defaults);
 
-    public Configuration getDefaults();
+    Configuration getDefaults();
 
-    public Options options();
+    Options options();
 
 }

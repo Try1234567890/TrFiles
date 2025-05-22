@@ -389,7 +389,7 @@ public class MemorySection implements Section {
         if (val == null) {
             return new ArrayList<>();
         }
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (Object o : val) {
             if (o instanceof String || isPrimitiveWrapper(o)) {
                 result.add(String.valueOf(o));
@@ -433,7 +433,7 @@ public class MemorySection implements Section {
         for (Object o : val) {
             if (o instanceof Boolean) {
                 result.add((Boolean) o);
-            } else if (o instanceof String string) {
+            } else if (o instanceof String) {
                 if (Boolean.TRUE.toString().equals(o)) {
                     result.add(true);
                 } else if (Boolean.FALSE.toString().equals(o)) {
@@ -581,7 +581,7 @@ public class MemorySection implements Section {
                 }
             } else if (o instanceof Character character) {
                 try {
-                    result.add((short) ((Character) o).charValue());
+                    result.add((short) character.charValue());
                 } catch (ClassCastException ignore) {
                 }
             }
