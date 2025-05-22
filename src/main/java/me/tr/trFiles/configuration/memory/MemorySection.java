@@ -258,6 +258,24 @@ public class MemorySection implements Section {
     }
 
     @Override
+    public Number getNumber(String path) {
+        Object val = get(path);
+        return val instanceof Number number ? number : null;
+    }
+
+    @Override
+    public Number getNumber(String path, Number def) {
+        Object val = get(path);
+        return val instanceof Number number ? number : def;
+    }
+
+    @Override
+    public boolean isNumber(String path) {
+        Object val = get(path);
+        return val instanceof Number;
+    }
+
+    @Override
     public boolean getBoolean(String path) {
         Object val = get(path);
         return val instanceof Boolean ? (Boolean) val : false;
@@ -384,6 +402,19 @@ public class MemorySection implements Section {
     }
 
     @Override
+    public List<Section> getSections(String path) {
+        Section val = getSection(path);
+        if (val == null) {
+            return new ArrayList<>();
+        }
+        List<Section> result = new ArrayList<>();
+        for (String key : val.getKeys(false)) {
+            result.add(val.getSection(key));
+        }
+        return result;
+    }
+
+    @Override
     public List<String> getStringList(String path) {
         List<?> val = getList(path);
         if (val == null) {
@@ -418,6 +449,21 @@ public class MemorySection implements Section {
                     result.add((int) character);
                 } catch (ClassCastException ignore) {
                 }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Number> getNumberList(String path) {
+        List<?> val = getList(path);
+        if (val == null) {
+            return new ArrayList<>();
+        }
+        List<Number> result = new ArrayList<>();
+        for (Object o : val) {
+            if (o instanceof Number number) {
+                result.add(number);
             }
         }
         return result;

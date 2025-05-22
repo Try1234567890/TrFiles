@@ -2,8 +2,8 @@ package me.tr.trFiles.configuration;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a section of a {@link Configuration}
@@ -49,6 +49,12 @@ public interface Section {
 
     boolean isInt(String path);
 
+    Number getNumber(String path);
+
+    Number getNumber(String path, Number def);
+
+    boolean isNumber(String path);
+
     boolean getBoolean(String path);
 
     boolean getBoolean(String path, boolean def);
@@ -91,9 +97,13 @@ public interface Section {
 
     boolean isList(String path);
 
+    List<Section> getSections(String path);
+
     List<String> getStringList(String path);
 
     List<Integer> getIntegerList(String path);
+
+    List<Number> getNumberList(String path);
 
     List<Boolean> getBooleanList(String path);
 
