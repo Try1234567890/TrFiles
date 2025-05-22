@@ -8,15 +8,16 @@ import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.general.utility.FileUtility;
 import me.tr.trFiles.general.utility.Validate;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.*;
-import java.util.jar.JarEntry;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
+    public static final String[] FILE_EXTENSIONS = new String[]{"json", "xml", "yaml", "yml" };
     protected static final TrFiles main = TrFiles.getInstance();
     protected final String BLANK_FILE = "{}\n";
 
@@ -31,7 +32,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @param file File to load {@link FileConfiguration} from.
      * @throws RuntimeException if an error occurs while loading the file.
      */
-    public void load(File file) {
+    public FileConfiguration load(File file) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             StringBuilder sb = new StringBuilder();
@@ -41,6 +42,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             loadFromString(sb.toString());
             setFile(file);
             setFileConfiguration(this);
+            return this;
         } catch (IOException e) {
             throw new RuntimeException("Error while loading file: " + file.getName(), e);
         }
@@ -58,6 +60,8 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @see #save()
      */
     public void save(File file) {
+        if (!file.exists())
+            main.getFileManager().createFile(file);
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
             String data = saveToString();
             writer.write(data);
@@ -76,6 +80,28 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      */
     public void save() {
         save(getFile());
+    }
+
+    /**
+     * Reload {@link FileConfiguration} by deleting all data and loading again
+     * from the specified {@link File}.
+     *
+     * @param file The file to reload from.
+     */
+    public FileConfiguration reload(File file) {
+        map.clear();
+        setFile(file);
+        FileConfiguration config = loadConfiguration(file);
+        setFileConfiguration(config);
+        return config;
+    }
+
+    /**
+     * Reload {@link FileConfiguration} by calling {@link #reload(File)},
+     * used file is the same used to load this {@code FileConfiguration}
+     */
+    public FileConfiguration reload() {
+        return reload(getFile());
     }
 
     /**
@@ -103,33 +129,14 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         }
     }
 
-    protected static String getFileIntoJarToString(JarFile jar, File intoJar) {
-        Validate.notNull(jar != null, "Jar file cannot be null");
-        ZipEntry entry = jar.getEntry(intoJar.getName());
-        if (entry == null) {
-            throw new NullPointerException("File " + intoJar.getPath() + " doesn't exist into " + jar.getName());
-        }
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry)))) {
-            StringBuilder contents = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                contents.append(line).append("\n");
-            }
-            return contents.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Error while reading file " + intoJar.getPath() + " into " + jar.getName(), e);
-        }
-    }
-
-    protected abstract String buildHeader();
-
-    protected abstract String buildFooter();
-
-    protected abstract String saveToString();
-
-    protected abstract FileConfiguration loadFromString(String contents);
-
-
+    /**
+     * Build header or footer of current {@link FileConfiguration}
+     * by splitting it in lines and adding respective character to
+     * make lines as comments in file.
+     *
+     * @param headerOrFooter String representing header or footer to string
+     * @return String representing header or footer formatted with options of current {@link FileConfiguration}
+     */
     protected String build(String headerOrFooter) {
         String[] lines = headerOrFooter.split("\n");
         StringBuilder sb = new StringBuilder();
@@ -147,35 +154,112 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return (FileOptions) options;
     }
 
-    public static @Nullable FileConfiguration loadFromJar(JarFile jar, File intoJar) {
-        FileConfiguration config = null;
-        if (FileUtility.hasFileExtension(intoJar)) {
-            return switch (FileUtility.getExtension(intoJar.getName())) {
-                case "yaml", "yml" -> YamlConfiguration.loadFromJar(jar, intoJar);
-                case "json" -> JsonConfiguration.loadFromJar(jar, intoJar);
-                case "xml" -> XMLConfiguration.loadFromJar(jar, intoJar);
-                default ->
-                        throw new IllegalStateException("Extension " + FileUtility.getExtension(intoJar.getName()) + " of " + intoJar.getPath() + " is not supported");
-            };
-        } else {
-            // todo finishing
-        }
-        return config;
-    }
 
-    public static FileConfiguration loadFromJar(JarFile jar, String intoJar) {
-        return loadFromJar(jar, main.getFileManager().getFileFromString(intoJar));
-    }
+    protected abstract String buildHeader();
 
-    public static FileConfiguration loadFromJar(File jar, File intoJar) {
-        Validate.checkIf(FileUtility.getExtension(jar).equals("jar"), "The specified file (" + jar.getPath() + ") is not a .jar file");
-        try {
-            return loadFromJar(new JarFile(jar), intoJar);
+    protected abstract String buildFooter();
+
+    protected abstract String saveToString();
+
+    protected abstract FileConfiguration loadFromString(String contents);
+
+    /**
+     * Loads a new {@link FileConfiguration} from the file into jar.
+     *
+     * @param jar     Jar file instance.
+     * @param intoJar File representing the path inside the jar.
+     * @param to      File representing the path to save the content file into.
+     * @return The new {@link FileConfiguration} instance loaded from the file into jar.
+     * @see #loadFromJar(JarFile, File)
+     */
+    public static FileConfiguration loadFromJar(JarFile jar, File intoJar, File to) {
+        if (to == null)
+            return loadFromJar(jar, intoJar);
+        if (!to.exists())
+            main.getFileManager().createFile(to);
+        Validate.checkIf(to.isFile(), "File at " + to.getPath() + " is not a file");
+        ZipEntry entry = jar.getEntry(intoJar.getPath());
+        if (entry == null)
+            throw new RuntimeException("File " + intoJar.getPath() + " not found into " + jar.getName());
+
+        try (InputStream is = jar.getInputStream(entry);
+             BufferedReader in = new BufferedReader(new InputStreamReader(is));
+             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(to)))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                out.write(line + "\n");
+            }
+            jar.close();
         } catch (IOException e) {
-            throw new RuntimeException("Error while creating new JarFile instance with " + jar.getPath() + " file.", e);
+            throw new RuntimeException("Error while reading file into jar", e);
+        }
+        return FileConfiguration.loadConfiguration(to);
+    }
+
+    /**
+     * Loads a new {@link FileConfiguration} from the file into jar.
+     *
+     * @param jar     Jar file instance.
+     * @param intoJar File representing the path inside the jar and path to file to save content into.
+     * @return The new {@link FileConfiguration} instance loaded from the file into jar.
+     * @see #loadFromJar(JarFile, File, File)
+     */
+    public static FileConfiguration loadFromJar(JarFile jar, File intoJar) {
+        return loadFromJar(jar, intoJar, intoJar);
+    }
+
+    /**
+     * Loads a new {@link FileConfiguration} from the file into jar.
+     *
+     * @param jar     Jar file instance.
+     * @param intoJar File representing the path inside the jar and path to file to save content into.
+     * @return The new {@link FileConfiguration} instance loaded from the file into jar.
+     * @see #loadFromJar(JarFile, File, File)
+     */
+    public static FileConfiguration loadFromJar(File jar, File intoJar, File to) {
+        Validate.checkIf(jar.isFile(), "Object at " + jar.getPath() + " is not a file");
+        Validate.checkIf(FileUtility.isJar(jar), "File at " + jar.getPath() + " is not a jar file");
+        try {
+            JarFile jarFile = new JarFile(jar);
+            return loadFromJar(jarFile, intoJar, to);
+        } catch (IOException e) {
+            throw new RuntimeException("Error while loading file " + intoJar.getPath() + " from " + jar.getPath(), e);
         }
     }
 
+    /**
+     * Loads a new {@link FileConfiguration} from the file into jar.
+     *
+     * @param jar     Jar file instance.
+     * @param intoJar File representing the path inside the jar and path to file to save content into.
+     * @return The new {@link FileConfiguration} instance loaded from the file into jar.
+     * @see #loadFromJar(JarFile, File, File)
+     */
+    public static FileConfiguration loadFromJar(File jar, File intoJar) {
+        return loadFromJar(jar, intoJar, intoJar);
+    }
+
+    /**
+     * Loads a new {@link FileConfiguration} from the file into jar.
+     *
+     * @param jar     Jar file instance.
+     * @param intoJar File representing the path inside the jar and path to file to save content into.
+     * @return The new {@link FileConfiguration} instance loaded from the file into jar.
+     * @see #loadFromJar(JarFile, File, File)
+     */
+    public static FileConfiguration loadFromJar(String jar, String intoJar, String to) {
+        return loadFromJar(main.getFileManager().getFileFromString(jar), main.getFileManager().getFileFromString(intoJar),
+                main.getFileManager().getFileFromString(to));
+    }
+
+    /**
+     * Loads a new {@link FileConfiguration} from the file into jar.
+     *
+     * @param jar     Jar file instance.
+     * @param intoJar File representing the path inside the jar and path to file to save content into.
+     * @return The new {@link FileConfiguration} instance loaded from the file into jar.
+     * @see #loadFromJar(JarFile, File, File)
+     */
     public static FileConfiguration loadFromJar(String jar, String intoJar) {
         return loadFromJar(main.getFileManager().getFileFromString(jar), main.getFileManager().getFileFromString(intoJar));
     }
@@ -195,10 +279,25 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         Validate.notNull(file != null, "File cannot be null.");
         if (FileUtility.hasFileExtension(file)) {
             Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
-            return loadConfigByExtension(file);
+            return loadConfigurationByExtension(file);
         } else {
-            return loadConfigWithoutExtension(file);
+            return loadConfigurationWithoutExtension(file);
         }
+    }
+
+    /**
+     * Loads a new {@link FileConfiguration} from the specified file by
+     * creating new {@link File} with file param and delegating to {@link #loadConfiguration(File)}
+     *
+     * @param file The file to load the {@link FileConfiguration} from.
+     * @return The loaded {@link FileConfiguration} instance.
+     * @throws IllegalArgumentException if the specified path does not point to a valid file.
+     * @throws NullPointerException     if the file or required objects are null or do not exist.
+     * @see #loadConfiguration(File)
+     */
+    public static FileConfiguration loadConfiguration(String file) {
+        Validate.notNull(file != null, "File string cannot be null.");
+        return loadConfiguration(main.getFileManager().getFileFromString(file));
     }
 
     /**
@@ -207,7 +306,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @param file The file to load the {@link FileConfiguration} from.
      * @return The loaded {@link FileConfiguration} instance.
      */
-    protected static FileConfiguration loadConfigWithoutExtension(File file) {
+    protected static FileConfiguration loadConfigurationWithoutExtension(File file) {
         File parent = file.getParentFile();
         Validate.notNull(parent != null, "Parent directory cannot be null.");
         Validate.checkIf(parent.exists(), "Folder at " + parent.getPath() + " does not exist.");
@@ -219,9 +318,9 @@ public abstract class FileConfiguration extends MemoryConfiguration {
                 .filter(f -> FileUtility.getFileNameWithoutExtension(f.getName()).equals(file.getName()))
                 .findFirst();
         if (optFile.isEmpty()) {
-            throw new NullPointerException("File at " + file.getName() + " not found into " + parent.getPath());
+            throw new NullPointerException("File " + file.getName() + " not found into " + parent.getPath());
         }
-        return loadConfigByExtension(optFile.get());
+        return loadConfigurationByExtension(optFile.get());
     }
 
     /**
@@ -231,7 +330,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @return The loaded {@link FileConfiguration} instance.
      * @throws IllegalStateException if the file extension is not recognized
      */
-    protected static FileConfiguration loadConfigByExtension(File file) {
+    protected static FileConfiguration loadConfigurationByExtension(File file) {
         return switch (FileUtility.getExtension(file)) {
             case "json" -> JsonConfiguration.loadConfiguration(file);
             case "xml" -> XMLConfiguration.loadConfiguration(file);
@@ -239,27 +338,5 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             default ->
                     throw new IllegalStateException("Extension " + FileUtility.getExtension(file.getName()) + " of " + file.getPath() + " is not supported");
         };
-    }
-
-    /**
-     * Reload {@link FileConfiguration} by deleting all data and loading again
-     * from the specified {@link File}.
-     *
-     * @param file The file to reload from.
-     */
-    public FileConfiguration reload(File file) {
-        map.clear();
-        setFile(file);
-        FileConfiguration config = loadConfiguration(file);
-        setFileConfiguration(config);
-        return config;
-    }
-
-    /**
-     * Reload {@link FileConfiguration} by calling {@link #reload(File)},
-     * used file is the same used to load this {@code FileConfiguration}
-     */
-    public FileConfiguration reload() {
-        return reload(getFile());
     }
 }

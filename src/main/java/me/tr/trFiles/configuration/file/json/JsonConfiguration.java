@@ -16,6 +16,7 @@ import java.util.jar.JarFile;
  * This class represents the extension of FileConfiguration File for JSON.
  */
 public class JsonConfiguration extends FileConfiguration {
+    public static final String[] FILE_EXTENSIONS = new String[]{"json"};
     private final Gson gson;
 
 
@@ -42,31 +43,6 @@ public class JsonConfiguration extends FileConfiguration {
         }
         return this;
     }
-
-    public static JsonConfiguration loadFromJar(JarFile jar, File intoJar) {
-        Validate.checkIf(FileUtility.isJson(intoJar), "File to search is not a JSON file. Use FileConfiguration#loadFromJar instead.");
-        JsonConfiguration config = new JsonConfiguration();
-        config.loadFromString(getFileIntoJarToString(jar, intoJar));
-        return config;
-    }
-
-    public static JsonConfiguration loadFromJar(JarFile jar, String intoJar) {
-        return loadFromJar(jar, main.getFileManager().getFileFromString(intoJar));
-    }
-
-    public static JsonConfiguration loadFromJar(File jar, File intoJar) {
-        Validate.checkIf(FileUtility.getExtension(jar).equals("jar"), "The specified file (" + jar.getPath() + ") is not a .jar file");
-        try {
-            return loadFromJar(new JarFile(jar), intoJar);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while creating new JarFile instance with " + jar.getPath() + " file.", e);
-        }
-    }
-
-    public static JsonConfiguration loadFromJar(String jar, String intoJar) {
-        return loadFromJar(main.getFileManager().getFileFromString(jar), main.getFileManager().getFileFromString(intoJar));
-    }
-
 
     public JsonConfiguration(File file) {
         GsonBuilder jsonBuilder = new GsonBuilder();
