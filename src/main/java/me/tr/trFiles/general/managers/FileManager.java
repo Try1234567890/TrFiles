@@ -1,16 +1,28 @@
-package me.tr.trFiles.general;
+package me.tr.trFiles.general.managers;
 
 import me.tr.trFiles.general.utility.FileUtility;
 import me.tr.trFiles.general.utility.Validate;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class FileManager {
-    private JarFile jarFileToClose;
+    private JarFile jarToClose;
+
+    public void closeJar() {
+        if (jarToClose != null) {
+            try {
+                jarToClose.close();
+            } catch (IOException e) {
+                throw new RuntimeException("Error while closing file.", e);
+            }
+        }
+    }
 
     /**
      * Got an instance of {@link File} from a String correctly
@@ -25,6 +37,10 @@ public class FileManager {
         int lastSlashIndex = path.lastIndexOf('/') + 1;
         lastSlashIndex = lastSlashIndex <= 0 ? path.length() : lastSlashIndex;
         return new File(path.substring(0, lastSlashIndex), path.substring(lastSlashIndex));
+    }
+
+    public String getStringPathFromFile(File file) {
+        return file.getPath().replace('\\', '/');
     }
 
     /**
@@ -72,9 +88,31 @@ public class FileManager {
         Validate.checkIf(FileUtility.isJar(jar), "File found at path " + jar + " is not a .jar file.");
         try {
             JarFile jarFile = new JarFile(jar);
-            JarEntry jarEntry = jarFile.getJarEntry(fileIntoJar.getPath());
-            Validate.notNull(jarEntry != null, "File into jar " + jar.getPath() + " at path " + fileIntoJar.getPath() + " not found");
-            jarFileToClose = jarFile;
+            JarEntry jarEntry = jarFile.getJarEntry(getStringPathFromFile(fileIntoJar));
+            Validate.notNull(jarEntry != null, "File into jar " + getStringPathFromFile(jar) + " at path " + getStringPathFromFile(fileIntoJar) + " not found");
+            jarToClose = jarFile;
+            return jarFile.getInputStream(jarEntry);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Retrieves an {@link InputStream} for a file located inside a JAR file.
+     *
+     * @param jarFile     The JAR file to search in.
+     * @param fileIntoJar The file into the JAR.
+     * @return An {@link InputStream}   if the file is found inside the JAR, otherwise {@code null}.
+     * @throws IllegalArgumentException If the given file is not a valid JAR.
+     * @throws NullPointerException     If the specified JAR file does not exist.
+     * @throws RuntimeException         If an error occurs while getting input stream.
+     * @see #getFileInJar(String, String)
+     */
+    public @Nullable InputStream getFileInJar(JarFile jarFile, File fileIntoJar) {
+        try {
+            JarEntry jarEntry = jarFile.getJarEntry(getStringPathFromFile(fileIntoJar));
+            Validate.notNull(jarEntry != null, "File into jar at path " + getStringPathFromFile(fileIntoJar) + " not found");
+            jarToClose = jarFile;
             return jarFile.getInputStream(jarEntry);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -100,7 +138,7 @@ public class FileManager {
             if (file.createNewFile())
                 return true;
         } catch (IOException e) {
-            throw new RuntimeException("Error while creating " + file.getPath(), e);
+            throw new RuntimeException("Error while creating " + getStringPathFromFile(file), e);
         }
         return false;
     }
