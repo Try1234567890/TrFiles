@@ -173,17 +173,12 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @see #loadFromJar(JarFile, File)
      */
     public static FileConfiguration loadFromJar(JarFile jar, File intoJar, File to) {
-        if (to == null)
-            return loadFromJar(jar, intoJar);
         if (!to.exists())
             main.getFileManager().createFile(to);
-        Validate.checkIf(to.isFile(), "File at " + to.getPath() + " is not a file");
-        ZipEntry entry = jar.getEntry(intoJar.getPath());
-        if (entry == null)
-            throw new RuntimeException("File " + intoJar.getPath() + " not found into " + jar.getName());
-
-        try (InputStream is = jar.getInputStream(entry);
-             BufferedReader in = new BufferedReader(new InputStreamReader(is));
+        InputStream is = main.getFileManager().getFileInJar(jar, intoJar);
+        if (is == null)
+            return null;
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(is));
              BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(to)))) {
             String line;
             while ((line = in.readLine()) != null) {
@@ -217,13 +212,13 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @see #loadFromJar(JarFile, File, File)
      */
     public static FileConfiguration loadFromJar(File jar, File intoJar, File to) {
-        Validate.checkIf(jar.isFile(), "Object at " + jar.getPath() + " is not a file");
-        Validate.checkIf(FileUtility.isJar(jar), "File at " + jar.getPath() + " is not a jar file");
+        Validate.checkIf(jar.isFile(), "Object at " + main.getFileManager().getStringPathFromFile(jar) + " is not a file");
+        Validate.checkIf(FileUtility.isJar(jar), "File at " + main.getFileManager().getStringPathFromFile(jar) + " is not a jar file");
         try {
             JarFile jarFile = new JarFile(jar);
             return loadFromJar(jarFile, intoJar, to);
         } catch (IOException e) {
-            throw new RuntimeException("Error while loading file " + intoJar.getPath() + " from " + jar.getPath(), e);
+            throw new RuntimeException("Error while loading file " + main.getFileManager().getStringPathFromFile(intoJar) + " from " + main.getFileManager().getStringPathFromFile(jar), e);
         }
     }
 
@@ -278,7 +273,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
     public static FileConfiguration loadConfiguration(File file) {
         Validate.notNull(file != null, "File cannot be null.");
         if (FileUtility.hasFileExtension(file)) {
-            Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
+            Validate.checkIf(file.isFile(), "Object at " + main.getFileManager().getStringPathFromFile(file) + " is not a file.");
             return loadConfigurationByExtension(file);
         } else {
             return loadConfigurationWithoutExtension(file);
@@ -309,16 +304,16 @@ public abstract class FileConfiguration extends MemoryConfiguration {
     protected static FileConfiguration loadConfigurationWithoutExtension(File file) {
         File parent = file.getParentFile();
         Validate.notNull(parent != null, "Parent directory cannot be null.");
-        Validate.checkIf(parent.exists(), "Folder at " + parent.getPath() + " does not exist.");
-        Validate.checkIf(parent.isDirectory(), "Object at " + parent.getPath() + " is not a directory.");
+        Validate.checkIf(parent.exists(), "Folder at " + main.getFileManager().getStringPathFromFile(parent) + " does not exist.");
+        Validate.checkIf(parent.isDirectory(), "Object at " + main.getFileManager().getStringPathFromFile(parent) + " is not a directory.");
         File[] files = parent.listFiles();
-        Validate.notNull(files != null, "Files at " + parent.getPath() + " cannot be null.");
+        Validate.notNull(files != null, "Files at " + main.getFileManager().getStringPathFromFile(parent) + " cannot be null.");
         Optional<File> optFile = Arrays.stream(files)
                 .filter(File::isFile)
                 .filter(f -> FileUtility.getFileNameWithoutExtension(f.getName()).equals(file.getName()))
                 .findFirst();
         if (optFile.isEmpty()) {
-            throw new NullPointerException("File " + file.getName() + " not found into " + parent.getPath());
+            throw new NullPointerException("File " + file.getName() + " not found into " + main.getFileManager().getStringPathFromFile(parent));
         }
         return loadConfigurationByExtension(optFile.get());
     }
@@ -336,7 +331,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             case "xml" -> XMLConfiguration.loadConfiguration(file);
             case "yaml", "yml" -> YamlConfiguration.loadConfiguration(file);
             default ->
-                    throw new IllegalStateException("Extension " + FileUtility.getExtension(file.getName()) + " of " + file.getPath() + " is not supported");
+                    throw new IllegalStateException("Extension " + FileUtility.getExtension(file.getName()) + " of " + main.getFileManager().getStringPathFromFile(file) + " is not supported");
         };
     }
 }
