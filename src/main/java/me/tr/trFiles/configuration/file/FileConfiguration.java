@@ -273,7 +273,6 @@ public abstract class FileConfiguration extends MemoryConfiguration {
     public static FileConfiguration loadConfiguration(File file) {
         Validate.notNull(file != null, "File cannot be null.");
         if (FileUtility.hasFileExtension(file)) {
-            Validate.checkIf(file.isFile(), "Object at " + main.getFileManager().getStringPathFromFile(file) + " is not a file.");
             return loadConfigurationByExtension(file);
         } else {
             return loadConfigurationWithoutExtension(file);
