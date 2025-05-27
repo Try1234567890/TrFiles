@@ -43,6 +43,12 @@ public interface Section {
 
     boolean isString(String path);
 
+    char getChar(String path);
+
+    char getChar(String path, char def);
+
+    boolean isChar(String path);
+
     int getInt(String path);
 
     int getInt(String path, int def);
@@ -97,7 +103,9 @@ public interface Section {
 
     boolean isList(String path);
 
-    List<Section> getSections(String path);
+    List<Section> getSectionList();
+
+    List<Section> getSectionList(String path);
 
     List<String> getStringList(String path);
 
@@ -122,6 +130,34 @@ public interface Section {
     List<BigInteger> getBigIntegerList(String path);
 
     List<BigDecimal> getBigDecimalList(String path);
+
+    Section[] getSectionsArray();
+
+    Section[] getSectionArray(String path);
+
+    String[] getStringArray(String path);
+
+    Integer[] getIntegerArray(String path);
+
+    Number[] getNumberArray(String path);
+
+    Boolean[] getBooleanArray(String path);
+
+    Double[] getDoubleArray(String path);
+
+    Float[] getFloatArray(String path);
+
+    Long[] getLongArray(String path);
+
+    Byte[] getByteArray(String path);
+
+    Character[] getCharacterArray(String path);
+
+    Short[] getShortArray(String path);
+
+    BigInteger[] getBigIntegerArray(String path);
+
+    BigDecimal[] getBigDecimalArray(String path);
 
     Section getSection(String path);
 

@@ -240,6 +240,27 @@ public class MemorySection implements Section {
     }
 
     @Override
+    public char getChar(String path) {
+        Object val = get(path);
+        if (val instanceof String string
+                && string.length() == 1) {
+            return string.charAt(0);
+        }
+        return (char) -1;
+    }
+
+    @Override
+    public char getChar(String path, char def) {
+        char val = getChar(path);
+        return val == (char) -1 ? def : getChar(path);
+    }
+
+    @Override
+    public boolean isChar(String path) {
+        return getChar(path) != (char) -1;
+    }
+
+    @Override
     public int getInt(String path) {
         Object val = get(path);
         return val instanceof Number number ? number.intValue() : -1;
@@ -402,14 +423,29 @@ public class MemorySection implements Section {
     }
 
     @Override
-    public List<Section> getSections(String path) {
+    public List<Section> getSectionList() {
+        final List<Section> result = new ArrayList<>();
+        for (String key : getKeys(false)) {
+            Section section = getSection(key);
+            if (section != null) {
+                result.add(section);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<Section> getSectionList(String path) {
         Section val = getSection(path);
         if (val == null) {
             return new ArrayList<>();
         }
         List<Section> result = new ArrayList<>();
         for (String key : val.getKeys(false)) {
-            result.add(val.getSection(key));
+            Section section = val.getSection(key);
+            if (section != null) {
+                result.add(section);
+            }
         }
         return result;
     }
@@ -673,6 +709,62 @@ public class MemorySection implements Section {
             }
         }
         return result;
+    }
+
+    public Section[] getSectionsArray() {
+        return getSectionList().toArray(new Section[]{});
+    }
+
+    public Section[] getSectionArray(String path) {
+        return getSectionList(path).toArray(new Section[]{});
+    }
+
+    public String[] getStringArray(String path) {
+        return getStringList(path).toArray(new String[]{});
+    }
+
+    public Integer[] getIntegerArray(String path) {
+        return getIntegerList(path).toArray(new Integer[]{});
+    }
+
+    public Number[] getNumberArray(String path) {
+        return getNumberList(path).toArray(new Number[]{});
+    }
+
+    public Boolean[] getBooleanArray(String path) {
+        return getBooleanList(path).toArray(new Boolean[]{});
+    }
+
+    public Double[] getDoubleArray(String path) {
+        return getDoubleList(path).toArray(new Double[]{});
+    }
+
+    public Float[] getFloatArray(String path) {
+        return getFloatList(path).toArray(new Float[]{});
+    }
+
+    public Long[] getLongArray(String path) {
+        return getLongList(path).toArray(new Long[]{});
+    }
+
+    public Byte[] getByteArray(String path) {
+        return getByteList(path).toArray(new Byte[]{});
+    }
+
+    public Character[] getCharacterArray(String path) {
+        return getCharacterList(path).toArray(new Character[]{});
+    }
+
+    public Short[] getShortArray(String path) {
+        return getShortList(path).toArray(new Short[]{});
+    }
+
+    public BigInteger[] getBigIntegerArray(String path) {
+        return getBigIntegerList(path).toArray(new BigInteger[]{});
+    }
+
+    public BigDecimal[] getBigDecimalArray(String path) {
+        return getBigDecimalList(path).toArray(new BigDecimal[]{});
     }
 
     @Override
