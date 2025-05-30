@@ -2,6 +2,7 @@ package me.tr.trFiles.general.managers;
 
 import me.tr.trFiles.general.utility.FileUtility;
 import me.tr.trFiles.general.utility.Validate;
+import me.tr.trFiles.general.utility.os.OSUtility;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -33,14 +34,15 @@ public class FileManager {
      * @see #getPathFromString(String)
      */
     public File getFileFromString(String path) {
-        path = path.replace('\\', '/');
+        path = OSUtility.removeIllegalChars(path.replace('\\', '/'));
         int lastSlashIndex = path.lastIndexOf('/') + 1;
         lastSlashIndex = lastSlashIndex <= 0 ? path.length() : lastSlashIndex;
         return new File(path.substring(0, lastSlashIndex), path.substring(lastSlashIndex));
     }
 
+
     public String getStringPathFromFile(File file) {
-        return file.getPath().replace('\\', '/');
+        return OSUtility.removeIllegalChars(file.getPath().replace('\\', '/'));
     }
 
     /**

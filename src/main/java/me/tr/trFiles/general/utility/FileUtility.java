@@ -11,7 +11,7 @@ import java.util.Arrays;
  * Utility file class
  */
 public class FileUtility {
-
+    public static char[] ILLEGAL_CHARACTERS = new char[]{'\\', '/', ':', '?', '"', '<', '>', '|'};
     /**
      * Check if the file name has an extension.
      * <p>
