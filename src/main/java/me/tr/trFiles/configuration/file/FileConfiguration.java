@@ -1,23 +1,23 @@
 package me.tr.trFiles.configuration.file;
 
 import me.tr.trFiles.TrFiles;
-import me.tr.trFiles.configuration.Section;
 import me.tr.trFiles.configuration.file.json.JsonConfiguration;
 import me.tr.trFiles.configuration.file.xml.XMLConfiguration;
 import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.general.utility.FileUtility;
 import me.tr.trFiles.general.utility.Validate;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
-    public static final String[] FILE_EXTENSIONS = new String[]{"json", "xml", "yaml", "yml" };
+    public static final String[] FILE_EXTENSIONS = new String[]{"json", "xml", "yaml", "yml"};
     protected static final TrFiles main = TrFiles.getInstance();
     protected final String BLANK_FILE = "{}\n";
 
@@ -104,30 +104,6 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return reload(getFile());
     }
 
-    /**
-     * Convert {@link Map} into {@link Section} by cycling all
-     * {@link Map.Entry} that map contains, if the entry value
-     * is an instance of {@code Map}, call recursive this method by passing
-     * as {@code Map} the cast value as it and as {@code Section}
-     * the result of {@link Section#createSection(String)} using
-     * as parameter the entry key, else if is not an instance of {@code Map}
-     * call method {@link Section#set(String, Object)} by using entry key as first
-     * parameter and entry value as second parameter.
-     *
-     * @param input   Map to convert into sections.
-     * @param section Root section to start insert values in.
-     */
-    protected void convertMapsToSections(Map<?, ?> input, Section section) {
-        for (Map.Entry<?, ?> entry : input.entrySet()) {
-            String key = entry.getKey().toString();
-            Object value = entry.getValue();
-            if (value instanceof Map) {
-                convertMapsToSections((Map<?, ?>) value, section.createSection(key));
-            } else {
-                section.set(key, value);
-            }
-        }
-    }
 
     /**
      * Build header or footer of current {@link FileConfiguration}
@@ -333,4 +309,73 @@ public abstract class FileConfiguration extends MemoryConfiguration {
                     throw new IllegalStateException("Extension " + FileUtility.getExtension(file.getName()) + " of " + main.getFileManager().getStringPathFromFile(file) + " is not supported");
         };
     }
+
+
+    /**
+     * Copy the current {@link FileConfiguration} to param {@link File}.
+     *
+     * @param to File to copy current {@link FileConfiguration} into.
+     * @return New {@link FileConfiguration} loaded from the copied file.
+     */
+    public FileConfiguration copy(File to) {
+        Validate.checkIf(to.exists(), "Object at " + main.getFileManager().getStringPathFromFile(to) + " does not exist.");
+        Validate.checkIf(to.isFile(), "Object at " + main.getFileManager().getStringPathFromFile(to) + " is not a file.");
+        FileConfiguration config = loadConfiguration(to);
+        config.getMap().putAll(getMap());
+        return config;
+    }
+
+    /**
+     * Safety deletes the current FileConfiguration file.
+     *
+     * @return true if the file has been successfully deleted, otherwise false.
+     */
+    public boolean delete() {
+        getMap().clear();
+        return getFile().delete();
+    }
+
+    /**
+     * Move the current {@link FileConfiguration} to param {@link File}.
+     *
+     * @param to {@link File} file to move current {@link FileConfiguration} to.
+     * @return The new {@link FileConfiguration} loaded.
+     */
+    public FileConfiguration move(File to) {
+        FileConfiguration newConfig = copy(to);
+        newConfig.save();
+        if (!delete()) {
+            // todo logger
+        }
+        return newConfig;
+    }
+
+    /**
+     * Compress in a zip file the current {@link FileConfiguration} file.
+     *
+     * @param zip File to use as zip if it is null, a new file zip will be created at
+     *            the same position of this {@link FileConfiguration} file.
+     */
+    public void zip(@Nullable File zip) {
+        if (zip == null)
+            zip = new File(getFile().getParentFile(), getFile().getName() + ".zip");
+        if (!zip.exists())
+            main.getFileManager().createFile(zip);
+        Validate.checkIf(zip.isFile(), "Object at " + main.getFileManager().getStringPathFromFile(zip) + " is not a file.");
+        try (FileInputStream fileToZipIs = new FileInputStream(getFile());
+             FileOutputStream fileOs = new FileOutputStream(zip);
+             ZipOutputStream zipOs = new ZipOutputStream(fileOs)) {
+            ZipEntry zipEntry = new ZipEntry(getFile().getName());
+            zipOs.putNextEntry(zipEntry);
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fileToZipIs.read(bytes)) > 0) {
+                zipOs.write(bytes, 0, length);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error while zipping file " + main.getFileManager().getStringPathFromFile(zip), e);
+        }
+    }
+
+
 }

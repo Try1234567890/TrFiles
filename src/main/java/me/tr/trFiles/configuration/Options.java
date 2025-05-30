@@ -6,7 +6,6 @@ package me.tr.trFiles.configuration;
  */
 public class Options {
     private char pathSeparator = '.';
-    private boolean copyDefault = false;
     private final Configuration configuration;
 
     protected Options(Configuration configuration) {
@@ -23,15 +22,6 @@ public class Options {
 
     public Options pathSeparator(char pathSeparator) {
         this.pathSeparator = pathSeparator;
-        return this;
-    }
-
-    public boolean copyDefault() {
-        return copyDefault;
-    }
-
-    public Options copyDefault(boolean copyDefault) {
-        this.copyDefault = copyDefault;
         return this;
     }
 }

@@ -164,4 +164,6 @@ public interface Section {
     boolean isSection(String path);
 
     void addDefault(String path, Object value);
+
+    Object getDefault(String path);
 }

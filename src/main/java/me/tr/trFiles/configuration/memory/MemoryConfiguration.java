@@ -1,6 +1,7 @@
 package me.tr.trFiles.configuration.memory;
 
 import me.tr.trFiles.configuration.Configuration;
+import me.tr.trFiles.configuration.Section;
 import me.tr.trFiles.configuration.file.FileConfiguration;
 
 import java.io.File;
@@ -34,17 +35,12 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
 
     @Override
     public void addDefault(String path, Object value) {
-        if (defaults == null) {
-            defaults = new MemoryConfiguration();
-        }
-        defaults.set(path, value);
+        getDefaults().set(path, value);
     }
 
     @Override
     public void addDefaults(Map<String, Object> defaults) {
-        for (Map.Entry<String, Object> entry : defaults.entrySet()) {
-            addDefault(entry.getKey(), entry.getValue());
-        }
+        convertMapsToSections(defaults, getDefaults());
     }
 
     @Override
@@ -60,10 +56,39 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
 
     @Override
     public Configuration getDefaults() {
+        if (this.defaults == null) {
+            this.defaults = new MemoryConfiguration();
+        }
         return this.defaults;
     }
 
-    public MemoryConfiguration() {}
+    public MemoryConfiguration() {
+    }
+
+    /**
+     * Convert {@link Map} into {@link Section} by cycling all
+     * {@link Map.Entry} that map contains, if the entry value
+     * is an instance of {@code Map}, call recursive this method by passing
+     * as {@code Map} the cast value as it and as {@code Section}
+     * the result of {@link Section#createSection(String)} using
+     * as parameter the entry key, else if is not an instance of {@code Map}
+     * call method {@link Section#set(String, Object)} by using entry key as first
+     * parameter and entry value as second parameter.
+     *
+     * @param input   Map to convert into sections.
+     * @param section Root section to start insert values in.
+     */
+    protected void convertMapsToSections(Map<?, ?> input, Section section) {
+        for (Map.Entry<?, ?> entry : input.entrySet()) {
+            String key = entry.getKey().toString();
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                convertMapsToSections((Map<?, ?>) value, section.createSection(key));
+            } else {
+                section.set(key, value);
+            }
+        }
+    }
 
     public MemoryConfiguration(Configuration defaults) {
         this.defaults = defaults;
