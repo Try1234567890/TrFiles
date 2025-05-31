@@ -2,7 +2,6 @@ package me.tr.trFiles.configuration.file;
 
 import me.tr.trFiles.TrFiles;
 import me.tr.trFiles.configuration.file.json.JsonConfiguration;
-import me.tr.trFiles.configuration.file.xml.XMLConfiguration;
 import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.general.utility.FileUtility;
@@ -17,7 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
-    public static final String[] FILE_EXTENSIONS = new String[]{"json", "xml", "yaml", "yml"};
+    public static final String[] FILE_EXTENSIONS = new String[]{"json", "yaml", "yml"};
     protected static final TrFiles main = TrFiles.getInstance();
     protected final String BLANK_FILE = "{}\n";
 
@@ -34,8 +33,8 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      */
     public FileConfiguration load(File file) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
             StringBuilder sb = new StringBuilder();
+            String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append("\n");
             }
@@ -60,6 +59,8 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      * @see #save()
      */
     public void save(File file) {
+        if (file == null)
+            return;
         if (!file.exists())
             main.getFileManager().createFile(file);
         try (Writer writer = new OutputStreamWriter(new FileOutputStream(file))) {
@@ -303,7 +304,6 @@ public abstract class FileConfiguration extends MemoryConfiguration {
     protected static FileConfiguration loadConfigurationByExtension(File file) {
         return switch (FileUtility.getExtension(file)) {
             case "json" -> JsonConfiguration.loadConfiguration(file);
-            case "xml" -> XMLConfiguration.loadConfiguration(file);
             case "yaml", "yml" -> YamlConfiguration.loadConfiguration(file);
             default ->
                     throw new IllegalStateException("Extension " + FileUtility.getExtension(file.getName()) + " of " + main.getFileManager().getStringPathFromFile(file) + " is not supported");

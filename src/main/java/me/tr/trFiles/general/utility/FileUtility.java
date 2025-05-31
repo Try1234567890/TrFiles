@@ -1,7 +1,6 @@
 package me.tr.trFiles.general.utility;
 
 import me.tr.trFiles.configuration.file.json.JsonConfiguration;
-import me.tr.trFiles.configuration.file.xml.XMLConfiguration;
 import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
 
 import java.io.File;
@@ -154,28 +153,6 @@ public class FileUtility {
     }
 
     /**
-     * Check if the file is an XML by getting extension with {@link #getExtension(String)}
-     * and check if it equals to {@code json}.
-     *
-     * @param fileName File name to check.
-     * @return {@code true} if the file is an XML file, otherwise {@code false}.
-     */
-    public static boolean isXML(String fileName) {
-        return Arrays.stream(XMLConfiguration.FILE_EXTENSIONS).anyMatch(getExtension(fileName)::equalsIgnoreCase);
-    }
-
-    /**
-     * Check if the file is an XML by getting file name
-     * and delegate to {@link #isJson(String)}
-     *
-     * @param file File to check.
-     * @return {@code true} if the file is an XML file, otherwise {@code false}.
-     */
-    public static boolean isXML(File file) {
-        return isXML(file.getName());
-    }
-
-    /**
      * Check if the file is a JAR by getting extension with {@link #getExtension(String)}
      * and check if it equals to {@code jar}.
      *
@@ -200,25 +177,25 @@ public class FileUtility {
     /**
      * Check if the file extension is supported by
      * using the file as parameter for {@link #isYaml(File)} &
-     * {@link #isJson(File)} & {@link #isXML(File)} and at last one return true.
+     * {@link #isJson(File)} and at last one return true.
      *
      * @param file File to check if extension is supported for.
      * @return {@code true} if extension is supported, otherwise {@code false}.
      */
     public static boolean isSupportedExtension(File file) {
-        return isYaml(file) || isJson(file) || isXML(file);
+        return isYaml(file) || isJson(file);
     }
 
     /**
      * Check if the file name extension is supported by
      * using the file name as parameter for {@link #isYaml(String)} &
-     * {@link #isJson(String)} & {@link #isXML(String)} and at last one return true.
+     * {@link #isJson(String)} and at last one return true.
      *
      * @param name File name to check if extension is supported for.
      * @return {@code true} if extension is supported, otherwise {@code false}.
      */
     public static boolean isSupportedExtension(String name) {
-        return isYaml(name) || isJson(name) || isXML(name);
+        return isYaml(name) || isJson(name);
     }
 
 }
