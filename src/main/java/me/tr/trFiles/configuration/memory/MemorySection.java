@@ -474,6 +474,16 @@ public class MemorySection implements Section {
     }
 
     @Override
+    public List<Object> getObjectList(String path) {
+        List<Object> result = new ArrayList<>();
+        List<?> val = getDefList(path);
+        if (val == null)
+            return result;
+        result.addAll(val);
+        return result;
+    }
+
+    @Override
     public List<String> getStringList(String path) {
         List<String> result = new ArrayList<>();
         List<?> val = getDefList(path);
@@ -728,58 +738,77 @@ public class MemorySection implements Section {
         return val != null ? val : (def instanceof List<?> ? (List<?>) def : null);
     }
 
+    @Override
     public Section[] getSectionsArray() {
         return getSectionList().toArray(new Section[]{});
     }
 
+    @Override
     public Section[] getSectionArray(String path) {
         return getSectionList(path).toArray(new Section[]{});
     }
 
+    @Override
+    public Object[] getObjectArray(String path) {
+        return getObjectList(path).toArray(new Object[]{});
+    }
+
+    @Override
     public String[] getStringArray(String path) {
         return getStringList(path).toArray(new String[]{});
     }
 
+    @Override
     public Integer[] getIntegerArray(String path) {
         return getIntegerList(path).toArray(new Integer[]{});
     }
 
+    @Override
     public Number[] getNumberArray(String path) {
         return getNumberList(path).toArray(new Number[]{});
     }
 
+    @Override
     public Boolean[] getBooleanArray(String path) {
         return getBooleanList(path).toArray(new Boolean[]{});
     }
 
+    @Override
     public Double[] getDoubleArray(String path) {
         return getDoubleList(path).toArray(new Double[]{});
     }
 
+    @Override
     public Float[] getFloatArray(String path) {
         return getFloatList(path).toArray(new Float[]{});
     }
 
+    @Override
     public Long[] getLongArray(String path) {
         return getLongList(path).toArray(new Long[]{});
     }
 
+    @Override
     public Byte[] getByteArray(String path) {
         return getByteList(path).toArray(new Byte[]{});
     }
 
+    @Override
     public Character[] getCharacterArray(String path) {
         return getCharacterList(path).toArray(new Character[]{});
     }
 
+    @Override
     public Short[] getShortArray(String path) {
         return getShortList(path).toArray(new Short[]{});
     }
 
+    @Override
     public BigInteger[] getBigIntegerArray(String path) {
         return getBigIntegerList(path).toArray(new BigInteger[]{});
     }
 
+    @Override
     public BigDecimal[] getBigDecimalArray(String path) {
         return getBigDecimalList(path).toArray(new BigDecimal[]{});
     }

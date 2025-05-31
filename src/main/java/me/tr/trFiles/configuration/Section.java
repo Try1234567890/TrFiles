@@ -101,6 +101,8 @@ public interface Section {
 
     List<?> getList(String path, List<?> def);
 
+    List<Object> getObjectList(String path);
+
     boolean isList(String path);
 
     List<Section> getSectionList();
@@ -134,6 +136,8 @@ public interface Section {
     Section[] getSectionsArray();
 
     Section[] getSectionArray(String path);
+
+    Object[] getObjectArray(String path);
 
     String[] getStringArray(String path);
 
