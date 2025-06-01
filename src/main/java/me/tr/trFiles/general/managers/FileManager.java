@@ -34,15 +34,15 @@ public class FileManager {
      * @see #getPathFromString(String)
      */
     public File getFileFromString(String path) {
-        path = OSUtility.removeIllegalChars(path.replace('\\', '/'));
+        path = path.replace('\\', '/');
         int lastSlashIndex = path.lastIndexOf('/') + 1;
         lastSlashIndex = lastSlashIndex <= 0 ? path.length() : lastSlashIndex;
-        return new File(path.substring(0, lastSlashIndex), path.substring(lastSlashIndex));
+        return new File(path.substring(0, lastSlashIndex), OSUtility.removeIllegalChars(path.substring(lastSlashIndex)));
     }
 
 
     public String getStringPathFromFile(File file) {
-        return OSUtility.removeIllegalChars(file.getPath().replace('\\', '/'));
+        return file.getPath().replace('\\', '/');
     }
 
     /**
