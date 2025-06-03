@@ -2,6 +2,7 @@ package me.tr.trFiles.configuration.memory;
 
 import me.tr.trFiles.configuration.Configuration;
 import me.tr.trFiles.configuration.Section;
+import me.tr.trFiles.general.utility.Validate;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -490,7 +491,7 @@ public class MemorySection implements Section {
         if (val == null)
             return result;
         for (Object o : val) {
-            if (o instanceof String || isPrimitiveWrapper(o)) {
+            if (o instanceof String || isPrimitive(o)) {
                 result.add(String.valueOf(o));
             }
         }
@@ -813,6 +814,172 @@ public class MemorySection implements Section {
         return getBigDecimalList(path).toArray(new BigDecimal[]{});
     }
 
+    @Override
+    public int[] getPrimitiveIntegerArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new int[]{};
+        int[] result = new int[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Number) {
+                result[i] = ((Number) o).intValue();
+            } else if (o instanceof String string) {
+                try {
+                    result[i] = Integer.parseInt(string);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean[] getPrimitiveBooleanArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new boolean[]{};
+        boolean[] result = new boolean[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Boolean) {
+                result[i] = (Boolean) o;
+            } else if (o instanceof String string) {
+                if (equalsBoolean(string)) {
+                    result[i] = Boolean.parseBoolean(string);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public double[] getPrimitiveDoubleArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new double[]{};
+        double[] result = new double[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Number) {
+                result[i] = ((Number) o).doubleValue();
+            } else if (o instanceof String string) {
+                try {
+                    result[i] = Double.parseDouble(string);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public float[] getPrimitiveFloatArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new float[]{};
+        float[] result = new float[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Number) {
+                result[i] = ((Number) o).floatValue();
+            } else if (o instanceof String string) {
+                try {
+                    result[i] = Float.parseFloat(string);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public long[] getPrimitiveLongArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new long[]{};
+        long[] result = new long[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Number) {
+                result[i] = ((Number) o).longValue();
+            } else if (o instanceof String string) {
+                try {
+                    result[i] = Long.parseLong(string);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public byte[] getPrimitiveByteArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new byte[]{};
+        byte[] result = new byte[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Number) {
+                result[i] = ((Number) o).byteValue();
+            } else if (o instanceof String string) {
+                try {
+                    result[i] = Byte.parseByte(string);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public char[] getPrimitiveCharacterArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new char[]{};
+        char[] result = new char[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Character) {
+                result[i] = (Character) o;
+            } else if (o instanceof String string) {
+                if (string.length() == 1) {
+                    result[i] = string.charAt(0);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public short[] getPrimitiveShortArray(String path) {
+        Object[] val = getObjectArray(path);
+        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        if (def == null)
+            return new short[]{};
+        short[] result = new short[def.length];
+        for (int i = 0; i < result.length; i++) {
+            Object o = def[i];
+            if (o instanceof Number) {
+                result[i] = ((Number) o).shortValue();
+            } else if (o instanceof String string) {
+                try {
+                    result[i] = Short.parseShort(string);
+                } catch (NumberFormatException ignore) {
+                }
+            }
+        }
+        return result;
+    }
+
 
     @Override
     public void addDefault(String path, Object value) {
@@ -862,7 +1029,7 @@ public class MemorySection implements Section {
             }
             builder.insert(0, parent.getName());
         }
-        if (key != null && !key.isEmpty()) {
+        if (!Validate.isNull(key)) {
             if (!builder.isEmpty()) {
                 builder.append(separator);
             }
@@ -871,11 +1038,15 @@ public class MemorySection implements Section {
         return builder.toString();
     }
 
-    protected boolean isPrimitiveWrapper(Object input) {
+    protected boolean isPrimitive(Object input) {
         return input instanceof Integer || input instanceof Boolean ||
                 input instanceof Character || input instanceof Byte ||
                 input instanceof Short || input instanceof Double ||
                 input instanceof Long || input instanceof Float;
+    }
+
+    protected boolean equalsBoolean(String input) {
+        return input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false");
     }
 
 

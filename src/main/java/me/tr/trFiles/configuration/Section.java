@@ -163,6 +163,22 @@ public interface Section {
 
     BigDecimal[] getBigDecimalArray(String path);
 
+    int[] getPrimitiveIntegerArray(String path);
+
+    boolean[] getPrimitiveBooleanArray(String path);
+
+    double[] getPrimitiveDoubleArray(String path);
+
+    float[] getPrimitiveFloatArray(String path);
+
+    long[] getPrimitiveLongArray(String path);
+
+    byte[] getPrimitiveByteArray(String path);
+
+    char[] getPrimitiveCharacterArray(String path);
+
+    short[] getPrimitiveShortArray(String path);
+
     Section getSection(String path);
 
     boolean isSection(String path);

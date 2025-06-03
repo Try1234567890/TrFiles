@@ -6,7 +6,7 @@
 
     <groupId>me.tr</groupId>
     <artifactId>TrFiles</artifactId>
-    <version>2.2.3-hotfix</version>
+    <version>2.2.4</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
