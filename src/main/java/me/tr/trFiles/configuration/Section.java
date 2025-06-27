@@ -85,6 +85,12 @@ public interface Section {
 
     boolean isLong(String path);
 
+    short getShort(String path);
+
+    short getShort(String path, short def);
+
+    boolean isShort(String path);
+
     BigInteger getBigInteger(String path);
 
     BigInteger getBigInteger(String path, BigInteger def);

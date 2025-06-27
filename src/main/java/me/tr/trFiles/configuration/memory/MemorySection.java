@@ -389,6 +389,25 @@ public class MemorySection implements Section {
     }
 
     @Override
+    public short getShort(String path) {
+        Object val = get(path);
+        Object def = val != null ? val : getDefault(path);
+        return def instanceof Short ? (Short) def : -1;
+    }
+
+    @Override
+    public short getShort(String path, short def) {
+        Object val = get(path);
+        return val instanceof Short ? (Short) val : def;
+    }
+
+    @Override
+    public boolean isShort(String path) {
+        Object val = get(path);
+        return val instanceof Short;
+    }
+
+    @Override
     public BigInteger getBigInteger(String path) {
         Object val = get(path);
         Object def = val != null ? val : getDefault(path);
