@@ -16,10 +16,11 @@ public class OSUtility {
     }
 
     public static String removeIllegalChars(String from) {
+
         OSType os = OSType.fromString(OS_NAME);
         if (os == null)
             return from;
-        for (char c : os.illegalChars()) {
+        for (char c : os.getIllegalChars()) {
             from = from.replace(String.valueOf(c), "");
         }
         return from;

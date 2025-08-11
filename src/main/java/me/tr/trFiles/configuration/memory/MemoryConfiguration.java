@@ -2,14 +2,13 @@ package me.tr.trFiles.configuration.memory;
 
 import me.tr.trFiles.configuration.Configuration;
 import me.tr.trFiles.configuration.Section;
-import me.tr.trFiles.configuration.file.FileConfiguration;
 
 import java.io.File;
 import java.util.Map;
 
 public class MemoryConfiguration extends MemorySection implements Configuration {
     protected File file;
-    protected FileConfiguration config;
+    protected Configuration config;
     protected Configuration defaults;
     protected MemoryOptions options;
 
@@ -24,12 +23,12 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
     }
 
     @Override
-    public FileConfiguration getFileConfiguration() {
+    public Configuration getFileConfiguration() {
         return config;
     }
 
     @Override
-    public void setFileConfiguration(FileConfiguration config) {
+    public void setFileConfiguration(Configuration config) {
         this.config = config;
     }
 
@@ -62,9 +61,6 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
         return this.defaults;
     }
 
-    public MemoryConfiguration() {
-    }
-
     /**
      * Convert {@link Map} into {@link Section} by cycling all
      * {@link Map.Entry} that map contains, if the entry value
@@ -94,11 +90,19 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
         this.defaults = defaults;
     }
 
+    public MemoryConfiguration() {
+    }
+
     @Override
     public MemoryOptions options() {
         if (options == null) {
             options = new MemoryOptions(this);
         }
         return options;
+    }
+
+    @Override
+    public Map<String, Object> asMap() {
+        return map;
     }
 }

@@ -33,6 +33,19 @@ public class Validate {
 
     /**
      * Check if the condition is respected,
+     * if not run the provided Runnable.
+     *
+     * @param condition The condition to check for.
+     * @param run       Runnable to execute if condition is false.
+     */
+    public static void checkIf(boolean condition, Runnable run) {
+        if (!condition) {
+            run.run();
+        }
+    }
+
+    /**
+     * Check if the condition is respected,
      * if not throw new exception with the message provided.
      *
      * @param condition The condition to check for.

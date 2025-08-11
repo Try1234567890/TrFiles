@@ -28,7 +28,7 @@ public class MemorySection implements Section {
         this.parent = parent;
         this.fullPath = createPath(parent, path);
         this.root = parent.getRoot();
-        this.name = currentPath.substring(currentPath.lastIndexOf(root.options().pathSeparator()) + 1);
+        this.name = currentPath.substring(currentPath.lastIndexOf(root.options().getPathSeparator()) + 1);
     }
 
 
@@ -134,7 +134,7 @@ public class MemorySection implements Section {
         if (root == null) {
             throw new IllegalStateException("Cannot access section without a root");
         }
-        final char separator = root.options().pathSeparator();
+        final char separator = root.options().getPathSeparator();
         int separatorIndex = -1, separatorLength;
         Section section = this;
         while ((separatorIndex = path.indexOf(separator, separatorLength = separatorIndex + 1)) != -1) {
@@ -162,7 +162,7 @@ public class MemorySection implements Section {
         if (root == null) {
             throw new IllegalStateException("Cannot set value without a root");
         }
-        final char separator = root.options().pathSeparator();
+        final char separator = root.options().getPathSeparator();
         int separatorIndex = -1, separatorLength;
         Section section = this;
         while ((separatorIndex = path.indexOf(separator, separatorLength = separatorIndex + 1)) != -1) {
@@ -216,7 +216,7 @@ public class MemorySection implements Section {
         if (root == null) {
             throw new IllegalStateException("Cannot create section without a root");
         }
-        final char separator = root.options().pathSeparator();
+        final char separator = root.options().getPathSeparator();
         Section section = this;
         int separatorIndex = -1, lengthBeforeSeparator;
         while ((separatorIndex = path.indexOf(separator, lengthBeforeSeparator = separatorIndex + 1)) != -1) {
@@ -1040,7 +1040,7 @@ public class MemorySection implements Section {
      */
     public static String createRelativePath(Section section, String key, Section relativeTo) {
         Configuration root = section.getRoot();
-        char separator = root.options().pathSeparator();
+        char separator = root.options().getPathSeparator();
         StringBuilder builder = new StringBuilder();
         for (Section parent = section; (parent != null) && (parent != relativeTo); parent = parent.getParent()) {
             if (!builder.isEmpty()) {
@@ -1065,7 +1065,8 @@ public class MemorySection implements Section {
     }
 
     protected boolean equalsBoolean(String input) {
-        return input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false");
+        return input.equalsIgnoreCase("true")
+                || input.equalsIgnoreCase("false");
     }
 
 

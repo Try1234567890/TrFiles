@@ -1,7 +1,5 @@
 package me.tr.trFiles.configuration;
 
-import me.tr.trFiles.configuration.file.FileConfiguration;
-
 import java.io.File;
 import java.util.Map;
 
@@ -14,9 +12,9 @@ public interface Configuration extends Section {
 
     File getFile();
 
-    FileConfiguration getFileConfiguration();
+    Configuration getFileConfiguration();
 
-    void setFileConfiguration(FileConfiguration config);
+    void setFileConfiguration(Configuration config);
 
     void addDefault(String path, Object value);
 
@@ -30,4 +28,5 @@ public interface Configuration extends Section {
 
     Options options();
 
+    Map<String, Object> asMap();
 }

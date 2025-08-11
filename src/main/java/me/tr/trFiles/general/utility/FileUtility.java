@@ -1,15 +1,26 @@
 package me.tr.trFiles.general.utility;
 
-import me.tr.trFiles.configuration.file.json.JsonConfiguration;
-import me.tr.trFiles.configuration.file.yaml.YamlConfiguration;
-
 import java.io.File;
-import java.util.Arrays;
+import java.nio.file.Path;
 
 /**
- * Utility file class
+ * Utility file class for files
  */
 public class FileUtility {
+
+
+    /**
+     * Get only the file name from its String path.
+     *
+     * @param path The file path as String
+     * @return Only the file name.
+     */
+    public static String getFileName(String path) {
+        path = path.replace('\\', '/');
+        int index = path.lastIndexOf('/');
+        return path.substring(index != -1 ? (index + 1) : 0);
+    }
+
     /**
      * Check if the file name has an extension.
      * <p>
@@ -48,6 +59,20 @@ public class FileUtility {
     }
 
     /**
+     * Check if the file has an extension delegating to {@link #hasFileExtension(String)}
+     * and using as String parameter the file name.
+     * <p>
+     *
+     * @param file File to check for extension from.
+     * @return {@code true} if the file has an extension, otherwise {@code false}
+     * @see #hasFileExtension(String)
+     */
+    public static boolean hasFileExtension(Path file) {
+        return hasFileExtension(file.toFile());
+    }
+
+
+    /**
      * Retrieve file name without extension by end reading name
      * until index calculated by this formula {@code (name length - extension length) - 1}
      * is reached.
@@ -84,17 +109,42 @@ public class FileUtility {
     }
 
     /**
+     * Retrieve file name without extension delegating to {@link #getFileNameWithoutExtension(String)}
+     * using file name as String parameter.
+     *
+     * @param file File to get name from.
+     * @return File name without {@code .extension}
+     * @see #getFileNameWithoutExtension(String)
+     */
+    public static String getFileNameWithoutExtension(Path file) {
+        return getFileNameWithoutExtension(file.toFile());
+    }
+
+    /**
      * Retrieve the extension file by splitting the provided
      * fileName by {@code .} and getting last part.
      *
      * @param fileName File name to get extension.
-     * @return If a supported extension is found, return extension (without {@code .} at start), otherwise an empty string.
+     * @return If a supported extension is found, return extension (without {@code .} at start),
+     * otherwise an empty string.
      */
     public static String getExtension(String fileName) {
         if (!hasFileExtension(fileName))
             return "";
         int index = fileName.lastIndexOf('.');
         return fileName.substring(index + 1);
+    }
+
+    /**
+     * Retrieve the extension file by splitting the provided
+     * fileName by {@code .} and getting last part.
+     *
+     * @param file TrFile instance to get extension.
+     * @return If a supported extension is found, return extension (without {@code .} at start),
+     * otherwise an empty string.
+     */
+    public static String getExtension(TrFile file) {
+        return getExtension(file.getFile().getName());
     }
 
     /**
@@ -109,93 +159,40 @@ public class FileUtility {
     }
 
     /**
-     * Check if the file is a YAML by getting extension with {@link #getExtension(String)}
-     * and check if it equals to {@code yaml} or {@code yml}.
+     * Retrieve the extension file by getting file name
+     * e delegate to {@link #getExtension(String)}
      *
-     * @param fileName File name to check.
-     * @return {@code true} if the file is a YAML file, otherwise {@code false}.
+     * @param file File to get extension.
+     * @return Extension got (without {@code .} at start)
      */
-    public static boolean isYaml(String fileName) {
-        return Arrays.stream(YamlConfiguration.FILE_EXTENSIONS).anyMatch(getExtension(fileName)::equalsIgnoreCase);
+    public static String getExtension(Path file) {
+        return getExtension(file.toFile());
     }
 
-    /**
-     * Check if the file is a YAML by getting file name
-     * and delegate to {@link #isYaml(String)}
-     *
-     * @param file File to check.
-     * @return {@code true} if the file is a YAML file, otherwise {@code false}.
-     */
-    public static boolean isYaml(File file) {
-        return isYaml(file.getName());
+
+    public static boolean isJar(String file) {
+        return hasFileExtension(file) && getExtension(file).equalsIgnoreCase("jar");
     }
 
-    /**
-     * Check if the file is a JSON by getting extension with {@link #getExtension(String)}
-     * and check if it equals to {@code json}.
-     *
-     * @param fileName File name to check.
-     * @return {@code true} if the file is a JSON file, otherwise {@code false}.
-     */
-    public static boolean isJson(String fileName) {
-        return Arrays.stream(JsonConfiguration.FILE_EXTENSIONS).anyMatch(getExtension(fileName)::equalsIgnoreCase);
-    }
 
-    /**
-     * Check if the file is a JSON by getting file name
-     * and delegate to {@link #isJson(String)}
-     *
-     * @param file File to check.
-     * @return {@code true} if the file is a JSON file, otherwise {@code false}.
-     */
-    public static boolean isJson(File file) {
-        return isJson(file.getName());
-    }
-
-    /**
-     * Check if the file is a JAR by getting extension with {@link #getExtension(String)}
-     * and check if it equals to {@code jar}.
-     *
-     * @param fileName File name to check.
-     * @return {@code true} if the file is a JAR file, otherwise {@code false}.
-     */
-    public static boolean isJar(String fileName) {
-        return getExtension(fileName).equalsIgnoreCase("jar");
-    }
-
-    /**
-     * Check if the file is a JAR by getting file name
-     * and delegate to {@link #isJar(String)}.
-     *
-     * @param file File to check.
-     * @return {@code true} if the file is a JAR file, otherwise {@code false}.
-     */
     public static boolean isJar(File file) {
-        return isJar(file.getName());
+        return file.isFile() && isJar(file.getName());
     }
 
-    /**
-     * Check if the file extension is supported by
-     * using the file as parameter for {@link #isYaml(File)} &
-     * {@link #isJson(File)} and at last one return true.
-     *
-     * @param file File to check if extension is supported for.
-     * @return {@code true} if extension is supported, otherwise {@code false}.
-     */
-    public static boolean isSupportedExtension(File file) {
-        return isYaml(file) || isJson(file);
+    public static boolean isJar(Path path) {
+        return isJar(path.toFile());
     }
 
-    /**
-     * Check if the file name extension is supported by
-     * using the file name as parameter for {@link #isYaml(String)} &
-     * {@link #isJson(String)} and at last one return true.
-     *
-     * @param name File name to check if extension is supported for.
-     * @return {@code true} if extension is supported, otherwise {@code false}.
-     */
-    public static boolean isSupportedExtension(String name) {
-        return isYaml(name) || isJson(name);
+    public static boolean isZip(String file) {
+        return hasFileExtension(file) && getExtension(file).equalsIgnoreCase("zip");
     }
 
+
+    public static boolean isZip(File file) {
+        return file.isFile() && isZip(file.getName());
+    }
+
+    public static boolean isZip(Path path) {
+        return isZip(path.toFile());
+    }
 }

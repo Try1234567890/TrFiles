@@ -3,30 +3,16 @@ package me.tr.trFiles.general.managers;
 import me.tr.trFiles.general.utility.FileUtility;
 import me.tr.trFiles.general.utility.Validate;
 import me.tr.trFiles.general.utility.os.OSUtility;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class FileManager {
-    private JarFile jarToClose;
-
-    public void closeJar() {
-        if (jarToClose != null) {
-            try {
-                jarToClose.close();
-            } catch (IOException e) {
-                throw new RuntimeException("Error while closing file.", e);
-            }
-        }
-    }
 
     /**
-     * Got an instance of {@link File} from a String correctly
+     * Get an instance of {@link File} from a String correctly
      * respecting directories and file name.
      *
      * @param path Path to file.
@@ -38,11 +24,6 @@ public class FileManager {
         int lastSlashIndex = path.lastIndexOf('/') + 1;
         lastSlashIndex = lastSlashIndex <= 0 ? path.length() : lastSlashIndex;
         return new File(path.substring(0, lastSlashIndex), OSUtility.removeIllegalChars(path.substring(lastSlashIndex)));
-    }
-
-
-    public String getStringPathFromFile(File file) {
-        return file.getPath().replace('\\', '/');
     }
 
     /**
@@ -59,65 +40,95 @@ public class FileManager {
     }
 
     /**
-     * Retrieves an {@link InputStream} for a file located inside a JAR file.
+     * Get a formatted file path as String.
      *
-     * @param jar         The path to the JAR file.
-     * @param pathIntoJar The internal path of the file within the JAR.
-     * @return An {@link InputStream} if the file is found inside the JAR, otherwise {@code null}.
-     * @throws IllegalArgumentException If the given JAR path is not a file or not a valid JAR.
-     * @throws NullPointerException     If the specified JAR file does not exist.
-     * @see #getFileInJar(File, File)
+     * @param file File to get the path from.
+     * @return the formatted file path.
      */
-    public @Nullable InputStream getFileInJar(String jar, String pathIntoJar) {
-        return getFileInJar(getFileFromString(jar), getFileFromString(pathIntoJar));
+    public String getStringPathFromFile(File file) {
+        return file.toString().replace('\\', '/');
+    }
+
+    /**
+     * Get a formatted file path as String.
+     *
+     * @param path Path to get the path from.
+     * @return the formatted file path.
+     */
+    public String getStringPathFromPath(Path path) {
+        return getStringPathFromFile(path.toFile());
     }
 
 
-    /**
-     * Retrieves an {@link InputStream} for a file located inside a JAR file.
-     *
-     * @param jar         The JAR file to open.
-     * @param fileIntoJar The file into the JAR.
-     * @return An {@link InputStream}   if the file is found inside the JAR, otherwise {@code null}.
-     * @throws IllegalArgumentException If the given file is not a valid JAR.
-     * @throws NullPointerException     If the specified JAR file does not exist.
-     * @throws RuntimeException         If an error occurs while getting input stream.
-     * @see #getFileInJar(String, String)
-     */
-    public @Nullable InputStream getFileInJar(File jar, File fileIntoJar) {
-        Validate.notNull(jar.exists(), "Jar file at path " + jar + " doesn't exist");
-        Validate.checkIf(jar.isFile(), "Object found at path " + jar + " is not a file.");
-        Validate.checkIf(FileUtility.isJar(jar), "File found at path " + jar + " is not a .jar file.");
-        try {
-            JarFile jarFile = new JarFile(jar);
-            JarEntry jarEntry = jarFile.getJarEntry(getStringPathFromFile(fileIntoJar));
-            Validate.notNull(jarEntry != null, "File into jar " + getStringPathFromFile(jar) + " at path " + getStringPathFromFile(fileIntoJar) + " not found");
-            jarToClose = jarFile;
-            return jarFile.getInputStream(jarEntry);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public void write(InputStream is, File to) throws IOException {
+        Validate.notNull(is != null, "InputStream cannot be null");
+        Validate.notNull(to != null, "File cannot be null");
+        Validate.checkIf(to.isFile(), () -> createFile(to));
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(to)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                writer.write(line);
+                writer.newLine();
+            }
+            writer.flush();
         }
     }
 
+
     /**
-     * Retrieves an {@link InputStream} for a file located inside a JAR file.
+     * Inserts a file into a zip archive.
      *
-     * @param jarFile     The JAR file to search in.
-     * @param fileIntoJar The file into the JAR.
-     * @return An {@link InputStream}   if the file is found inside the JAR, otherwise {@code null}.
-     * @throws IllegalArgumentException If the given file is not a valid JAR.
-     * @throws NullPointerException     If the specified JAR file does not exist.
-     * @throws RuntimeException         If an error occurs while getting input stream.
-     * @see #getFileInJar(String, String)
+     * @param zip   The zip archive.
+     * @param file  The file to insert.
+     * @param force if true and the zip file already exists, it will be overwritten, otherwise it will be created.
+     * @throws NullPointerException if force is true and zip and file are null.
+     * @throws RuntimeException     if an error occurs while creating the file.
      */
-    public @Nullable InputStream getFileInJar(JarFile jarFile, File fileIntoJar) {
-        try {
-            JarEntry jarEntry = jarFile.getJarEntry(getStringPathFromFile(fileIntoJar));
-            Validate.notNull(jarEntry != null, "File into jar at path " + getStringPathFromFile(fileIntoJar) + " not found");
-            jarToClose = jarFile;
-            return jarFile.getInputStream(jarEntry);
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void zipFile(File zip, File file, boolean force) {
+        if (force) {
+            if (zip == null || !zip.isFile()) {
+                if (file == null) {
+                    throw new NullPointerException("File cannot be null.");
+                }
+                zip = new File(file.getPath() + ".zip");
+            }
+            try {
+                zip.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException("Error while creating file.", e);
+            }
+        }
+        zipFile(zip, file);
+    }
+
+    /**
+     * Inserts a file into a zip archive.
+     *
+     * @param zip  The zip archive.
+     * @param file The file to insert.
+     * @throws RuntimeException if an error occurs while zipping the file.
+     */
+    public void zipFile(File zip, File file) {
+        Validate.notNull(zip != null, "Zip file cannot be null.");
+        Validate.checkIf(file.isFile(), "The object found at " + file.getPath() + " is not a file.");
+        Validate.checkIf(FileUtility.isZip(zip), "The file found at " + zip.getPath() + " is not a zip archive.");
+        Validate.checkIf(file.canRead(), "The file found at " + file.getPath() + " is not readable.");
+        Validate.checkIf(zip.canWrite(), "The file found at " + zip.getPath() + " is not writable.");
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zip))) {
+            ZipEntry entry = new ZipEntry(file.getName());
+            zos.putNextEntry(entry);
+            byte[] buffer = new byte[1024];
+            int length;
+            try (InputStream is = new FileInputStream(file)) {
+                while ((length = is.read(buffer)) > 0) {
+                    zos.write(buffer, 0, length);
+                }
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error while zipping file " + file.getPath(), e);
         }
     }
 

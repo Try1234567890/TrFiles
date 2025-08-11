@@ -12,16 +12,15 @@ public class Options {
         this.configuration = configuration;
     }
 
-    public Configuration configuration() {
-        return configuration;
-    }
-
-    public char pathSeparator() {
+    public char getPathSeparator() {
         return pathSeparator;
     }
 
-    public Options pathSeparator(char pathSeparator) {
+    public void setPathSeparator(char pathSeparator) {
         this.pathSeparator = pathSeparator;
-        return this;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 }

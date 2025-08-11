@@ -13,7 +13,7 @@ public enum OSType {
         this.illegalChars = illegalChars;
     }
 
-    public char[] illegalChars() {
+    public char[] getIllegalChars() {
         return illegalChars;
     }
 
