@@ -192,4 +192,6 @@ public interface Section {
     void addDefault(String path, Object value);
 
     Object getDefault(String path);
+
+    Map<String, Object> asMap();
 }

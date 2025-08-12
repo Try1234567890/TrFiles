@@ -28,5 +28,4 @@ public interface Configuration extends Section {
 
     Options options();
 
-    Map<String, Object> asMap();
 }

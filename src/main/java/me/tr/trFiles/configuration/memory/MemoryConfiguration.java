@@ -100,9 +100,4 @@ public class MemoryConfiguration extends MemorySection implements Configuration 
         }
         return options;
     }
-
-    @Override
-    public Map<String, Object> asMap() {
-        return map;
-    }
 }

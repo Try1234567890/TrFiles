@@ -1074,4 +1074,9 @@ public class MemorySection implements Section {
     public String toString() {
         return map.toString();
     }
+
+    @Override
+    public Map<String, Object> asMap() {
+        return map;
+    }
 }
