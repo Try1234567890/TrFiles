@@ -16,14 +16,12 @@ public class TrFile {
         Validate.checkIf(!Validate.isNull(path), "Path cannot be null or empty");
         this.strPath = path;
         this.file = new File(path);
-        Validate.checkIf(file.isFile(), "File does not exist or is not a file");
         this.path = file.toPath();
     }
 
 
     public TrFile(File file) {
         Validate.notNull(file != null, "File cannot be null");
-        Validate.checkIf(file.isFile(), "File does not exist or is not a file");
         this.file = file;
         this.path = file.toPath();
         this.strPath = path.toString();
@@ -33,7 +31,6 @@ public class TrFile {
         Validate.checkIf(path != null, "Path cannot be null");
         this.path = path;
         this.file = path.toFile();
-        Validate.checkIf(file.isFile(), "File does not exist or is not a file");
         this.strPath = path.toString();
     }
 
