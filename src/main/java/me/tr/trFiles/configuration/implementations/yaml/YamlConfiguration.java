@@ -10,7 +10,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class YamlConfiguration extends FileConfiguration {
@@ -65,6 +64,9 @@ public class YamlConfiguration extends FileConfiguration {
     }
 
     public static YamlConfiguration from(File file) {
+        if (!Implementations.YAML.isValid(file)) {
+            throw new IllegalArgumentException(file.getPath() + " is not a valid YAML file.");
+        }
         return (YamlConfiguration) FileConfiguration.from(file);
     }
 

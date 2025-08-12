@@ -11,7 +11,6 @@ import me.tr.trFiles.general.utility.Validate;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
 
@@ -53,6 +52,7 @@ public class PropertiesConfiguration extends FileConfiguration {
         return new PropertiesConfiguration();
     }
 
+
     /**
      * Create a new empty instance of {@link PropertiesConfiguration}.
      */
@@ -69,6 +69,9 @@ public class PropertiesConfiguration extends FileConfiguration {
     }
 
     public static PropertiesConfiguration from(File file) {
+        if (!Implementations.PROPERTIES.isValid(file)) {
+            throw new IllegalArgumentException(file.getPath() + " is not a valid PROPERTIES file.");
+        }
         return (PropertiesConfiguration) FileConfiguration.from(file);
     }
 

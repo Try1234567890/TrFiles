@@ -3,14 +3,12 @@ package me.tr.trFiles.configuration.implementations.json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import me.tr.trFiles.TrFiles;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
 import me.tr.trFiles.configuration.implementations.Implementations;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.general.utility.Validate;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class JsonConfiguration extends FileConfiguration {
@@ -21,6 +19,7 @@ public class JsonConfiguration extends FileConfiguration {
     @Override
     protected FileConfiguration loadFromString(String contents) {
         Validate.notNull(contents != null, "Contents cannot be null.");
+
         Map<?, ?> input;
         try {
             input = gson.fromJson(contents, Map.class);
@@ -60,6 +59,9 @@ public class JsonConfiguration extends FileConfiguration {
     }
 
     public static JsonConfiguration from(File file) {
+        if (!Implementations.JSON.isValid(file)) {
+            throw new IllegalArgumentException(file.getPath() + " is not a valid JSON file.");
+        }
         return (JsonConfiguration) FileConfiguration.from(file);
     }
 

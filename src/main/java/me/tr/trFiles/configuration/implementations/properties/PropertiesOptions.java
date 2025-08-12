@@ -53,7 +53,6 @@ public class PropertiesOptions extends FileOptions {
         super(configuration, "#", "");
     }
 
-    // Getters e setters per tutte le opzioni
     public boolean isUseAnnotations() {
         return useAnnotations;
     }

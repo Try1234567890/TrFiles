@@ -66,6 +66,9 @@ public class XmlConfiguration extends FileConfiguration {
     }
 
     public static XmlConfiguration from(File file) {
+        if (!Implementations.XML.isValid(file)) {
+            throw new IllegalArgumentException(file.getPath() + " is not a valid XML file.");
+        }
         return (XmlConfiguration) FileConfiguration.from(file);
     }
 

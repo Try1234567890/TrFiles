@@ -10,10 +10,12 @@ import java.io.*;
 import java.util.Map;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
     private FileOptions options;
     private Implementations implementation;
+
 
     /**
      * Load the configuration from the provided String.
@@ -54,6 +56,7 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append("\n");
             }
+
             contents = builder.toString();
         } catch (IOException e) {
             throw new RuntimeException("Error while loading configuration. ", e);
@@ -178,6 +181,47 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return to;
     }
 
+    /**
+     * Load a FileConfiguration from the provided file inside the provided zip
+     *
+     * @param zip    The zip file to get the file from.
+     * @param inside The file to get inside the zip.
+     * @param to     The file to save the FileConfiguration loaded from inside the zip.
+     * @return a new FileConfiguration loaded from jar.
+     * @throws IOException if an error occurs while doing I/O operations
+     */
+    public static FileConfiguration fromZip(File zip, File inside, @Nullable File to) throws IOException {
+        Validate.notNull(zip != null, "Jar cannot be null");
+        Validate.checkIf(zip.isFile(), "Object at " + zip.getPath() + " is not a file.");
+        Validate.checkIf(FileUtility.isZip(zip), "Object at " + zip.getPath() + " is not a zip.");
+        Validate.notNull(inside != null, "File inside jar path cannot be null");
+        if (to == null) {
+            to = inside;
+        }
+        if (!to.isFile()) {
+            TrFiles.getFileManager().createFile(to);
+        }
+
+        try (ZipFile zipFile = new ZipFile(zip)) {
+            ZipEntry ze = zipFile.getEntry(TrFiles.getFileManager().getStringPathFromFile(inside));
+            if (ze == null) {
+                throw new FileNotFoundException("File inside " + inside + " zip " + zip.getPath() + " not found.");
+            }
+            InputStream is = zipFile.getInputStream(ze);
+            TrFiles.getFileManager().write(is, to);
+        }
+        return from(to);
+    }
+
+    /**
+     * Load a FileConfiguration from the provided file inside the provided jar
+     *
+     * @param jar    The jar file to get the file from.
+     * @param inside The file to get inside the jar.
+     * @param to     The file to save the FileConfiguration loaded from inside the jar.
+     * @return a new FileConfiguration loaded from jar.
+     * @throws IOException if an error occurs while doing I/O operations
+     */
     public static FileConfiguration fromJar(File jar, File inside, @Nullable File to) throws IOException {
         Validate.notNull(jar != null, "Jar cannot be null");
         Validate.checkIf(jar.isFile(), "Object at " + jar.getPath() + " is not a file.");
@@ -201,11 +245,17 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return from(to);
     }
 
+    /**
+     * Load a FileConfiguration from the provided file.
+     *
+     * @param file File to load FileConfiguration from.
+     * @return The FileConfiguration loaded.
+     */
     public static FileConfiguration from(File file) {
         Validate.notNull(file != null, "Provided path cannot be null.");
         Implementations implementation = Implementations.fromExtension(FileUtility.getExtension(file));
         if (implementation == null) {
-            throw new IllegalArgumentException("File " + file + " doesn't have a valid implementation. Make sure it is one of " + Implementations.listToString());
+            throw new NullPointerException("File " + file.getPath() + " doesn't have a valid implementation. Make sure it is one of " + Implementations.listToString());
         }
         FileConfiguration configuration = implementation.getReference().newInstance();
         configuration.setImplementation(implementation);
@@ -294,5 +344,30 @@ public abstract class FileConfiguration extends MemoryConfiguration {
      */
     protected void setImplementation(Implementations implementation) {
         this.implementation = implementation;
+    }
+
+
+    //-------//-------//-------//-------//-------//-------//
+    // UTILITY METHOD FOR FILECONFIGURATION CLASSES //
+    // UTILITY METHOD FOR FILECONFIGURATION CLASSES //
+    //-------//-------//-------//-------//-------//-------//
+
+
+    protected boolean isInsideAString(String line, int index) {
+        boolean open = false;
+        boolean close = false;
+        for (int i = index - 1; i >= 0; i--) {
+            if (i < line.length() && line.charAt(i) == '"') {
+                open = true;
+                break;
+            }
+        }
+        for (int i = index + 1; i < line.length(); i++) {
+            if (line.charAt(i) == '"') {
+                close = true;
+                break;
+            }
+        }
+        return open && close;
     }
 }

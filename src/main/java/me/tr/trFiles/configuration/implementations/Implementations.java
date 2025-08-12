@@ -76,6 +76,10 @@ public enum Implementations {
         return null;
     }
 
+    public String toString() {
+        return String.join(", ", extensions);
+    }
+
     public static String listToString() {
         return String.join(", ", Arrays.stream(values()).map(impl -> impl.getExtensions()[0]).toList());
     }

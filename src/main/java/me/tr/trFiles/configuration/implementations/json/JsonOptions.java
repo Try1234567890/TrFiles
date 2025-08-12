@@ -9,7 +9,6 @@ import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import java.lang.reflect.Modifier;
 
 public class JsonOptions extends FileOptions {
-
     private boolean prettyPrinting;
     private boolean serializeNulls;
     private String datePattern;

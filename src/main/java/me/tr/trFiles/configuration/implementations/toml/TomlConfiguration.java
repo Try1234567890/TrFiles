@@ -48,6 +48,7 @@ public class TomlConfiguration extends FileConfiguration {
         return new TomlConfiguration();
     }
 
+
     /**
      * Create a new empty instance of {@link TomlConfiguration}.
      */
@@ -65,6 +66,9 @@ public class TomlConfiguration extends FileConfiguration {
 
 
     public static TomlConfiguration from(File file) {
+        if (!Implementations.TOML.isValid(file)) {
+            throw new IllegalArgumentException(file.getPath() + " is not a valid TOML file.");
+        }
         return (TomlConfiguration) FileConfiguration.from(file);
     }
 
