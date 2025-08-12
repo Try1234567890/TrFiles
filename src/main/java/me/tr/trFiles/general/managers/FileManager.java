@@ -20,10 +20,7 @@ public class FileManager {
      * @see #getPathFromString(String)
      */
     public File getFileFromString(String path) {
-        path = path.replace('\\', '/');
-        int lastSlashIndex = path.lastIndexOf('/') + 1;
-        lastSlashIndex = lastSlashIndex <= 0 ? path.length() : lastSlashIndex;
-        return new File(path.substring(0, lastSlashIndex), OSUtility.removeIllegalChars(path.substring(lastSlashIndex)));
+        return new File(OSUtility.removeIllegalChars(path));
     }
 
     /**
@@ -46,7 +43,7 @@ public class FileManager {
      * @return the formatted file path.
      */
     public String getStringPathFromFile(File file) {
-        return file.toString().replace('\\', '/');
+        return OSUtility.removeIllegalChars(file.toString()).replace('\\', '/');
     }
 
     /**
@@ -76,6 +73,20 @@ public class FileManager {
         }
     }
 
+    public String read(InputStream is) throws IOException {
+        Validate.notNull(is != null, "InputStream cannot be null");
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            StringBuilder result = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+                result.append("\n");
+            }
+            return result.toString();
+        }
+    }
+
 
     /**
      * Inserts a file into a zip archive.
@@ -98,7 +109,7 @@ public class FileManager {
             try {
                 zip.createNewFile();
             } catch (IOException e) {
-                throw new RuntimeException("Error while creating file.", e);
+                throw new RuntimeException("Error while creating file at " + file.getPath(), e);
             }
         }
         zipFile(zip, file);
@@ -128,7 +139,7 @@ public class FileManager {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error while zipping file " + file.getPath(), e);
+            throw new RuntimeException("Error while zipping file " + getStringPathFromFile(file), e);
         }
     }
 
