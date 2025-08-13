@@ -63,7 +63,7 @@ public enum Implementations {
     public static @Nullable Implementations fromExtension(String extension) {
         try {
             return valueOf(extension.toUpperCase());
-        } catch (IllegalArgumentException _) {
+        } catch (IllegalArgumentException ignored) {
             for (Implementations impl : Implementations.values()) {
                 for (String exte : impl.getExtensions()) {
                     exte = exte.substring(1);
