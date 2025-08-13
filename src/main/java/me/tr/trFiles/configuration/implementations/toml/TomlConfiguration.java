@@ -53,7 +53,7 @@ public class TomlConfiguration extends FileConfiguration {
      * Create a new empty instance of {@link TomlConfiguration}.
      */
     public TomlConfiguration() {
-        buildProperties();
+        buildToml();
     }
 
     /**
@@ -61,7 +61,7 @@ public class TomlConfiguration extends FileConfiguration {
      */
     public TomlConfiguration(MemoryConfiguration configuration) {
         super(configuration);
-        buildProperties();
+        buildToml();
     }
 
 
@@ -77,7 +77,7 @@ public class TomlConfiguration extends FileConfiguration {
     }
 
 
-    private void buildProperties() {
+    private void buildToml() {
         setImplementation(Implementations.TOML);
 
         this.mapper = TomlMapper.builder()
@@ -96,7 +96,6 @@ public class TomlConfiguration extends FileConfiguration {
                 .configure(MapperFeature.ALLOW_VOID_VALUED_PROPERTIES, options().isAllowVoidValuedProperties())
                 .configure(MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS, options().isCanOverrideAccessModifiers())
                 .configure(MapperFeature.OVERRIDE_PUBLIC_ACCESS_MODIFIERS, options().isOverridePublicAccessModifiers())
-                .configure(MapperFeature.INVERSE_READ_WRITE_ACCESS, options().isInverseReadWriteAccess())
                 .configure(MapperFeature.USE_STATIC_TYPING, options().isUseStaticTyping())
                 .configure(MapperFeature.USE_BASE_TYPE_AS_DEFAULT_IMPL, options().isUseBaseTypeAsDefaultImpl())
                 .configure(MapperFeature.INFER_BUILDER_TYPE_BINDINGS, options().isInferBuilderTypeBindings())

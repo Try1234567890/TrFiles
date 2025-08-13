@@ -25,7 +25,6 @@ public class OSUtility {
         StringBuilder builder = new StringBuilder();
         while ((currIndex = from.indexOf('/', nextIndex = currIndex + 1)) != -1) {
             String folder = from.substring(nextIndex, currIndex);
-            System.out.println(folder);
             for (char c : OS.getIllegalChars()) {
                 folder = folder.replace(Character.toString(c), "");
             }
