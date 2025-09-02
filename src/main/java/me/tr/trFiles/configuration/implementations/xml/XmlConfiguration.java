@@ -5,80 +5,108 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.implementations.Implementations;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.general.utility.Validate;
+import me.tr.trFiles.configuration.memory.implementations.MemoryXmlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class XmlConfiguration extends FileConfiguration {
-    private XmlMapper xmlMapper;
+    private MemoryXmlConfiguration configuration;
     private XmlOptions options;
     private String rootName;
 
-
     @Override
-    protected FileConfiguration loadFromString(String contents) {
-        Validate.notNull(contents != null, "Contents cannot be null.");
-        Map<?, ?> input;
-        try {
-            input = xmlMapper.reader().readValue(contents, Map.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while loading configuration. ", e);
-        }
-        convertMapsToSections(input, this);
-        setImplementation(Implementations.XML);
-        return this;
+    public void loadFromString(String contents) {
+        this.configuration = new MemoryXmlConfiguration(buildXml());
+        configuration.loadFromString(contents);
     }
 
     @Override
-    protected String saveToString() {
-        String contents;
-        try {
-            contents = xmlMapper.writer().withRootName(getRootName()).writeValueAsString(getValues(true));
-        } catch (IOException e) {
-            throw new RuntimeException("Error while saving configuration. ", e);
-        }
-        setImplementation(Implementations.XML);
-        return contents;
+    public void setConfiguration(MemoryConfiguration configuration) {
+        if (!(configuration instanceof MemoryXmlConfiguration)) return;
+        this.configuration = (MemoryXmlConfiguration) configuration;
     }
 
     @Override
-    protected XmlConfiguration newInstance() {
-        return new XmlConfiguration();
+    public MemoryXmlConfiguration getConfiguration() {
+        return configuration;
     }
 
-    /**
-     * Create a new empty instance of {@link XmlConfiguration}.
-     */
-    public XmlConfiguration() {
-        buildXml();
+    @Override
+    public String[] getExtensions() {
+        return new String[]{".xml"};
     }
 
-    /**
-     * Create a new instance of {@link XmlConfiguration} with provided configuration content.
-     */
-    public XmlConfiguration(MemoryConfiguration configuration) {
-        super(configuration);
-        buildXml();
+    public XmlConfiguration(File file, Map<String, Object> map) {
+        super(file, map);
     }
 
-    public static XmlConfiguration from(File file) {
-        if (!Implementations.XML.isValid(file)) {
-            throw new IllegalArgumentException(file.getPath() + " is not a valid XML file.");
-        }
-        return (XmlConfiguration) FileConfiguration.from(file);
+    public XmlConfiguration(File file, Reader reader) {
+        super(file, reader);
     }
 
-    public static XmlConfiguration fromMap(Map<String, Object> map) {
-        return (XmlConfiguration) fromMap(map, Implementations.XML);
+    public XmlConfiguration(File file, InputStream is) {
+        super(file, is);
     }
 
-    private void buildXml() {
-        setImplementation(Implementations.XML);
+    public XmlConfiguration(File file) {
+        super(file);
+    }
 
+    public XmlConfiguration(Path path) {
+        super(path);
+    }
+
+    public XmlConfiguration(String path) {
+        super(path);
+    }
+
+    public XmlConfiguration(ZipFile archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public XmlConfiguration(File archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public static XmlConfiguration fromMap(File file, Map<String, Object> map) {
+        return new XmlConfiguration(file, map);
+    }
+
+    public static XmlConfiguration fromReader(File file, Reader reader) {
+        return new XmlConfiguration(file, reader);
+    }
+
+    public static XmlConfiguration fromInputStream(File file, InputStream is) {
+        return new XmlConfiguration(file, is);
+    }
+
+    public static XmlConfiguration fromFile(File file) {
+        return new XmlConfiguration(file);
+    }
+
+    public static XmlConfiguration fromPath(Path path) {
+        return new XmlConfiguration(path);
+    }
+
+    public static XmlConfiguration fromString(String path) {
+        return new XmlConfiguration(path);
+    }
+
+    public static XmlConfiguration fromArchive(ZipFile archive, File inside, File to) {
+        return new XmlConfiguration(archive, inside, to);
+    }
+
+    public static XmlConfiguration fromArchive(File archive, File inside, File to) {
+        return new XmlConfiguration(archive, inside, to);
+    }
+
+    private XmlMapper buildXml() {
         XmlMapper mapper = new XmlMapper();
 
         mapper.configure(FromXmlParser.Feature.AUTO_DETECT_XSI_TYPE, options().isAutoDetectXsiType());
@@ -101,9 +129,8 @@ public class XmlConfiguration extends FileConfiguration {
         mapper.configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, options().isWriteSelfReferencesAsNull());
         mapper.configure(SerializationFeature.WRAP_EXCEPTIONS, options().isWrapExceptions());
 
-        setRootName("Configuration");
-
-        this.xmlMapper = mapper;
+        setRootName("configuration");
+        return mapper;
     }
 
     public String getRootName() {

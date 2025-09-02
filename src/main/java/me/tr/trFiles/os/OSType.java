@@ -1,4 +1,6 @@
-package me.tr.trFiles.general.utility.os;
+package me.tr.trFiles.os;
+
+import me.tr.trFiles.Validator;
 
 public enum OSType {
 
@@ -18,11 +20,10 @@ public enum OSType {
     }
 
     public static OSType fromString(String str) {
-        if (str == null || str.isEmpty()) return null;
+        if (Validator.isNull(str, null)) return null;
         for (OSType type : values()) {
             String name = type.name().toLowerCase();
-            if (str.toLowerCase().contains(name)
-                    || str.toLowerCase().contains(name.substring(0, 3))) {
+            if (str.toLowerCase().contains(name)) {
                 return type;
             }
         }

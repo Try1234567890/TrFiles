@@ -21,7 +21,7 @@ public class XmlOptions extends FileOptions {
     private boolean failOnUnwrappedTypeIdentifiers;
     private boolean writeSelfReferencesAsNull;
 
-    protected XmlOptions(MemoryConfiguration configuration) {
+    protected XmlOptions(XmlConfiguration configuration) {
         super(configuration, "<!--", "-->");
         this.autoDetectXsiType = false;
         this.emptyElementAsNull = false;

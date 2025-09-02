@@ -4,83 +4,109 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.implementations.Implementations;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.general.utility.Validate;
+import me.tr.trFiles.configuration.memory.implementations.MemoryTomlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class TomlConfiguration extends FileConfiguration {
-    private TomlMapper mapper;
+    private MemoryTomlConfiguration configuration;
     private TomlOptions options;
 
-
     @Override
-    protected FileConfiguration loadFromString(String contents) {
-        Validate.notNull(contents != null, "Contents cannot be null");
-        Map<?, ?> input;
-        try {
-            input = mapper.readValue(contents, Map.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while loading configuration. ", e);
-        }
-        convertMapsToSections(input, this);
-        setImplementation(Implementations.TOML);
-        return this;
+    public void loadFromString(String contents) {
+        this.configuration = new MemoryTomlConfiguration(buildToml());
+        configuration.loadFromString(contents);
     }
 
     @Override
-    protected String saveToString() {
-        String contents;
-        try {
-            contents = mapper.writeValueAsString(getValues(true));
-        } catch (IOException e) {
-            throw new RuntimeException("Error while saving configuration. ", e);
-        }
-        setImplementation(Implementations.TOML);
-        return contents;
+    public void setConfiguration(MemoryConfiguration configuration) {
+        if (!(configuration instanceof MemoryTomlConfiguration)) return;
+        this.configuration = (MemoryTomlConfiguration) configuration;
     }
 
     @Override
-    protected TomlConfiguration newInstance() {
-        return new TomlConfiguration();
+    public MemoryTomlConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public String[] getExtensions() {
+        return new String[]{".toml"};
+    }
+
+    public TomlConfiguration(File file, Map<String, Object> map) {
+        super(file, map);
+    }
+
+    public TomlConfiguration(File file, Reader reader) {
+        super(file, reader);
+    }
+
+    public TomlConfiguration(File file, InputStream is) {
+        super(file, is);
+    }
+
+    public TomlConfiguration(File file) {
+        super(file);
+    }
+
+    public TomlConfiguration(Path path) {
+        super(path);
+    }
+
+    public TomlConfiguration(String path) {
+        super(path);
+    }
+
+    public TomlConfiguration(ZipFile archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public TomlConfiguration(File archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public static TomlConfiguration fromMap(File file, Map<String, Object> map) {
+        return new TomlConfiguration(file, map);
+    }
+
+    public static TomlConfiguration fromReader(File file, Reader reader) {
+        return new TomlConfiguration(file, reader);
+    }
+
+    public static TomlConfiguration fromInputStream(File file, InputStream is) {
+        return new TomlConfiguration(file, is);
+    }
+
+    public static TomlConfiguration fromFile(File file) {
+        return new TomlConfiguration(file);
+    }
+
+    public static TomlConfiguration fromPath(Path path) {
+        return new TomlConfiguration(path);
+    }
+
+    public static TomlConfiguration fromString(String path) {
+        return new TomlConfiguration(path);
+    }
+
+    public static TomlConfiguration fromArchive(ZipFile archive, File inside, File to) {
+        return new TomlConfiguration(archive, inside, to);
+    }
+
+    public static TomlConfiguration fromArchive(File archive, File inside, File to) {
+        return new TomlConfiguration(archive, inside, to);
     }
 
 
-    /**
-     * Create a new empty instance of {@link TomlConfiguration}.
-     */
-    public TomlConfiguration() {
-        buildToml();
-    }
-
-    /**
-     * Create a new instance of {@link TomlConfiguration} with provided configuration content.
-     */
-    public TomlConfiguration(MemoryConfiguration configuration) {
-        super(configuration);
-        buildToml();
-    }
-
-
-    public static TomlConfiguration from(File file) {
-        if (!Implementations.TOML.isValid(file)) {
-            throw new IllegalArgumentException(file.getPath() + " is not a valid TOML file.");
-        }
-        return (TomlConfiguration) FileConfiguration.from(file);
-    }
-
-    public static TomlConfiguration fromMap(Map<String, Object> map) {
-        return (TomlConfiguration) fromMap(map, Implementations.XML);
-    }
-
-
-    private void buildToml() {
-        setImplementation(Implementations.TOML);
-
-        this.mapper = TomlMapper.builder()
+    private TomlMapper buildToml() {
+        return TomlMapper.builder()
                 .configure(MapperFeature.USE_ANNOTATIONS, options().isUseAnnotations())
                 .configure(MapperFeature.USE_GETTERS_AS_SETTERS, options().isUseGettersAsSetters())
                 .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, options().isPropagateTransientMarker())

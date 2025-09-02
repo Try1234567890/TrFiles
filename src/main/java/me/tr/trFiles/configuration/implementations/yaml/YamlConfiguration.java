@@ -1,77 +1,115 @@
 package me.tr.trFiles.configuration.implementations.yaml;
 
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.implementations.Implementations;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.general.utility.Validate;
+import me.tr.trFiles.configuration.memory.implementations.MemoryYamlConfiguration;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class YamlConfiguration extends FileConfiguration {
-    private Yaml yaml;
+    private MemoryYamlConfiguration configuration;
     private YamlOptions options;
 
+
     @Override
-    protected FileConfiguration loadFromString(String contents) {
-        Validate.notNull(contents != null, "Contents cannot be null.");
-        Map<?, ?> input;
-        try {
-            input = yaml.load(contents);
-        } catch (YAMLException e) {
-            throw new RuntimeException("Error while loading configuration. ", e);
+    public void loadFromString(String contents) {
+        if (configuration == null) {
+            configuration = new MemoryYamlConfiguration(buildYaml());
         }
-        convertMapsToSections(input, this);
-        setImplementation(Implementations.YAML);
-        return this;
+        configuration.loadFromString(contents);
     }
 
-    @Override
-    protected String saveToString() {
-        String contents;
-        try {
-            contents = yaml.dump(getValues(true));
-        } catch (YAMLException e) {
-            throw new RuntimeException("Error while saving configuration. ", e);
-        }
-        setImplementation(Implementations.YAML);
-        return buildHeader() + contents + buildFooter();
 
+    @Override
+    public void setConfiguration(MemoryConfiguration configuration) {
+        if (!(configuration instanceof MemoryYamlConfiguration)) return;
+        this.configuration = (MemoryYamlConfiguration) configuration;
     }
 
     @Override
-    protected YamlConfiguration newInstance() {
-        return new YamlConfiguration();
-    }
-
-    /**
-     * Create a new empty instance of {@link YamlConfiguration}.
-     */
-    public YamlConfiguration() {
-        buildYaml();
-    }
-
-    /**
-     * Create a new instance of {@link YamlConfiguration} with provided configuration content.
-     */
-    public YamlConfiguration(MemoryConfiguration configuration) {
-        super(configuration);
-        buildYaml();
-    }
-
-    public static YamlConfiguration from(File file) {
-        if (!Implementations.YAML.isValid(file)) {
-            throw new IllegalArgumentException(file.getPath() + " is not a valid YAML file.");
+    public MemoryYamlConfiguration getConfiguration() {
+        if (configuration == null) {
+            configuration = new MemoryYamlConfiguration(buildYaml());
         }
-        return (YamlConfiguration) FileConfiguration.from(file);
+        return configuration;
     }
 
-    public static YamlConfiguration fromMap(Map<String, Object> map) {
-        return (YamlConfiguration) fromMap(map, Implementations.YAML);
+
+    @Override
+    public String[] getExtensions() {
+        return new String[]{".yml", ".yaml"};
+    }
+
+    public YamlConfiguration(File file, Map<String, Object> map) {
+        super(file, map);
+    }
+
+    public YamlConfiguration(File file, Reader reader) {
+        super(file, reader);
+    }
+
+    public YamlConfiguration(File file, InputStream is) {
+        super(file, is);
+    }
+
+    public YamlConfiguration(File file) {
+        super(file);
+    }
+
+    public YamlConfiguration(Path path) {
+        super(path);
+    }
+
+    public YamlConfiguration(String path) {
+        super(path);
+    }
+
+    public YamlConfiguration(ZipFile archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public YamlConfiguration(File archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public static YamlConfiguration fromMap(File file, Map<String, Object> map) {
+        return new YamlConfiguration(file, map);
+    }
+
+    public static YamlConfiguration fromReader(File file, Reader reader) {
+        return new YamlConfiguration(file, reader);
+    }
+
+    public static YamlConfiguration fromInputStream(File file, InputStream is) {
+        return new YamlConfiguration(file, is);
+    }
+
+    public static YamlConfiguration fromFile(File file) {
+        return new YamlConfiguration(file);
+    }
+
+    public static YamlConfiguration fromPath(Path path) {
+        return new YamlConfiguration(path);
+    }
+
+    public static YamlConfiguration fromString(String path) {
+        return new YamlConfiguration(path);
+    }
+
+    public static YamlConfiguration fromArchive(ZipFile archive, File inside, File to) {
+        return new YamlConfiguration(archive, inside, to);
+    }
+
+    public static YamlConfiguration fromArchive(File archive, File inside, File to) {
+        return new YamlConfiguration(archive, inside, to);
     }
 
     @Override
@@ -82,15 +120,12 @@ public class YamlConfiguration extends FileConfiguration {
         return options;
     }
 
-    private void buildYaml() {
-        setImplementation(Implementations.YAML);
-
+    private Yaml buildYaml() {
         LoaderOptions loaderOptions = new LoaderOptions();
         loaderOptions.setAllowDuplicateKeys(options().isAllowDuplicateKeys());
         loaderOptions.setAllowRecursiveKeys(options().isAllowRecursiveKeys());
         loaderOptions.setProcessComments(options().isProcessComments());
         loaderOptions.setEnumCaseSensitive(options().isEnumCaseSensitive());
-
 
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultScalarStyle(options().getDefaultStyle());
@@ -107,8 +142,6 @@ public class YamlConfiguration extends FileConfiguration {
         dumperOptions.setNonPrintableStyle(options().getNonPrintableStyle());
         dumperOptions.setVersion(options().getVersion());
         dumperOptions.setPrettyFlow(options().isPrettyFlow());
-
-
-        yaml = new Yaml(loaderOptions, dumperOptions);
+        return new Yaml(loaderOptions, dumperOptions);
     }
 }

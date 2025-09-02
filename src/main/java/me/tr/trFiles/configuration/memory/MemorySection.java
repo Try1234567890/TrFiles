@@ -1,8 +1,8 @@
 package me.tr.trFiles.configuration.memory;
 
+import me.tr.trFiles.Validator;
 import me.tr.trFiles.configuration.Configuration;
 import me.tr.trFiles.configuration.Section;
-import me.tr.trFiles.general.utility.Validate;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -1048,7 +1048,7 @@ public class MemorySection implements Section {
             }
             builder.insert(0, parent.getName());
         }
-        if (!Validate.isNull(key)) {
+        if (!Validator.isNull(key, null)) {
             if (!builder.isEmpty()) {
                 builder.append(separator);
             }

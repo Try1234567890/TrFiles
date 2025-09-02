@@ -1,20 +1,11 @@
 package me.tr.trFiles.configuration;
 
-import java.io.File;
 import java.util.Map;
 
 /**
  * Represents a source of configurable options and settings
  */
 public interface Configuration extends Section {
-
-    void setFile(File file);
-
-    File getFile();
-
-    Configuration getFileConfiguration();
-
-    void setFileConfiguration(Configuration config);
 
     void addDefault(String path, Object value);
 
@@ -26,6 +17,6 @@ public interface Configuration extends Section {
 
     Configuration getDefaults();
 
-    Options options();
+    ConfigurationOptions options();
 
 }

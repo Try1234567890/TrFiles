@@ -1,7 +1,13 @@
-package me.tr.trFiles.general.utility;
+package me.tr.trFiles.configuration.management;
+
+import me.tr.trFiles.os.OSUtility;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 /**
  * Utility file class for files
@@ -136,18 +142,6 @@ public class FileUtility {
     }
 
     /**
-     * Retrieve the extension file by splitting the provided
-     * fileName by {@code .} and getting last part.
-     *
-     * @param file TrFile instance to get extension.
-     * @return If a supported extension is found, return extension (without {@code .} at start),
-     * otherwise an empty string.
-     */
-    public static String getExtension(TrFile file) {
-        return getExtension(file.getFile().getName());
-    }
-
-    /**
      * Retrieve the extension file by getting file name
      * e delegate to {@link #getExtension(String)}
      *
@@ -170,29 +164,82 @@ public class FileUtility {
     }
 
 
-    public static boolean isJar(String file) {
-        return hasFileExtension(file) && getExtension(file).equalsIgnoreCase("jar");
+    /**
+     * Get an instance of {@link File} from a String correctly
+     * respecting directories and file name.
+     *
+     * @param path Path to file.
+     * @return A new instance of {@link File}.
+     * @see #getPathFromString(String)
+     */
+    public static File getFileFromString(String path) {
+        return new File(OSUtility.removeIllegalChars(path));
     }
 
+    /**
+     * Got an instance of {@link File} from a String correctly
+     * respecting directories and file name by delegating to {@link #getFileFromString(String)}
+     * and calling {@link File#toPath()} method on the result.
+     *
+     * @param path Path to file.
+     * @return A new instance of {@link File}.
+     * @see #getPathFromString(String)
+     */
+    public static Path getPathFromString(String path) {
+        return getFileFromString(path).toPath();
+    }
+
+    /**
+     * Get a formatted file path as String.
+     *
+     * @param file File to get the path from.
+     * @return the formatted file path.
+     */
+    public static String getStringPathFromFile(File file) {
+        return OSUtility.removeIllegalChars(file.toString()).replace('\\', '/');
+    }
+
+    /**
+     * Get a formatted file path as String.
+     *
+     * @param path Path to get the path from.
+     * @return the formatted file path.
+     */
+    public static String getStringPathFromPath(Path path) {
+        return getStringPathFromFile(path.toFile());
+    }
 
     public static boolean isJar(File file) {
-        return file.isFile() && isJar(file.getName());
+        return file.isFile() && getExtension(file).equalsIgnoreCase("jar")
+                && (hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x03, 0x04})
+                || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x05, 0x06})
+                || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x07, 0x08}));
     }
-
-    public static boolean isJar(Path path) {
-        return isJar(path.toFile());
-    }
-
-    public static boolean isZip(String file) {
-        return hasFileExtension(file) && getExtension(file).equalsIgnoreCase("zip");
-    }
-
 
     public static boolean isZip(File file) {
-        return file.isFile() && isZip(file.getName());
+        return file.isFile() && getExtension(file).equalsIgnoreCase("zip")
+                && (hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x03, 0x04})
+                || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x05, 0x06})
+                || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x07, 0x08}));
     }
 
-    public static boolean isZip(Path path) {
-        return isZip(path.toFile());
+    public static boolean hasMagicNumber(File file, byte[] magicNumbers) {
+        try (InputStream is = new FileInputStream(file)) {
+            return hasMagicNumber(is, magicNumbers);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurs while reading file at " + file.getPath(), e);
+        }
+    }
+
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static boolean hasMagicNumber(InputStream is, byte[] magicNumbers) {
+        byte[] header = new byte[magicNumbers.length];
+        try (is) {
+            is.read(header);
+            return Arrays.equals(header, magicNumbers);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurs while reading provided input stream.", e);
+        }
     }
 }

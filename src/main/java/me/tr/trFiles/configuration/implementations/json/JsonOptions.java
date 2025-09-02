@@ -4,7 +4,6 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.LongSerializationPolicy;
 import com.google.gson.Strictness;
 import me.tr.trFiles.configuration.implementations.FileOptions;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
 import java.lang.reflect.Modifier;
 
@@ -23,9 +22,8 @@ public class JsonOptions extends FileOptions {
     private LongSerializationPolicy longSerializationPolicy;
     private Strictness strictness;
 
-    protected JsonOptions(MemoryConfiguration configuration) {
+    protected JsonOptions(JsonConfiguration configuration) {
         super(configuration, "//", "");
-
         this.prettyPrinting = true;
         this.serializeNulls = false;
         this.datePattern = null;

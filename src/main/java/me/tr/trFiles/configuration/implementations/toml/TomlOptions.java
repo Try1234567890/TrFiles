@@ -49,7 +49,7 @@ public class TomlOptions extends FileOptions {
     private boolean failOnUnwrappedTypeIdentifiers = true;
     private boolean writeSelfReferencesAsNull = false;
 
-    protected TomlOptions(MemoryConfiguration configuration) {
+    protected TomlOptions(TomlConfiguration configuration) {
         super(configuration, "#", "");
     }
 

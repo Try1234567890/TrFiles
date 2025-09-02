@@ -1,5 +1,6 @@
 package me.tr.trFiles.configuration.implementations.yaml;
 
+import me.tr.trFiles.configuration.implementations.FileConfiguration;
 import me.tr.trFiles.configuration.implementations.FileOptions;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import org.yaml.snakeyaml.DumperOptions;
@@ -27,7 +28,7 @@ public class YamlOptions extends FileOptions {
     private Boolean prettyFlow;
 
 
-    protected YamlOptions(MemoryConfiguration configuration) {
+    protected YamlOptions(YamlConfiguration configuration) {
         super(configuration, "#", "");
         setAllowDuplicateKeys(true);
         setAllowRecursiveKeys(false);

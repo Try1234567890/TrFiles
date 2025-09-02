@@ -9,7 +9,7 @@ public class FileOptions extends MemoryOptions {
     private String header;
     private String footer;
 
-    protected FileOptions(MemoryConfiguration configuration, String commentPrefix, String commentSuffix) {
+    protected FileOptions(FileConfiguration configuration, String commentPrefix, String commentSuffix) {
         super(configuration);
         setCommentPrefix(commentPrefix);
         setCommentSuffix(commentSuffix);
@@ -17,7 +17,7 @@ public class FileOptions extends MemoryOptions {
         setFooter("");
     }
 
-    protected FileOptions(MemoryConfiguration configuration) {
+    protected FileOptions(FileConfiguration configuration) {
         super(configuration);
         setCommentPrefix("");
         setCommentSuffix("");

@@ -1,325 +1,185 @@
 package me.tr.trFiles.configuration.implementations;
 
-import me.tr.trFiles.TrFiles;
+import me.tr.trFiles.Validator;
+import me.tr.trFiles.configuration.management.FileUtility;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.general.utility.FileUtility;
-import me.tr.trFiles.general.utility.Validate;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public abstract class FileConfiguration extends MemoryConfiguration {
+    private File file;
     private FileOptions options;
-    private Implementations implementation;
 
+    /*
+      protected FileConfiguration() {
+      }
+    */
 
-    /**
-     * Load the configuration from the provided String.
-     *
-     * @param contents The file contents to load the configuration from.
-     * @return the loaded configuration.
-     */
-    protected abstract FileConfiguration loadFromString(String contents);
+    public FileConfiguration(File file, Map<String, Object> map) {
+        from(file, map);
+    }
 
-    /**
-     * Save the current configuration as a String.
-     *
-     * @return the configuration to string.
-     */
-    protected abstract String saveToString();
+    public FileConfiguration(File file, Reader reader) {
+        from(file, reader);
+    }
 
-    /**
-     * Create a new instance of the current FileConfiguration instance
-     *
-     * @return The new file configuration instance.
-     */
-    protected abstract FileConfiguration newInstance();
+    public FileConfiguration(File file, InputStream is) {
+        from(file, is);
+    }
 
-    /**
-     * Load the provided file into a FileConfiguration
-     *
-     * @param file The file to load.
-     * @return The loaded configuration
-     */
-    protected FileConfiguration load(File file) {
-        Validate.notNull(file != null, "File cannot be null.");
-        Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
-        Validate.checkIf(file.canRead(), "File " + file.getPath() + " is not readable.");
-        String contents;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line).append("\n");
+    public FileConfiguration(File file) {
+        from(file);
+    }
+
+    public FileConfiguration(Path path) {
+        from(path);
+    }
+
+    public FileConfiguration(String path) {
+        from(path);
+    }
+
+    public FileConfiguration(ZipFile archive, File inside, File to) {
+        from(archive, inside, to);
+    }
+
+    public FileConfiguration(File archive, File inside, File to) {
+        from(archive, inside, to);
+    }
+
+    public FileConfiguration from(File file, Map<String, Object> map) {
+        super.from(map);
+        setFile(file);
+        return this;
+    }
+
+    public FileConfiguration from(File file, Reader reader) {
+        super.from(reader);   // popola direttamente this
+        setFile(file);
+        return this;
+    }
+
+    public FileConfiguration from(File file, InputStream is) {
+        super.from(is);
+        setFile(file);
+        return this;
+    }
+
+    public FileConfiguration from(File file) {
+        Validator.isNull(file, "The provided file is null.");
+        Validator.checkIf(file.isFile(), "The saving file at " + file.getPath() + " not exists or is not a file.");
+        Validator.checkIf(file.canRead(), "Cannot read the provided file at " + file.getPath());
+        Validator.checkIf(file.canWrite(), "Cannot write the provided file at " + file.getPath());
+
+        try (InputStream is = new FileInputStream(file)) {
+            return from(file, is);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurs while loading a configuration from provided file: " + file.getPath(), e);
+        }
+    }
+
+    public FileConfiguration from(Path path) {
+        Validator.isNull(path, "The provided path is null.");
+        return from(path.toFile());
+    }
+
+    public FileConfiguration from(String path) {
+        Validator.isNull(path, "The path provided is null.");
+        return from(FileUtility.getFileFromString(path));
+    }
+
+    public FileConfiguration from(ZipFile archive, File inside, File to) {
+        Validator.isNull(archive, "The archive file cannot be null.");
+        Validator.isNull(inside, "The inside archive file cannot be null.");
+        Validator.isNull(to, "The saving file cannot be null.");
+
+        Validator.checkIf(to.canRead(), "Cannot read the saving file at " + to.getPath());
+        Validator.checkIf(to.canWrite(), "Cannot write the saving file at " + to.getPath());
+        Validator.checkIf(to.isFile(), "The saving file at " + to.getPath() + " not exists or is not a file.");
+
+        Validator.checkIf(FileUtility.getExtension(inside).equalsIgnoreCase(FileUtility.getExtension(to)), "Inside archive file and saving file implementations not corresponds.");
+        try (archive) {
+            ZipEntry entry = archive.getEntry(FileUtility.getStringPathFromFile(inside));
+            if (entry == null) {
+                throw new RuntimeException("The entry " + FileUtility.getStringPathFromFile(inside) + " does not exist inside the provided archive.");
             }
-
-            contents = builder.toString();
+            return from(to, archive.getInputStream(entry));
         } catch (IOException e) {
-            throw new RuntimeException("Error while loading configuration. ", e);
-        }
-        setFileConfiguration(this);
-        return loadFromString(contents);
-    }
-
-    /**
-     * Save the current configuration to the provided file.
-     *
-     * @param file The file to save configuration into.
-     */
-    protected void save(File file) {
-        Validate.notNull(file != null, "File cannot be null.");
-        Validate.checkIf(file.isFile(), "Object at " + file.getPath() + " is not a file.");
-        Validate.checkIf(file.canWrite(), "File " + file.getPath() + " is not writable.");
-        String contents = saveToString();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write(contents);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while saving configuration. ", e);
+            throw new RuntimeException("An error occurs while loading a configuration from provided archive", e);
         }
     }
 
+    public FileConfiguration from(File archiveFile, File inside, File to) {
+        Validator.isNull(archiveFile, "The archive cannot be null.");
+        Validator.isNull(inside, "The inside archive file cannot be null.");
+        Validator.isNull(to, "The saving file cannot be null.");
 
-    public FileConfiguration(MemoryConfiguration configuration) {
-        super(configuration);
+        Validator.checkIf(archiveFile.canRead(), "Cannot read the archive file.");
+        Validator.checkIf(FileUtility.isZip(archiveFile), "The provided archive file at" + archiveFile.getPath() + " not exists or is not a archive.");
+
+        try (ZipFile archive = new ZipFile(archiveFile)) {
+            return from(archive, inside, to);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurs while loading a configuration from provided archive", e);
+        }
     }
 
-    public FileConfiguration() {
-    }
-
-
-    /**
-     * Save the current configuration to the same file used
-     * while loading it.
-     */
     public void save() {
-        save(getFile());
+        super.save(getFile());
     }
 
-    /**
-     * Reload the current configuration from the same file used
-     * while loading it.
-     */
     public void reload() {
-        asMap().clear();
-        load(getFile());
+        super.reload(getFile());
     }
 
-
-    /**
-     * Move the current configuration to the provided file and delete the original file.
-     *
-     * @param file The file to move the current configuration to.
-     */
-    public void move(File file) {
-        copy(file);
-        delete();
+    public void move(File to) {
+        super.move(getFile(), to);
     }
 
-    /**
-     * Copy the current configuration to the provided file.
-     *
-     * @param file File to copy into the contents of the current configuration.
-     */
-    public void copy(File file) {
-        Validate.notNull(file != null, "File cannot be null.");
-        Validate.checkIf(file.exists(), () -> TrFiles.getFileManager().createFile(file));
-        save(file);
-        reload();
+    public void copy(File to) {
+        super.copy(getFile(), to);
     }
 
-    /**
-     * Delete and clear the current configuration.
-     */
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void delete() {
-        asMap().clear();
-        getFile().delete();
+        super.delete(getFile());
     }
 
-    /**
-     * Zip the current configuration into the provided zip file.
-     *
-     * @param zip Zip file to zip into.
-     */
     public void zip(File zip) {
-        // All checks are made in zipFile method.
-        TrFiles.getFileManager().zipFile(zip, getFile());
+        super.zip(getFile(), zip);
     }
 
-    /**
-     * Zip the current configuration into an archive with the same
-     * path and name of this configuration file.
-     */
-    public void zip() {
-        File zip = new File(getFile().getParent(), getFile().getName() + ".zip");
-        Validate.checkIf(zip.exists(), () -> TrFiles.getFileManager().createFile(zip));
-        zip(zip);
-    }
-
-
-    /**
-     * Convert the current configuration (changing file too) to the provided one.
-     *
-     * @param implementation The implementation instance to convert into the current.
-     * @return the converted configuration instance.
-     */
-    public FileConfiguration convert(Implementations implementation) {
-        Validate.notNull(implementation != null, "Implementation cannot be null.");
-        FileConfiguration to = fromMap(asMap(), implementation);
-        if (to.getFile() == null) {
-            to.setFile(new File(getFile().getParent(),
-                    FileUtility.getFileNameWithoutExtension(getFile().getName())
-                            + to.getImplementation().getExtensions()[0]));
-            delete();
-        }
-        Validate.checkIf(to.getFile().exists(), () -> TrFiles.getFileManager().createFile(to.getFile()));
-        to.save(to.getFile());
+    public FileConfiguration convert(FileConfiguration to) {
+        MemoryConfiguration config = super.convert(getFile(), to);
+        to.setConfiguration(config);
+        to.setFile(getFile());
         return to;
     }
 
-    /**
-     * Load a FileConfiguration from the provided file inside the provided zip
-     *
-     * @param zip    The zip file to get the file from.
-     * @param inside The file to get inside the zip.
-     * @param to     The file to save the FileConfiguration loaded from inside the zip.
-     * @return a new FileConfiguration loaded from jar.
-     * @throws IOException if an error occurs while doing I/O operations
-     */
-    public static FileConfiguration fromZip(File zip, File inside, @Nullable File to) throws IOException {
-        Validate.notNull(zip != null, "Jar cannot be null");
-        Validate.checkIf(zip.isFile(), "Object at " + zip.getPath() + " is not a file.");
-        Validate.checkIf(FileUtility.isZip(zip), "Object at " + zip.getPath() + " is not a zip.");
-        Validate.notNull(inside != null, "File inside jar path cannot be null");
-        if (to == null) {
-            to = inside;
-        }
-        if (!to.isFile()) {
-            TrFiles.getFileManager().createFile(to);
-        }
-
-        try (ZipFile zipFile = new ZipFile(zip)) {
-            ZipEntry ze = zipFile.getEntry(TrFiles.getFileManager().getStringPathFromFile(inside));
-            if (ze == null) {
-                throw new FileNotFoundException("File inside " + inside + " zip " + zip.getPath() + " not found.");
-            }
-            InputStream is = zipFile.getInputStream(ze);
-            TrFiles.getFileManager().write(is, to);
-        }
-        return from(to);
+    @Override
+    public String saveToString() {
+        return buildHeader() + getConfiguration().saveToString() + buildFooter();
     }
 
-    /**
-     * Load a FileConfiguration from the provided file inside the provided jar
-     *
-     * @param jar    The jar file to get the file from.
-     * @param inside The file to get inside the jar.
-     * @param to     The file to save the FileConfiguration loaded from inside the jar.
-     * @return a new FileConfiguration loaded from jar.
-     * @throws IOException if an error occurs while doing I/O operations
-     */
-    public static FileConfiguration fromJar(File jar, File inside, @Nullable File to) throws IOException {
-        Validate.notNull(jar != null, "Jar cannot be null");
-        Validate.checkIf(jar.isFile(), "Object at " + jar.getPath() + " is not a file.");
-        Validate.checkIf(FileUtility.isJar(jar), "Object at " + jar.getPath() + " is not a jar.");
-        Validate.notNull(inside != null, "File inside jar path cannot be null");
-
-        if (to == null) {
-            to = inside;
-        }
-        if (!to.isFile()) {
-            TrFiles.getFileManager().createFile(to);
-        }
-        try (JarFile jarFile = new JarFile(jar)) {
-            ZipEntry ze = jarFile.getEntry(TrFiles.getFileManager().getStringPathFromFile(inside));
-            if (ze == null) {
-                throw new FileNotFoundException("File inside " + inside + " jar " + jar.getPath() + " not found.");
-            }
-            InputStream is = jarFile.getInputStream(ze);
-            TrFiles.getFileManager().write(is, to);
-        }
-        return from(to);
+    public String buildHeader() {
+        return buildComments(options().getHeader());
     }
 
-    /**
-     * Load a FileConfiguration from the provided file.
-     *
-     * @param file File to load FileConfiguration from.
-     * @return The FileConfiguration loaded.
-     */
-    public static FileConfiguration from(File file) {
-        Validate.notNull(file != null, "Provided path cannot be null.");
-        Implementations implementation = Implementations.fromExtension(FileUtility.getExtension(file));
-        if (implementation == null) {
-            throw new NullPointerException("File " + file.getPath() + " doesn't have a valid implementation. Make sure it is one of " + Implementations.listToString());
-        }
-        FileConfiguration configuration = implementation.getReference().newInstance();
-        configuration.setImplementation(implementation);
-        configuration.setFile(file);
-        return configuration.load(file);
+    public String buildFooter() {
+        return buildComments(options().getFooter());
     }
 
-    /**
-     * Create a new FileConfiguration from a map.
-     *
-     * @param map            The map contains the data.
-     * @param implementation The implementations to create
-     * @return The chosen FileConfiguration filled with provided data.
-     */
-    protected static FileConfiguration fromMap(Map<String, Object> map, Implementations implementation) {
-        Validate.notNull(map != null, "Map cannot be null.");
-        Validate.notNull(implementation != null, "Implementation cannot be null.");
-        FileConfiguration newConfig = implementation.getReference().newInstance();
-        if (map.isEmpty()) return newConfig;
-        newConfig.asMap().putAll(map);
-        return newConfig;
+    public String buildComments(String comments) {
+        String[] lines = comments.split("\n");
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines)
+            sb.append(options().getCommentPrefix()).append(line).append(options().getCommentSuffix()).append("\n");
+        return sb.toString();
     }
 
-    /**
-     * Build the header of the current configuration file
-     *
-     * @return the header built ready for dumping.
-     */
-    protected String buildHeader() {
-        return buildComment(options().getHeader());
-    }
-
-    /**
-     * Build the footer of the current configuration file
-     *
-     * @return the footer built ready for dumping.
-     */
-    protected String buildFooter() {
-        return buildComment(options().getFooter());
-    }
-
-    /**
-     * Build a comment by adding start and end chars.
-     *
-     * @param comments The comments to build, divided in lines by '\n'
-     * @return A formatted String like a comment.
-     */
-    protected String buildComment(String comments) {
-        if (Validate.isNull(comments)) return "";
-        StringBuilder builder = new StringBuilder();
-        for (String comment : comments.split("\n")) {
-            builder.append(options().getCommentPrefix())
-                    .append(comment)
-                    .append(options().getCommentSuffix())
-                    .append("\n");
-        }
-        return builder.toString();
-    }
-
-    /**
-     * Get the current configuration options.
-     *
-     * @return The current configuration options.
-     */
     @Override
     public FileOptions options() {
         if (options == null) {
@@ -328,46 +188,26 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return options;
     }
 
-    /**
-     * Get the current implementation
-     *
-     * @return the current implementation
-     */
-    public Implementations getImplementation() {
-        return implementation;
+    public File getFile() {
+        return file;
     }
 
-    /**
-     * Set the current implementation
-     *
-     * @param implementation The implementation to set for this configuration
-     */
-    protected void setImplementation(Implementations implementation) {
-        this.implementation = implementation;
+    public void setFile(File file) {
+        this.file = file;
     }
 
+    public abstract void setConfiguration(MemoryConfiguration configuration);
 
-    //-------//-------//-------//-------//-------//-------//
-    // UTILITY METHOD FOR FILECONFIGURATION CLASSES //
-    // UTILITY METHOD FOR FILECONFIGURATION CLASSES //
-    //-------//-------//-------//-------//-------//-------//
+    public abstract MemoryConfiguration getConfiguration();
 
+    public abstract String[] getExtensions();
 
-    protected boolean isInsideAString(String line, int index) {
-        boolean open = false;
-        boolean close = false;
-        for (int i = index - 1; i >= 0; i--) {
-            if (i < line.length() && line.charAt(i) == '"') {
-                open = true;
-                break;
+    private boolean isValid(File file) {
+        for (String extension : getExtensions()) {
+            if (FileUtility.getExtension(file).equalsIgnoreCase(extension)) {
+                return true;
             }
         }
-        for (int i = index + 1; i < line.length(); i++) {
-            if (line.charAt(i) == '"') {
-                close = true;
-                break;
-            }
-        }
-        return open && close;
+        return false;
     }
 }

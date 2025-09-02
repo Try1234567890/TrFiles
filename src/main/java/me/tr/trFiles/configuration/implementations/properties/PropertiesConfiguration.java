@@ -4,86 +4,108 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.implementations.Implementations;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.general.utility.Validate;
+import me.tr.trFiles.configuration.memory.implementations.MemoryPropertiesConfiguration;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.Properties;
+import java.util.zip.ZipFile;
 
 public class PropertiesConfiguration extends FileConfiguration {
-    private JavaPropsMapper propertiesMapper;
+    private MemoryPropertiesConfiguration configuration;
     private PropertiesOptions options;
 
-
     @Override
-    protected FileConfiguration loadFromString(String contents) {
-        Validate.notNull(contents != null, "Contents cannot be null");
-        Map<?, ?> input;
-        try {
-            Properties prop = new Properties();
-            prop.load(new StringReader(contents));
-            input = propertiesMapper.readPropertiesAs(prop, Map.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Error while loading configuration. ", e);
-        }
-        convertMapsToSections(input, this);
-        setImplementation(Implementations.PROPERTIES);
-        return this;
+    public void loadFromString(String contents) {
+        this.configuration = new MemoryPropertiesConfiguration(buildProperties());
+        configuration.loadFromString(contents);
     }
 
     @Override
-    protected String saveToString() {
-        String contents;
-        try {
-            contents = propertiesMapper.writeValueAsString(getValues(true));
-        } catch (IOException e) {
-            throw new RuntimeException("Error while saving configuration. ", e);
-        }
-        setImplementation(Implementations.PROPERTIES);
-        return contents;
+    public void setConfiguration(MemoryConfiguration configuration) {
+        if (!(configuration instanceof MemoryPropertiesConfiguration)) return;
+        this.configuration = (MemoryPropertiesConfiguration) configuration;
     }
 
     @Override
-    protected PropertiesConfiguration newInstance() {
-        return new PropertiesConfiguration();
+    public MemoryPropertiesConfiguration getConfiguration() {
+        return configuration;
     }
 
-
-    /**
-     * Create a new empty instance of {@link PropertiesConfiguration}.
-     */
-    public PropertiesConfiguration() {
-        buildProperties();
+    @Override
+    public String[] getExtensions() {
+        return new String[]{".properties"};
     }
 
-    /**
-     * Create a new instance of {@link PropertiesConfiguration} with provided configuration content.
-     */
-    public PropertiesConfiguration(MemoryConfiguration configuration) {
-        super(configuration);
-        buildProperties();
+    public PropertiesConfiguration(File file, Map<String, Object> map) {
+        super(file, map);
     }
 
-    public static PropertiesConfiguration from(File file) {
-        if (!Implementations.PROPERTIES.isValid(file)) {
-            throw new IllegalArgumentException(file.getPath() + " is not a valid PROPERTIES file.");
-        }
-        return (PropertiesConfiguration) FileConfiguration.from(file);
+    public PropertiesConfiguration(File file, Reader reader) {
+        super(file, reader);
     }
 
-    public static PropertiesConfiguration fromMap(Map<String, Object> map) {
-        return (PropertiesConfiguration) fromMap(map, Implementations.PROPERTIES);
+    public PropertiesConfiguration(File file, InputStream is) {
+        super(file, is);
     }
 
+    public PropertiesConfiguration(File file) {
+        super(file);
+    }
 
-    private void buildProperties() {
-        setImplementation(Implementations.PROPERTIES);
+    public PropertiesConfiguration(Path path) {
+        super(path);
+    }
 
-        this.propertiesMapper = JavaPropsMapper.builder()
+    public PropertiesConfiguration(String path) {
+        super(path);
+    }
+
+    public PropertiesConfiguration(ZipFile archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public PropertiesConfiguration(File archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public static PropertiesConfiguration fromMap(File file, Map<String, Object> map) {
+        return new PropertiesConfiguration(file, map);
+    }
+
+    public static PropertiesConfiguration fromReader(File file, Reader reader) {
+        return new PropertiesConfiguration(file, reader);
+    }
+
+    public static PropertiesConfiguration fromInputStream(File file, InputStream is) {
+        return new PropertiesConfiguration(file, is);
+    }
+
+    public static PropertiesConfiguration fromFile(File file) {
+        return new PropertiesConfiguration(file);
+    }
+
+    public static PropertiesConfiguration fromPath(Path path) {
+        return new PropertiesConfiguration(path);
+    }
+
+    public static PropertiesConfiguration fromString(String path) {
+        return new PropertiesConfiguration(path);
+    }
+
+    public static PropertiesConfiguration fromArchive(ZipFile archive, File inside, File to) {
+        return new PropertiesConfiguration(archive, inside, to);
+    }
+
+    public static PropertiesConfiguration fromArchive(File archive, File inside, File to) {
+        return new PropertiesConfiguration(archive, inside, to);
+    }
+
+    private JavaPropsMapper buildProperties() {
+        return JavaPropsMapper.builder()
                 .configure(MapperFeature.USE_ANNOTATIONS, options().isUseAnnotations())
                 .configure(MapperFeature.USE_GETTERS_AS_SETTERS, options().isUseGettersAsSetters())
                 .configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, options().isPropagateTransientMarker())

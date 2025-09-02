@@ -4,11 +4,11 @@ package me.tr.trFiles.configuration;
  * Various settings for controlling the input and output of a {@link
  * Configuration}
  */
-public class Options {
+public class ConfigurationOptions {
     private char pathSeparator = '.';
     private final Configuration configuration;
 
-    protected Options(Configuration configuration) {
+    protected ConfigurationOptions(Configuration configuration) {
         this.configuration = configuration;
     }
 

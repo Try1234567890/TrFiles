@@ -2,76 +2,109 @@ package me.tr.trFiles.configuration.implementations.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.implementations.Implementations;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.general.utility.Validate;
+import me.tr.trFiles.configuration.memory.implementations.MemoryJsonConfiguration;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class JsonConfiguration extends FileConfiguration {
-    private Gson gson;
+    private MemoryJsonConfiguration configuration;
     private JsonOptions options;
 
-
     @Override
-    protected FileConfiguration loadFromString(String contents) {
-        Validate.notNull(contents != null, "Contents cannot be null.");
-
-        Map<?, ?> input;
-        try {
-            input = gson.fromJson(contents, Map.class);
-        } catch (JsonSyntaxException e) {
-            throw new RuntimeException("Error while loading configuration. ", e);
-        }
-        convertMapsToSections(input, this);
-        setImplementation(Implementations.JSON);
-        return this;
+    public void loadFromString(String contents) {
+        this.configuration = new MemoryJsonConfiguration(buildGson());
+        configuration.loadFromString(contents);
     }
 
     @Override
-    protected String saveToString() {
-        String contents = gson.toJson(getValues(true));
-        setImplementation(Implementations.JSON);
-        return buildHeader() + contents + buildFooter();
+    public void setConfiguration(MemoryConfiguration configuration) {
+        if (!(configuration instanceof MemoryJsonConfiguration)) return;
+        this.configuration = (MemoryJsonConfiguration) configuration;
     }
 
     @Override
-    protected JsonConfiguration newInstance() {
-        return new JsonConfiguration();
+    public MemoryJsonConfiguration getConfiguration() {
+        return configuration;
     }
 
-    /**
-     * Create a new empty instance of {@link JsonConfiguration}.
-     */
-    public JsonConfiguration() {
-        buildGson();
+
+    @Override
+    public String[] getExtensions() {
+        return new String[]{".json"};
     }
 
-    /**
-     * Create a new instance of {@link JsonConfiguration} with provided configuration content.
-     */
-    public JsonConfiguration(MemoryConfiguration configuration) {
-        super(configuration);
-        buildGson();
+    public JsonConfiguration(File file, Map<String, Object> map) {
+        super(file, map);
     }
 
-    public static JsonConfiguration from(File file) {
-        if (!Implementations.JSON.isValid(file)) {
-            throw new IllegalArgumentException(file.getPath() + " is not a valid JSON file.");
-        }
-        return (JsonConfiguration) FileConfiguration.from(file);
+    public JsonConfiguration(File file, Reader reader) {
+        super(file, reader);
     }
 
-    public static JsonConfiguration fromMap(Map<String, Object> map) {
-        return (JsonConfiguration) fromMap(map, Implementations.JSON);
+    public JsonConfiguration(File file, InputStream is) {
+        super(file, is);
     }
 
-    private void buildGson() {
-        setImplementation(Implementations.JSON);
+    public JsonConfiguration(File file) {
+        super(file);
+    }
 
+    public JsonConfiguration(Path path) {
+        super(path);
+    }
+
+    public JsonConfiguration(String path) {
+        super(path);
+    }
+
+    public JsonConfiguration(ZipFile archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public JsonConfiguration(File archive, File inside, File to) {
+        super(archive, inside, to);
+    }
+
+    public static JsonConfiguration fromMap(File file, Map<String, Object> map) {
+        return new JsonConfiguration(file, map);
+    }
+
+    public static JsonConfiguration fromReader(File file, Reader reader) {
+        return new JsonConfiguration(file, reader);
+    }
+
+    public static JsonConfiguration fromInputStream(File file, InputStream is) {
+        return new JsonConfiguration(file, is);
+    }
+
+    public static JsonConfiguration fromFile(File file) {
+        return new JsonConfiguration(file);
+    }
+
+    public static JsonConfiguration fromPath(Path path) {
+        return new JsonConfiguration(path);
+    }
+
+    public static JsonConfiguration fromString(String path) {
+        return new JsonConfiguration(path);
+    }
+
+    public static JsonConfiguration fromArchive(ZipFile archive, File inside, File to) {
+        return new JsonConfiguration(archive, inside, to);
+    }
+
+    public static JsonConfiguration fromArchive(File archive, File inside, File to) {
+        return new JsonConfiguration(archive, inside, to);
+    }
+
+    private Gson buildGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         if (options().isPrettyPrinting()) gsonBuilder.setPrettyPrinting();
         if (options().isSerializeNulls()) gsonBuilder.serializeNulls();
@@ -86,9 +119,8 @@ public class JsonConfiguration extends FileConfiguration {
         if (options().isSerializeSpecialFloatingPointValues()) gsonBuilder.serializeSpecialFloatingPointValues();
         gsonBuilder.setLongSerializationPolicy(options().getLongSerializationPolicy());
         gsonBuilder.setStrictness(options().getStrictness());
-        gson = gsonBuilder.create();
+        return gsonBuilder.create();
     }
-
 
     @Override
     public JsonOptions options() {

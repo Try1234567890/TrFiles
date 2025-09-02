@@ -49,7 +49,7 @@ public class PropertiesOptions extends FileOptions {
     private boolean failOnUnwrappedTypeIdentifiers = true;
     private boolean writeSelfReferencesAsNull = false;
 
-    protected PropertiesOptions(MemoryConfiguration configuration) {
+    protected PropertiesOptions(PropertiesConfiguration configuration) {
         super(configuration, "#", "");
     }
 

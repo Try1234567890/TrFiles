@@ -1,8 +1,8 @@
 package me.tr.trFiles.configuration.memory;
 
-import me.tr.trFiles.configuration.Options;
+import me.tr.trFiles.configuration.ConfigurationOptions;
 
-public class MemoryOptions extends Options {
+public class MemoryOptions extends ConfigurationOptions {
 
 
     protected MemoryOptions(MemoryConfiguration configuration) {
