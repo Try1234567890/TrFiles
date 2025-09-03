@@ -2,7 +2,6 @@ package me.tr.trFiles.configuration.implementations.xml;
 
 
 import me.tr.trFiles.configuration.implementations.FileOptions;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
 public class XmlOptions extends FileOptions {
     private boolean autoDetectXsiType;

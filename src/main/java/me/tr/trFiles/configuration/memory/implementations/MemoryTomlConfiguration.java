@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import me.tr.trFiles.Validator;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -31,6 +32,11 @@ public class MemoryTomlConfiguration extends MemoryConfiguration {
         this.mapper = new TomlMapper();
     }
 
+    public MemoryTomlConfiguration(File file) {
+        super(file);
+        this.mapper = new TomlMapper();
+    }
+
     public MemoryTomlConfiguration(TomlMapper mapper) {
         this.mapper = mapper;
     }
@@ -47,6 +53,11 @@ public class MemoryTomlConfiguration extends MemoryConfiguration {
 
     public MemoryTomlConfiguration(Map<String, Object> map, TomlMapper mapper) {
         super(map);
+        this.mapper = mapper;
+    }
+
+    public MemoryTomlConfiguration(File file, TomlMapper mapper) {
+        super(file);
         this.mapper = mapper;
     }
 

@@ -1,7 +1,6 @@
 package me.tr.trFiles.configuration.implementations.properties;
 
 import me.tr.trFiles.configuration.implementations.FileOptions;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
 public class PropertiesOptions extends FileOptions {
     private boolean useAnnotations = true;

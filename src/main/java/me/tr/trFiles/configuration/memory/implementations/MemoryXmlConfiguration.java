@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import me.tr.trFiles.Validator;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -32,6 +33,11 @@ public class MemoryXmlConfiguration extends MemoryConfiguration {
         this.xmlMapper = new XmlMapper();
     }
 
+    public MemoryXmlConfiguration(File file) {
+        super(file);
+        this.xmlMapper = new XmlMapper();
+    }
+
     public MemoryXmlConfiguration(XmlMapper xmlMapper) {
         this.xmlMapper = xmlMapper;
     }
@@ -48,6 +54,11 @@ public class MemoryXmlConfiguration extends MemoryConfiguration {
 
     public MemoryXmlConfiguration(Map<String, Object> map, XmlMapper xmlMapper) {
         super(map);
+        this.xmlMapper = xmlMapper;
+    }
+
+    public MemoryXmlConfiguration(File file, XmlMapper xmlMapper) {
+        super(file);
         this.xmlMapper = xmlMapper;
     }
 

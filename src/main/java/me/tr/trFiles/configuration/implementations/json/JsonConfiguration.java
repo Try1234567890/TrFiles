@@ -3,7 +3,6 @@ package me.tr.trFiles.configuration.implementations.json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.configuration.memory.implementations.MemoryJsonConfiguration;
 
 import java.io.File;
@@ -14,25 +13,7 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class JsonConfiguration extends FileConfiguration {
-    private MemoryJsonConfiguration configuration;
     private JsonOptions options;
-
-    @Override
-    public void loadFromString(String contents) {
-        this.configuration = new MemoryJsonConfiguration(buildGson());
-        configuration.loadFromString(contents);
-    }
-
-    @Override
-    public void setConfiguration(MemoryConfiguration configuration) {
-        if (!(configuration instanceof MemoryJsonConfiguration)) return;
-        this.configuration = (MemoryJsonConfiguration) configuration;
-    }
-
-    @Override
-    public MemoryJsonConfiguration getConfiguration() {
-        return configuration;
-    }
 
 
     @Override
@@ -40,36 +21,49 @@ public class JsonConfiguration extends FileConfiguration {
         return new String[]{".json"};
     }
 
+    @Override
+    protected MemoryJsonConfiguration newConfiguration() {
+        return new MemoryJsonConfiguration(buildGson());
+    }
+
     public JsonConfiguration(File file, Map<String, Object> map) {
         super(file, map);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(File file, Reader reader) {
         super(file, reader);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(File file, InputStream is) {
         super(file, is);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(File file) {
         super(file);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(Path path) {
         super(path);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(String path) {
         super(path);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(ZipFile archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public JsonConfiguration(File archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
     }
 
     public static JsonConfiguration fromMap(File file, Map<String, Object> map) {

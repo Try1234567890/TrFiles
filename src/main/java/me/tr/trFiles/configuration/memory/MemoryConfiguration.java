@@ -94,6 +94,10 @@ public abstract class MemoryConfiguration extends MemorySection implements Confi
         from(map);
     }
 
+    public MemoryConfiguration(File file) {
+        from(file);
+    }
+
     public MemoryConfiguration from() {
         loadFromString(getEmptyConfig());
         return this;
@@ -102,7 +106,6 @@ public abstract class MemoryConfiguration extends MemorySection implements Confi
     public MemoryConfiguration from(Reader reader) {
         Validator.isNull(reader, "The provided Reader is null");
         try {
-            System.out.println("MemoryConfiguration#from() " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
             loadFromString(FileManager.read(reader));
             return this;
         } catch (IOException e) {

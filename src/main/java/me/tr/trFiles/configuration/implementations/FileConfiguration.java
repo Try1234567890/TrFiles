@@ -1,23 +1,29 @@
 package me.tr.trFiles.configuration.implementations;
 
 import me.tr.trFiles.Validator;
+import me.tr.trFiles.configuration.Configuration;
+import me.tr.trFiles.configuration.Section;
 import me.tr.trFiles.configuration.management.FileUtility;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public abstract class FileConfiguration extends MemoryConfiguration {
+public abstract class FileConfiguration implements Section {
+    private MemoryConfiguration configuration;
     private File file;
     private FileOptions options;
 
-    /*
-      protected FileConfiguration() {
-      }
-    */
+    protected FileConfiguration(File file, MemoryConfiguration configuration) {
+        this.configuration = configuration;
+        this.file = file;
+    }
 
     public FileConfiguration(File file, Map<String, Object> map) {
         from(file, map);
@@ -51,20 +57,26 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         from(archive, inside, to);
     }
 
+    protected FileConfiguration from(File file, MemoryConfiguration configuration) {
+        this.configuration = configuration;
+        this.file = file;
+        return this;
+    }
+
     public FileConfiguration from(File file, Map<String, Object> map) {
-        super.from(map);
+        getConfiguration().from(map);
         setFile(file);
         return this;
     }
 
     public FileConfiguration from(File file, Reader reader) {
-        super.from(reader);   // popola direttamente this
+        getConfiguration().from(reader);
         setFile(file);
         return this;
     }
 
     public FileConfiguration from(File file, InputStream is) {
-        super.from(is);
+        getConfiguration().from(is);
         setFile(file);
         return this;
     }
@@ -129,40 +141,35 @@ public abstract class FileConfiguration extends MemoryConfiguration {
     }
 
     public void save() {
-        super.save(getFile());
+        getConfiguration().save(getFile());
     }
 
     public void reload() {
-        super.reload(getFile());
+        getConfiguration().reload(getFile());
     }
 
     public void move(File to) {
-        super.move(getFile(), to);
+        getConfiguration().move(getFile(), to);
     }
 
     public void copy(File to) {
-        super.copy(getFile(), to);
+        getConfiguration().copy(getFile(), to);
     }
 
     public void delete() {
-        super.delete(getFile());
+        getConfiguration().delete(getFile());
     }
 
     public void zip(File zip) {
-        super.zip(getFile(), zip);
+        getConfiguration().zip(getFile(), zip);
     }
 
     public FileConfiguration convert(FileConfiguration to) {
-        MemoryConfiguration config = super.convert(getFile(), to);
-        to.setConfiguration(config);
+        getConfiguration().convert(getFile(), to.getConfiguration());
         to.setFile(getFile());
         return to;
     }
 
-    @Override
-    public String saveToString() {
-        return buildHeader() + getConfiguration().saveToString() + buildFooter();
-    }
 
     public String buildHeader() {
         return buildComments(options().getHeader());
@@ -180,7 +187,6 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         return sb.toString();
     }
 
-    @Override
     public FileOptions options() {
         if (options == null) {
             options = new FileOptions(this);
@@ -196,11 +202,21 @@ public abstract class FileConfiguration extends MemoryConfiguration {
         this.file = file;
     }
 
-    public abstract void setConfiguration(MemoryConfiguration configuration);
 
-    public abstract MemoryConfiguration getConfiguration();
+    public String[] getExtensions() {
+        return new String[]{};
+    }
 
-    public abstract String[] getExtensions();
+    public MemoryConfiguration getConfiguration() {
+        if (configuration == null) {
+            configuration = newConfiguration();
+        }
+        return configuration;
+    }
+
+    protected void setConfiguration(MemoryConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
     private boolean isValid(File file) {
         for (String extension : getExtensions()) {
@@ -209,5 +225,487 @@ public abstract class FileConfiguration extends MemoryConfiguration {
             }
         }
         return false;
+    }
+
+    protected abstract MemoryConfiguration newConfiguration();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public List<String> getKeys(boolean recursive) {
+        return getConfiguration().getKeys(recursive);
+    }
+
+    @Override
+    public Map<String, Object> getValues(boolean recursive) {
+        return getConfiguration().getValues(recursive);
+    }
+
+    @Override
+    public boolean contains(String path) {
+        return getConfiguration().contains(path);
+    }
+
+    @Override
+    public boolean isSet(String path) {
+        return getConfiguration().isSet(path);
+    }
+
+    @Override
+    public String getCurrentPath() {
+        return getConfiguration().getCurrentPath();
+    }
+
+    @Override
+    public String getName() {
+        return getConfiguration().getName();
+    }
+
+    @Override
+    public Configuration getRoot() {
+        return getConfiguration().getRoot();
+    }
+
+    @Override
+    public Section getParent() {
+        return getConfiguration().getParent();
+    }
+
+    @Override
+    public String getFullPath() {
+        return getConfiguration().getFullPath();
+    }
+
+    @Override
+    public Object get(String path) {
+        return getConfiguration().get(path);
+    }
+
+    @Override
+    public Object get(String path, Object def) {
+        return getConfiguration().get(path, def);
+    }
+
+    @Override
+    public void set(String path, Object value) {
+        getConfiguration().set(path, value);
+    }
+
+    @Override
+    public Section createSection(String path) {
+        return getConfiguration().createSection(path);
+    }
+
+    @Override
+    public Section createSection(String path, Map<String, Object> map) {
+        return getConfiguration().createSection(path, map);
+    }
+
+    @Override
+    public String getString(String path) {
+        return getConfiguration().getString(path);
+    }
+
+    @Override
+    public String getString(String path, String def) {
+        return getConfiguration().getString(path, def);
+    }
+
+    @Override
+    public boolean isString(String path) {
+        return getConfiguration().isString(path);
+    }
+
+    @Override
+    public char getChar(String path) {
+        return getConfiguration().getChar(path);
+    }
+
+    @Override
+    public char getChar(String path, char def) {
+        return getConfiguration().getChar(path, def);
+    }
+
+    @Override
+    public boolean isChar(String path) {
+        return getConfiguration().isChar(path);
+    }
+
+    @Override
+    public int getInt(String path) {
+        return getConfiguration().getInt(path);
+    }
+
+    @Override
+    public int getInt(String path, int def) {
+        return getConfiguration().getInt(path, def);
+    }
+
+    @Override
+    public boolean isInt(String path) {
+        return getConfiguration().isInt(path);
+    }
+
+    @Override
+    public Number getNumber(String path) {
+        return getConfiguration().getNumber(path);
+    }
+
+    @Override
+    public Number getNumber(String path, Number def) {
+        return getConfiguration().getNumber(path, def);
+    }
+
+    @Override
+    public boolean isNumber(String path) {
+        return getConfiguration().isNumber(path);
+    }
+
+    @Override
+    public boolean getBoolean(String path) {
+        return getConfiguration().getBoolean(path);
+    }
+
+    @Override
+    public boolean getBoolean(String path, boolean def) {
+        return getConfiguration().getBoolean(path, def);
+    }
+
+    @Override
+    public boolean isBoolean(String path) {
+        return getConfiguration().isBoolean(path);
+    }
+
+    @Override
+    public double getDouble(String path) {
+        return getConfiguration().getDouble(path);
+    }
+
+    @Override
+    public double getDouble(String path, double def) {
+        return getConfiguration().getDouble(path, def);
+    }
+
+    @Override
+    public boolean isDouble(String path) {
+        return getConfiguration().isDouble(path);
+    }
+
+    @Override
+    public float getFloat(String path) {
+        return getConfiguration().getFloat(path);
+    }
+
+    @Override
+    public float getFloat(String path, float def) {
+        return getConfiguration().getFloat(path, def);
+    }
+
+    @Override
+    public boolean isFloat(String path) {
+        return getConfiguration().isFloat(path);
+    }
+
+    @Override
+    public long getLong(String path) {
+        return getConfiguration().getLong(path);
+    }
+
+    @Override
+    public long getLong(String path, long def) {
+        return getConfiguration().getLong(path, def);
+    }
+
+    @Override
+    public boolean isLong(String path) {
+        return getConfiguration().isLong(path);
+    }
+
+    @Override
+    public short getShort(String path) {
+        return getConfiguration().getShort(path);
+    }
+
+    @Override
+    public short getShort(String path, short def) {
+        return getConfiguration().getShort(path, def);
+    }
+
+    @Override
+    public boolean isShort(String path) {
+        return getConfiguration().isShort(path);
+    }
+
+    @Override
+    public BigInteger getBigInteger(String path) {
+        return getConfiguration().getBigInteger(path);
+    }
+
+    @Override
+    public BigInteger getBigInteger(String path, BigInteger def) {
+        return getConfiguration().getBigInteger(path, def);
+    }
+
+    @Override
+    public boolean isBigInteger(String path) {
+        return getConfiguration().isBigInteger(path);
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(String path) {
+        return getConfiguration().getBigDecimal(path);
+    }
+
+    @Override
+    public BigDecimal getBigDecimal(String path, BigDecimal def) {
+        return getConfiguration().getBigDecimal(path, def);
+    }
+
+    @Override
+    public boolean isBigDecimal(String path) {
+        return getConfiguration().isBigDecimal(path);
+    }
+
+    @Override
+    public List<?> getList(String path) {
+        return getConfiguration().getList(path);
+    }
+
+    @Override
+    public List<?> getList(String path, List<?> def) {
+        return getConfiguration().getList(path, def);
+    }
+
+    @Override
+    public List<Object> getObjectList(String path) {
+        return getConfiguration().getObjectList(path);
+    }
+
+    @Override
+    public boolean isList(String path) {
+        return getConfiguration().isList(path);
+    }
+
+    @Override
+    public List<Section> getSectionList() {
+        return getConfiguration().getSectionList();
+    }
+
+    @Override
+    public List<Section> getSectionList(String path) {
+        return getConfiguration().getSectionList(path);
+    }
+
+    @Override
+    public List<String> getStringList(String path) {
+        return getConfiguration().getStringList(path);
+    }
+
+    @Override
+    public List<Integer> getIntegerList(String path) {
+        return getConfiguration().getIntegerList(path);
+    }
+
+    @Override
+    public List<Number> getNumberList(String path) {
+        return getConfiguration().getNumberList(path);
+    }
+
+    @Override
+    public List<Boolean> getBooleanList(String path) {
+        return getConfiguration().getBooleanList(path);
+    }
+
+    @Override
+    public List<Double> getDoubleList(String path) {
+        return getConfiguration().getDoubleList(path);
+    }
+
+    @Override
+    public List<Float> getFloatList(String path) {
+        return getConfiguration().getFloatList(path);
+    }
+
+    @Override
+    public List<Long> getLongList(String path) {
+        return getConfiguration().getLongList(path);
+    }
+
+    @Override
+    public List<Byte> getByteList(String path) {
+        return getConfiguration().getByteList(path);
+    }
+
+    @Override
+    public List<Character> getCharacterList(String path) {
+        return getConfiguration().getCharacterList(path);
+    }
+
+    @Override
+    public List<Short> getShortList(String path) {
+        return getConfiguration().getShortList(path);
+    }
+
+    @Override
+    public List<BigInteger> getBigIntegerList(String path) {
+        return getConfiguration().getBigIntegerList(path);
+    }
+
+    @Override
+    public List<BigDecimal> getBigDecimalList(String path) {
+        return getConfiguration().getBigDecimalList(path);
+    }
+
+    @Override
+    public Section[] getSectionsArray() {
+        return getConfiguration().getSectionsArray();
+    }
+
+    @Override
+    public Section[] getSectionArray(String path) {
+        return getConfiguration().getSectionArray(path);
+    }
+
+    @Override
+    public Object[] getObjectArray(String path) {
+        return getConfiguration().getObjectArray(path);
+    }
+
+    @Override
+    public String[] getStringArray(String path) {
+        return getConfiguration().getStringArray(path);
+    }
+
+    @Override
+    public Integer[] getIntegerArray(String path) {
+        return getConfiguration().getIntegerArray(path);
+    }
+
+    @Override
+    public Number[] getNumberArray(String path) {
+        return getConfiguration().getNumberArray(path);
+    }
+
+    @Override
+    public Boolean[] getBooleanArray(String path) {
+        return getConfiguration().getBooleanArray(path);
+    }
+
+    @Override
+    public Double[] getDoubleArray(String path) {
+        return getConfiguration().getDoubleArray(path);
+    }
+
+    @Override
+    public Float[] getFloatArray(String path) {
+        return getConfiguration().getFloatArray(path);
+    }
+
+    @Override
+    public Long[] getLongArray(String path) {
+        return getConfiguration().getLongArray(path);
+    }
+
+    @Override
+    public Byte[] getByteArray(String path) {
+        return getConfiguration().getByteArray(path);
+    }
+
+    @Override
+    public Character[] getCharacterArray(String path) {
+        return getConfiguration().getCharacterArray(path);
+    }
+
+    @Override
+    public Short[] getShortArray(String path) {
+        return getConfiguration().getShortArray(path);
+    }
+
+    @Override
+    public BigInteger[] getBigIntegerArray(String path) {
+        return getConfiguration().getBigIntegerArray(path);
+    }
+
+    @Override
+    public BigDecimal[] getBigDecimalArray(String path) {
+        return getConfiguration().getBigDecimalArray(path);
+    }
+
+    @Override
+    public int[] getPrimitiveIntegerArray(String path) {
+        return getConfiguration().getPrimitiveIntegerArray(path);
+    }
+
+    @Override
+    public boolean[] getPrimitiveBooleanArray(String path) {
+        return getConfiguration().getPrimitiveBooleanArray(path);
+    }
+
+    @Override
+    public double[] getPrimitiveDoubleArray(String path) {
+        return getConfiguration().getPrimitiveDoubleArray(path);
+    }
+
+    @Override
+    public float[] getPrimitiveFloatArray(String path) {
+        return getConfiguration().getPrimitiveFloatArray(path);
+    }
+
+    @Override
+    public long[] getPrimitiveLongArray(String path) {
+        return getConfiguration().getPrimitiveLongArray(path);
+    }
+
+    @Override
+    public byte[] getPrimitiveByteArray(String path) {
+        return getConfiguration().getPrimitiveByteArray(path);
+    }
+
+    @Override
+    public char[] getPrimitiveCharacterArray(String path) {
+        return getConfiguration().getPrimitiveCharacterArray(path);
+    }
+
+    @Override
+    public short[] getPrimitiveShortArray(String path) {
+        return getConfiguration().getPrimitiveShortArray(path);
+    }
+
+    @Override
+    public Section getSection(String path) {
+        return getConfiguration().getSection(path);
+    }
+
+    @Override
+    public boolean isSection(String path) {
+        return getConfiguration().isSection(path);
+    }
+
+    @Override
+    public void addDefault(String path, Object value) {
+        getConfiguration().addDefault(path, value);
+    }
+
+    @Override
+    public Object getDefault(String path) {
+        return getConfiguration().getDefault(path);
+    }
+
+    @Override
+    public Map<String, Object> asMap() {
+        return getConfiguration().asMap();
     }
 }

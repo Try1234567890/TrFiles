@@ -2,6 +2,7 @@ package me.tr.trFiles.configuration.implementations.yaml;
 
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
+import me.tr.trFiles.configuration.memory.implementations.MemoryXmlConfiguration;
 import me.tr.trFiles.configuration.memory.implementations.MemoryYamlConfiguration;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -15,37 +16,16 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class YamlConfiguration extends FileConfiguration {
-    private MemoryYamlConfiguration configuration;
     private YamlOptions options;
 
 
-    @Override
-    public void loadFromString(String contents) {
-        if (configuration == null) {
-            configuration = new MemoryYamlConfiguration(buildYaml());
-        }
-        configuration.loadFromString(contents);
-    }
-
-
-    @Override
-    public void setConfiguration(MemoryConfiguration configuration) {
-        if (!(configuration instanceof MemoryYamlConfiguration)) return;
-        this.configuration = (MemoryYamlConfiguration) configuration;
-    }
-
-    @Override
-    public MemoryYamlConfiguration getConfiguration() {
-        if (configuration == null) {
-            configuration = new MemoryYamlConfiguration(buildYaml());
-        }
-        return configuration;
-    }
-
-
-    @Override
     public String[] getExtensions() {
         return new String[]{".yml", ".yaml"};
+    }
+
+    @Override
+    protected MemoryYamlConfiguration newConfiguration() {
+        return new MemoryYamlConfiguration(buildYaml());
     }
 
     public YamlConfiguration(File file, Map<String, Object> map) {
@@ -111,6 +91,7 @@ public class YamlConfiguration extends FileConfiguration {
     public static YamlConfiguration fromArchive(File archive, File inside, File to) {
         return new YamlConfiguration(archive, inside, to);
     }
+
 
     @Override
     public YamlOptions options() {

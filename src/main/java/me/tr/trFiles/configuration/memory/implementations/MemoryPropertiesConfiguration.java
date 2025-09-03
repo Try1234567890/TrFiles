@@ -4,10 +4,7 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import me.tr.trFiles.Validator;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 
@@ -33,6 +30,11 @@ public class MemoryPropertiesConfiguration extends MemoryConfiguration {
         this.propertiesMapper = new JavaPropsMapper();
     }
 
+    public MemoryPropertiesConfiguration(File file) {
+        super(file);
+        this.propertiesMapper = new JavaPropsMapper();
+    }
+
     public MemoryPropertiesConfiguration(JavaPropsMapper propertiesMapper) {
         this.propertiesMapper = propertiesMapper;
     }
@@ -49,6 +51,11 @@ public class MemoryPropertiesConfiguration extends MemoryConfiguration {
 
     public MemoryPropertiesConfiguration(Map<String, Object> map, JavaPropsMapper propertiesMapper) {
         super(map);
+        this.propertiesMapper = propertiesMapper;
+    }
+
+    public MemoryPropertiesConfiguration(File file, JavaPropsMapper propertiesMapper) {
+        super(file);
         this.propertiesMapper = propertiesMapper;
     }
 

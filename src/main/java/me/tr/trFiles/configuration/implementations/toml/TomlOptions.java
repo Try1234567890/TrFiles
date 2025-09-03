@@ -1,7 +1,6 @@
 package me.tr.trFiles.configuration.implementations.toml;
 
 import me.tr.trFiles.configuration.implementations.FileOptions;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
 public class TomlOptions extends FileOptions {
     private boolean useAnnotations = true;

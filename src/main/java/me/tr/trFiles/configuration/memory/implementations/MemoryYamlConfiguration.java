@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Map;
@@ -32,6 +33,11 @@ public class MemoryYamlConfiguration extends MemoryConfiguration {
         this.yaml = new Yaml();
     }
 
+    public MemoryYamlConfiguration(File file) {
+        super(file);
+        this.yaml = new Yaml();
+    }
+
     public MemoryYamlConfiguration(@NotNull Yaml yaml) {
         this.yaml = yaml;
     }
@@ -51,6 +57,12 @@ public class MemoryYamlConfiguration extends MemoryConfiguration {
         this.yaml = yaml;
     }
 
+    public MemoryYamlConfiguration(File file, @NotNull Yaml yaml) {
+        super(file);
+        this.yaml = yaml;
+    }
+
+
     @Override
     public void loadFromString(String contents) {
         if (Validator.isNull(contents, null)) contents = getEmptyConfig();
@@ -61,7 +73,6 @@ public class MemoryYamlConfiguration extends MemoryConfiguration {
             throw new RuntimeException("An error occurs while loading YAML configuration. ", e);
         }
         convertMapsToSections(input, this);
-        System.out.println("MemoryYamlConfiguration#loadFromString() " + getClass().getName() + "@" + Integer.toHexString(hashCode()));
     }
 
     @Override

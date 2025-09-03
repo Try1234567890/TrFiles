@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import me.tr.trFiles.Validator;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Map;
@@ -22,13 +23,18 @@ public class MemoryJsonConfiguration extends MemoryConfiguration {
     }
 
     public MemoryJsonConfiguration(InputStream is) {
-        super(is);
         this.gson = new Gson();
+        super.from(is);
     }
 
     public MemoryJsonConfiguration(Map<String, Object> map) {
-        super(map);
         this.gson = new Gson();
+        super.from(map);
+    }
+
+    public MemoryJsonConfiguration(File file) {
+        this.gson = new Gson();
+        super.from(file);
     }
 
     public MemoryJsonConfiguration(Gson gson) {
@@ -36,18 +42,23 @@ public class MemoryJsonConfiguration extends MemoryConfiguration {
     }
 
     public MemoryJsonConfiguration(Reader reader, Gson gson) {
-        super(reader);
         this.gson = gson;
+        super.from(reader);
     }
 
     public MemoryJsonConfiguration(InputStream is, Gson gson) {
-        super(is);
         this.gson = gson;
+        super.from(is);
     }
 
     public MemoryJsonConfiguration(Map<String, Object> map, Gson gson) {
-        super(map);
         this.gson = gson;
+        super.from(map);
+    }
+
+    public MemoryJsonConfiguration(File file, Gson gson) {
+        this.gson = gson;
+        super.from(file);
     }
 
     @Override

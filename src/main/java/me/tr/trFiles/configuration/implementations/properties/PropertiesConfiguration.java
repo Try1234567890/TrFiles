@@ -15,61 +15,56 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class PropertiesConfiguration extends FileConfiguration {
-    private MemoryPropertiesConfiguration configuration;
     private PropertiesOptions options;
-
-    @Override
-    public void loadFromString(String contents) {
-        this.configuration = new MemoryPropertiesConfiguration(buildProperties());
-        configuration.loadFromString(contents);
-    }
-
-    @Override
-    public void setConfiguration(MemoryConfiguration configuration) {
-        if (!(configuration instanceof MemoryPropertiesConfiguration)) return;
-        this.configuration = (MemoryPropertiesConfiguration) configuration;
-    }
-
-    @Override
-    public MemoryPropertiesConfiguration getConfiguration() {
-        return configuration;
-    }
 
     @Override
     public String[] getExtensions() {
         return new String[]{".properties"};
     }
 
+    @Override
+    protected MemoryPropertiesConfiguration newConfiguration() {
+        return new MemoryPropertiesConfiguration(buildProperties());
+    }
+
     public PropertiesConfiguration(File file, Map<String, Object> map) {
         super(file, map);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(File file, Reader reader) {
         super(file, reader);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(File file, InputStream is) {
         super(file, is);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(File file) {
         super(file);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(Path path) {
         super(path);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(String path) {
         super(path);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(ZipFile archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public PropertiesConfiguration(File archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
     }
 
     public static PropertiesConfiguration fromMap(File file, Map<String, Object> map) {

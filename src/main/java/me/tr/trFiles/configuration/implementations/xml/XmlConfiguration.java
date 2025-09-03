@@ -16,62 +16,57 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class XmlConfiguration extends FileConfiguration {
-    private MemoryXmlConfiguration configuration;
     private XmlOptions options;
     private String rootName;
-
-    @Override
-    public void loadFromString(String contents) {
-        this.configuration = new MemoryXmlConfiguration(buildXml());
-        configuration.loadFromString(contents);
-    }
-
-    @Override
-    public void setConfiguration(MemoryConfiguration configuration) {
-        if (!(configuration instanceof MemoryXmlConfiguration)) return;
-        this.configuration = (MemoryXmlConfiguration) configuration;
-    }
-
-    @Override
-    public MemoryXmlConfiguration getConfiguration() {
-        return configuration;
-    }
 
     @Override
     public String[] getExtensions() {
         return new String[]{".xml"};
     }
 
+    @Override
+    protected MemoryXmlConfiguration newConfiguration() {
+        return new MemoryXmlConfiguration(buildXml());
+    }
+
     public XmlConfiguration(File file, Map<String, Object> map) {
         super(file, map);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(File file, Reader reader) {
         super(file, reader);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(File file, InputStream is) {
         super(file, is);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(File file) {
         super(file);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(Path path) {
         super(path);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(String path) {
         super(path);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(ZipFile archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public XmlConfiguration(File archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryXmlConfiguration(getFile(), buildXml()));
     }
 
     public static XmlConfiguration fromMap(File file, Map<String, Object> map) {

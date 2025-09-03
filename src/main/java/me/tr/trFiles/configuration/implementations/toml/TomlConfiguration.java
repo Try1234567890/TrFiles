@@ -15,61 +15,57 @@ import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class TomlConfiguration extends FileConfiguration {
-    private MemoryTomlConfiguration configuration;
     private TomlOptions options;
 
-    @Override
-    public void loadFromString(String contents) {
-        this.configuration = new MemoryTomlConfiguration(buildToml());
-        configuration.loadFromString(contents);
-    }
-
-    @Override
-    public void setConfiguration(MemoryConfiguration configuration) {
-        if (!(configuration instanceof MemoryTomlConfiguration)) return;
-        this.configuration = (MemoryTomlConfiguration) configuration;
-    }
-
-    @Override
-    public MemoryTomlConfiguration getConfiguration() {
-        return configuration;
-    }
 
     @Override
     public String[] getExtensions() {
         return new String[]{".toml"};
     }
 
+    @Override
+    protected MemoryTomlConfiguration newConfiguration() {
+        return new MemoryTomlConfiguration(buildToml());
+    }
+
     public TomlConfiguration(File file, Map<String, Object> map) {
         super(file, map);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(File file, Reader reader) {
         super(file, reader);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(File file, InputStream is) {
         super(file, is);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(File file) {
         super(file);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(Path path) {
         super(path);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(String path) {
         super(path);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(ZipFile archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public TomlConfiguration(File archive, File inside, File to) {
         super(archive, inside, to);
+        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
     }
 
     public static TomlConfiguration fromMap(File file, Map<String, Object> map) {

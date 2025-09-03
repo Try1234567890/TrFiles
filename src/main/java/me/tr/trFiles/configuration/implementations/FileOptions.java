@@ -1,16 +1,14 @@
 package me.tr.trFiles.configuration.implementations;
 
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.configuration.memory.MemoryOptions;
-
-public class FileOptions extends MemoryOptions {
+public class FileOptions {
+    private FileConfiguration configuration;
     private String commentPrefix;
     private String commentSuffix;
     private String header;
     private String footer;
 
     protected FileOptions(FileConfiguration configuration, String commentPrefix, String commentSuffix) {
-        super(configuration);
+        setConfiguration(configuration);
         setCommentPrefix(commentPrefix);
         setCommentSuffix(commentSuffix);
         setHeader("");
@@ -18,11 +16,19 @@ public class FileOptions extends MemoryOptions {
     }
 
     protected FileOptions(FileConfiguration configuration) {
-        super(configuration);
+        setConfiguration(configuration);
         setCommentPrefix("");
         setCommentSuffix("");
         setHeader("");
         setFooter("");
+    }
+
+    public FileConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(FileConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     public String getCommentPrefix() {
@@ -56,4 +62,5 @@ public class FileOptions extends MemoryOptions {
     public void setFooter(String footer) {
         this.footer = footer;
     }
+
 }
