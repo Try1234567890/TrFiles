@@ -1,5 +1,7 @@
 package me.tr.trFiles.configuration;
 
+import me.tr.trFiles.configuration.memory.DataType;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -189,9 +191,8 @@ public interface Section {
 
     boolean isSection(String path);
 
-    void addDefault(String path, Object value);
-
-    Object getDefault(String path);
-
     Map<String, Object> asMap();
+
+    DataType getType(String path);
+
 }

@@ -4,75 +4,126 @@ import me.tr.trFiles.Validator;
 import me.tr.trFiles.configuration.management.FileUtility;
 import me.tr.trFiles.images.helper.Format;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 
 public class ImageUtility {
     private ImageUtility() {
     }
 
     public static boolean isImage(InputStream is) {
-        return isPNG(is) ||
-                isJPG(is) ||
-                isGIF(is) ||
-                isBMP(is) ||
-                isTIFF(is) ||
-                isWEBP(is) ||
-                isICO(is) ||
-                isSVG(is) ||
-                isEPS(is) ||
-                isPDF(is);
+        try (BufferedInputStream bis = is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is)) {
+            bis.mark(Integer.MAX_VALUE);
+            return isGIF(bis, false) ||
+                    isPNG(bis, false) ||
+                    isJPG(bis, false) ||
+                    isBMP(bis, false) ||
+                    isTIFF(bis, false) ||
+                    isWEBP(bis, false) ||
+                    isICO(bis, false) ||
+                    isSVG(bis, false) ||
+                    isEPS(bis, false) ||
+                    isPDF(bis, false);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurs while closing the input stream.", e);
+        }
     }
 
     public static boolean isPNG(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.PNG.getMagicNumbers());
+        return isPNG(is, true);
     }
 
 
     public static boolean isJPG(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.JPG.getMagicNumbers());
+        return isJPG(is, true);
     }
 
 
     public static boolean isGIF(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.GIF.getMagicNumbers());
+        return isGIF(is, true);
     }
 
 
     public static boolean isBMP(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.BMP.getMagicNumbers());
+        return isBMP(is, true);
     }
 
 
     public static boolean isTIFF(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.TIFF.getMagicNumbers());
+        return isTIFF(is, true);
     }
 
 
     public static boolean isWEBP(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.WEBP.getMagicNumbers());
+        return isWEBP(is, true);
     }
 
 
     public static boolean isICO(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.ICO.getMagicNumbers());
+        return isICO(is, true);
     }
 
 
     public static boolean isSVG(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.SVG.getMagicNumbers());
+        return isSVG(is, true);
     }
 
 
     public static boolean isEPS(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.EPS.getMagicNumbers());
+        return isEPS(is, true);
     }
 
 
     public static boolean isPDF(InputStream is) {
-        return FileUtility.hasMagicNumber(is, Format.PDF.getMagicNumbers());
+        return isPDF(is, true);
+    }
+
+    public static boolean isPNG(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.PNG.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isJPG(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.JPG.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isGIF(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.GIF.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isBMP(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.BMP.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isTIFF(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.TIFF.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isWEBP(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.WEBP.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isICO(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.ICO.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isSVG(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.SVG.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isEPS(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.EPS.getMagicNumbers(), close);
+    }
+
+
+    public static boolean isPDF(InputStream is, boolean close) {
+        return FileUtility.hasMagicNumber(is, Format.PDF.getMagicNumbers(), close);
     }
 
     public static boolean isImage(File file) {

@@ -1,10 +1,15 @@
 package me.tr.trFiles.configuration.implementations;
 
+import me.tr.trFiles.ReflectionUtility;
 import me.tr.trFiles.Validator;
+import me.tr.trFiles.configuration.ConfigRegistry;
 import me.tr.trFiles.configuration.Configuration;
 import me.tr.trFiles.configuration.Section;
+import me.tr.trFiles.configuration.management.FileManager;
 import me.tr.trFiles.configuration.management.FileUtility;
+import me.tr.trFiles.configuration.memory.DataType;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -20,62 +25,192 @@ public abstract class FileConfiguration implements Section {
     private File file;
     private FileOptions options;
 
-    protected FileConfiguration(File file, MemoryConfiguration configuration) {
-        this.configuration = configuration;
+    protected FileConfiguration() {
+    }
+
+    public static FileConfiguration emptyConfig(File file) {
+        FileConfiguration foundConfig = getConfigurationOf(file);
+        if (foundConfig == null) {
+            throw new UnknownImplementationException(file);
+        }
+        return foundConfig;
+    }
+
+    public static FileConfiguration fromReader(File file, Reader reader) {
+        FileConfiguration config = getConfigurationOf(file);
+        if (config == null) return null;
+        return config.from(file, reader);
+    }
+
+
+    public static FileConfiguration fromInputStream(File file, InputStream is) {
+        FileConfiguration config = getConfigurationOf(file);
+        if (config == null) return null;
+        return config.from(file, is);
+    }
+
+    public static FileConfiguration fromFile(File file) {
+        FileConfiguration config = getConfigurationOf(file);
+        if (config == null) return null;
+        return config.from(file);
+    }
+
+    public static FileConfiguration fromPath(Path path) {
+        FileConfiguration config = getConfigurationOf(path);
+        if (config == null) return null;
+        return config.from(path);
+    }
+
+    public static FileConfiguration fromString(String path) {
+        FileConfiguration config = getConfigurationOf(path);
+        if (config == null) return null;
+        return config.from(path);
+    }
+
+    public static FileConfiguration fromContent(File file, String content) {
+        FileConfiguration config = getConfigurationOf(file);
+        if (config == null) return null;
+        return config.fromC(file, content);
+    }
+
+    public static FileConfiguration fromArchive(ZipFile archive, File inside, File to) {
+        FileConfiguration config = getConfigurationOf(to);
+        if (config == null) return null;
+        return config.from(archive, inside, to);
+    }
+
+    public static FileConfiguration fromBytes(File file, byte[] bytes) {
+        FileConfiguration config = getConfigurationOf(file);
+        if (config == null) return null;
+        return config.from(file, bytes);
+    }
+
+    private static @Nullable FileConfiguration getConfigurationOf(File file) {
+        FileConfiguration config = ConfigRegistry.getConfigByFile(file);
+        if (config == null) {
+            throw new UnknownImplementationException(file);
+        }
+        return config.newConfiguration(file);
+    }
+
+
+    private static @Nullable FileConfiguration getConfigurationOf(Path path) {
+        return getConfigurationOf(path.toFile());
+    }
+
+    private static @Nullable FileConfiguration getConfigurationOf(String path) {
+        return getConfigurationOf(FileUtility.getFileFromString(path));
+    }
+
+
+    public static FileConfiguration fromMemory(File file, MemoryConfiguration memory) {
+        return memory.toFileConfiguration(file);
+    }
+
+    public static FileConfiguration emptyConfig(File file, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(file, "The provided reference instance of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided clazz of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).empty(file);
+    }
+
+    public static FileConfiguration fromReader(File file, Reader reader, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(reader, "The provided reader of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(file, reader);
+    }
+
+
+    public static FileConfiguration fromInputStream(File file, InputStream is, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(file, "The provided map of MemoryConfiguration is null.");
+        Validator.isNull(is, "The provided input stream of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(file, is);
+    }
+
+    public static FileConfiguration fromMap(File file, Map<String, Object> map, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(file, "The provided file of MemoryConfiguration is null.");
+        Validator.isNull(map, "The provided map of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(file, map);
+    }
+
+    public static FileConfiguration fromFile(File file, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(file, "The provided file of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(file);
+    }
+
+    public static FileConfiguration fromPath(Path path, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(path, "The provided path of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(path);
+    }
+
+    public static FileConfiguration fromString(String path, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(path, "The provided path of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(path);
+    }
+
+    public static FileConfiguration fromContent(File file, String content, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(file, "The provided file of MemoryConfiguration is null.");
+        Validator.isNull(content, "The provided content of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).fromC(file, content);
+    }
+
+    public static FileConfiguration fromArchive(ZipFile archive, File inside, File to, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(archive, "The provided archive of MemoryConfiguration is null.");
+        Validator.isNull(inside, "The provided inside file of MemoryConfiguration is null.");
+        Validator.isNull(to, "The provided destination file of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(archive, inside, to);
+    }
+
+    public static FileConfiguration fromBytes(File file, byte[] bytes, Class<? extends FileConfiguration> clazz) {
+        Validator.isNull(file, "The provided file of MemoryConfiguration is null.");
+        Validator.isNull(bytes, "The provided bytes of MemoryConfiguration is null.");
+        Validator.isNull(clazz, "The provided reference class of MemoryConfiguration is null.");
+        return ReflectionUtility.createInstance(clazz).from(file, bytes);
+    }
+
+    public FileConfiguration empty(File file) {
+        Validator.isNull(isValid(file), "The provided file of MemoryConfiguration is null.");
         this.file = file;
+        this.configuration = getConfiguration();
+        return this;
     }
 
-    public FileConfiguration(File file, Map<String, Object> map) {
-        from(file, map);
+    public FileConfiguration from(FileConfiguration configuration) {
+        Validator.isNull(configuration, "The provided configuration is null.");
+        this.configuration = configuration.getConfiguration();
+        this.file = configuration.getFile();
+        return this;
     }
 
-    public FileConfiguration(File file, Reader reader) {
-        from(file, reader);
-    }
-
-    public FileConfiguration(File file, InputStream is) {
-        from(file, is);
-    }
-
-    public FileConfiguration(File file) {
-        from(file);
-    }
-
-    public FileConfiguration(Path path) {
-        from(path);
-    }
-
-    public FileConfiguration(String path) {
-        from(path);
-    }
-
-    public FileConfiguration(ZipFile archive, File inside, File to) {
-        from(archive, inside, to);
-    }
-
-    public FileConfiguration(File archive, File inside, File to) {
-        from(archive, inside, to);
-    }
-
-    protected FileConfiguration from(File file, MemoryConfiguration configuration) {
+    public FileConfiguration from(File file, MemoryConfiguration configuration) {
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
         this.configuration = configuration;
         this.file = file;
         return this;
     }
 
     public FileConfiguration from(File file, Map<String, Object> map) {
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
         getConfiguration().from(map);
         setFile(file);
         return this;
     }
 
     public FileConfiguration from(File file, Reader reader) {
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
         getConfiguration().from(reader);
         setFile(file);
         return this;
     }
 
     public FileConfiguration from(File file, InputStream is) {
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
         getConfiguration().from(is);
         setFile(file);
         return this;
@@ -83,7 +218,7 @@ public abstract class FileConfiguration implements Section {
 
     public FileConfiguration from(File file) {
         Validator.isNull(file, "The provided file is null.");
-        Validator.checkIf(file.isFile(), "The saving file at " + file.getPath() + " not exists or is not a file.");
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
         Validator.checkIf(file.canRead(), "Cannot read the provided file at " + file.getPath());
         Validator.checkIf(file.canWrite(), "Cannot write the provided file at " + file.getPath());
 
@@ -109,9 +244,9 @@ public abstract class FileConfiguration implements Section {
         Validator.isNull(inside, "The inside archive file cannot be null.");
         Validator.isNull(to, "The saving file cannot be null.");
 
+        Validator.checkIf(isValid(to), "The provided file " + to.getPath() + " not exists or has not the expected implementation or is not supported.");
         Validator.checkIf(to.canRead(), "Cannot read the saving file at " + to.getPath());
         Validator.checkIf(to.canWrite(), "Cannot write the saving file at " + to.getPath());
-        Validator.checkIf(to.isFile(), "The saving file at " + to.getPath() + " not exists or is not a file.");
 
         Validator.checkIf(FileUtility.getExtension(inside).equalsIgnoreCase(FileUtility.getExtension(to)), "Inside archive file and saving file implementations not corresponds.");
         try (archive) {
@@ -129,6 +264,7 @@ public abstract class FileConfiguration implements Section {
         Validator.isNull(archiveFile, "The archive cannot be null.");
         Validator.isNull(inside, "The inside archive file cannot be null.");
         Validator.isNull(to, "The saving file cannot be null.");
+        Validator.checkIf(isValid(to), "The provided file " + to.getPath() + " not exists or has not the expected implementation or is not supported.");
 
         Validator.checkIf(archiveFile.canRead(), "Cannot read the archive file.");
         Validator.checkIf(FileUtility.isZip(archiveFile), "The provided archive file at" + archiveFile.getPath() + " not exists or is not a archive.");
@@ -138,6 +274,26 @@ public abstract class FileConfiguration implements Section {
         } catch (IOException e) {
             throw new RuntimeException("An error occurs while loading a configuration from provided archive", e);
         }
+    }
+
+    public FileConfiguration fromC(File file, String content) {
+        Validator.isNull(file, "The provided file cannot be null.");
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
+        Validator.checkIf(file.canRead(), "Cannot read the archive file.");
+        Validator.isNull(content, "The provided content cannot be null.");
+
+        setFile(file);
+        getConfiguration().loadFromString(content);
+
+        return this;
+    }
+
+    public FileConfiguration from(File file, byte[] bytes) {
+        Validator.isNull(file, "The provided file cannot be null.");
+        Validator.checkIf(isValid(file), "The provided file " + file.getPath() + " not exists or has not the expected implementation or is not supported.");
+        Validator.checkIf(file.canRead(), "Cannot read the archive file.");
+        Validator.isNull(bytes, "The provided bytes cannot be null.");
+        return from(file, new ByteArrayInputStream(bytes));
     }
 
     public void save() {
@@ -165,9 +321,18 @@ public abstract class FileConfiguration implements Section {
     }
 
     public FileConfiguration convert(FileConfiguration to) {
-        getConfiguration().convert(getFile(), to.getConfiguration());
-        to.setFile(getFile());
-        return to;
+        Validator.isNull(to, "Target configuration cannot be null.");
+        File newFile = new File(getFile().getParentFile(), FileUtility.getFileNameWithoutExtension(getFile()) + to.getExtensions()[0]);
+        FileConfiguration newConfiguration = to.newConfiguration(newFile);
+        FileManager.create(newFile);
+        MemoryConfiguration newMemory = to.newMemoryConfiguration().copy(getConfiguration());
+        newConfiguration.from(newFile, newMemory);
+        return newConfiguration;
+    }
+
+
+    public FileConfiguration convert(Class<? extends FileConfiguration> to) {
+        return convert(ReflectionUtility.createInstance(to));
     }
 
 
@@ -194,6 +359,11 @@ public abstract class FileConfiguration implements Section {
         return options;
     }
 
+    public FileConfiguration options(FileOptions options) {
+        this.options = options;
+        return this;
+    }
+
     public File getFile() {
         return file;
     }
@@ -202,14 +372,9 @@ public abstract class FileConfiguration implements Section {
         this.file = file;
     }
 
-
-    public String[] getExtensions() {
-        return new String[]{};
-    }
-
     public MemoryConfiguration getConfiguration() {
         if (configuration == null) {
-            configuration = newConfiguration();
+            configuration = newMemoryConfiguration();
         }
         return configuration;
     }
@@ -219,30 +384,46 @@ public abstract class FileConfiguration implements Section {
     }
 
     private boolean isValid(File file) {
+        Validator.isNull(file, "The provided file cannot be null.");
+        if (!Validator.checkIf(file.isFile(), (String) null)) return false;
         for (String extension : getExtensions()) {
-            if (FileUtility.getExtension(file).equalsIgnoreCase(extension)) {
+            if (FileUtility.getExtension(file).equalsIgnoreCase(extension)
+                    || FileUtility.getExtensionWithPoint(file).equalsIgnoreCase(extension)) {
                 return true;
             }
         }
         return false;
     }
 
-    protected abstract MemoryConfiguration newConfiguration();
+    public abstract FileConfiguration newConfiguration(File file);
 
+    public abstract MemoryConfiguration newMemoryConfiguration();
 
+    /**
+     * Retrieve the valid extensions that the
+     * file of the current FileConfiguration
+     * can have.
+     *
+     * @return A String array contains all valid extensions.
+     */
+    public abstract String[] getExtensions();
 
+    /**
+     * Registers a new {@link FileConfiguration} with the {@link ConfigRegistry}.
+     * <p>
+     * A {@link FileConfiguration} must be registered before it can be used.
+     * Attempting to access an unregistered configuration will result in an error.
+     */
+    public abstract void register();
 
+    public Class<? extends MemoryConfiguration> getMemoryReference() {
+        return getConfiguration().getClass();
+    }
 
-
-
-
-
-
-
-
-
-
-
+    @Override
+    public String toString() {
+        return "File: " + file + ": " + configuration;
+    }
 
     @Override
     public List<String> getKeys(boolean recursive) {
@@ -695,13 +876,8 @@ public abstract class FileConfiguration implements Section {
     }
 
     @Override
-    public void addDefault(String path, Object value) {
-        getConfiguration().addDefault(path, value);
-    }
-
-    @Override
-    public Object getDefault(String path) {
-        return getConfiguration().getDefault(path);
+    public DataType getType(String path) {
+        return getConfiguration().getType(path);
     }
 
     @Override

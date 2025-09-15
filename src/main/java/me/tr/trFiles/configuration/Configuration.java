@@ -1,5 +1,8 @@
 package me.tr.trFiles.configuration;
 
+import me.tr.trFiles.configuration.memory.MemoryConfiguration;
+
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -7,16 +10,21 @@ import java.util.Map;
  */
 public interface Configuration extends Section {
 
-    void addDefault(String path, Object value);
+    void save(File file);
 
-    void addDefaults(Map<String, Object> defaults);
+    void reload(File file);
 
-    void addDefaults(Configuration defaults);
+    void move(File file, File to);
 
-    void setDefaults(Configuration defaults);
+    void copy(File file, File to);
 
-    Configuration getDefaults();
+    void delete(File file);
+
+    void zip(File zip, File file);
+
+    MemoryConfiguration convert(MemoryConfiguration to);
 
     ConfigurationOptions options();
+
 
 }

@@ -3,20 +3,20 @@ package me.tr.trFiles.configuration.implementations.toml;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
+import me.tr.trFiles.configuration.ConfigRegistry;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.configuration.memory.implementations.MemoryTomlConfiguration;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class TomlConfiguration extends FileConfiguration {
     private TomlOptions options;
 
+    private TomlConfiguration() {}
 
     @Override
     public String[] getExtensions() {
@@ -24,80 +24,74 @@ public class TomlConfiguration extends FileConfiguration {
     }
 
     @Override
-    protected MemoryTomlConfiguration newConfiguration() {
-        return new MemoryTomlConfiguration(buildToml());
+    public TomlConfiguration newConfiguration(File file) {
+        return TomlConfiguration.emptyToml(file);
     }
 
-    public TomlConfiguration(File file, Map<String, Object> map) {
-        super(file, map);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
+    @Override
+    public MemoryTomlConfiguration newMemoryConfiguration() {
+        return MemoryTomlConfiguration.emptyToml(buildToml());
     }
 
-    public TomlConfiguration(File file, Reader reader) {
-        super(file, reader);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
+
+    @Override
+    public void register() {
+        ConfigRegistry.register(getClass());
     }
 
-    public TomlConfiguration(File file, InputStream is) {
-        super(file, is);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
+    @Override
+    public MemoryTomlConfiguration getConfiguration() {
+        return (MemoryTomlConfiguration) super.getConfiguration();
     }
 
-    public TomlConfiguration(File file) {
-        super(file);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
-    }
-
-    public TomlConfiguration(Path path) {
-        super(path);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
-    }
-
-    public TomlConfiguration(String path) {
-        super(path);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
-    }
-
-    public TomlConfiguration(ZipFile archive, File inside, File to) {
-        super(archive, inside, to);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
-    }
-
-    public TomlConfiguration(File archive, File inside, File to) {
-        super(archive, inside, to);
-        setConfiguration(new MemoryTomlConfiguration(getFile(), buildToml()));
-    }
-
-    public static TomlConfiguration fromMap(File file, Map<String, Object> map) {
-        return new TomlConfiguration(file, map);
+    public static TomlConfiguration emptyToml(File file) {
+        return (TomlConfiguration) emptyConfig(file, TomlConfiguration.class);
     }
 
     public static TomlConfiguration fromReader(File file, Reader reader) {
-        return new TomlConfiguration(file, reader);
+        return (TomlConfiguration) fromReader(file, reader, TomlConfiguration.class);
     }
 
+
     public static TomlConfiguration fromInputStream(File file, InputStream is) {
-        return new TomlConfiguration(file, is);
+        return (TomlConfiguration) fromInputStream(file, is, TomlConfiguration.class);
     }
 
     public static TomlConfiguration fromFile(File file) {
-        return new TomlConfiguration(file);
+        return (TomlConfiguration) fromFile(file, TomlConfiguration.class);
     }
 
     public static TomlConfiguration fromPath(Path path) {
-        return new TomlConfiguration(path);
+        return (TomlConfiguration) fromPath(path, TomlConfiguration.class);
     }
 
     public static TomlConfiguration fromString(String path) {
-        return new TomlConfiguration(path);
+        return (TomlConfiguration) fromString(path, TomlConfiguration.class);
+    }
+
+    public static TomlConfiguration fromContent(File file, String content) {
+        return (TomlConfiguration) fromContent(file, content, TomlConfiguration.class);
     }
 
     public static TomlConfiguration fromArchive(ZipFile archive, File inside, File to) {
-        return new TomlConfiguration(archive, inside, to);
+        return (TomlConfiguration) fromArchive(archive, inside, to, TomlConfiguration.class);
     }
 
-    public static TomlConfiguration fromArchive(File archive, File inside, File to) {
-        return new TomlConfiguration(archive, inside, to);
+    public static TomlConfiguration fromBytes(File file, byte[] bytes) {
+        return (TomlConfiguration) fromBytes(file, bytes, TomlConfiguration.class);
+    }
+
+
+    @Override
+    public TomlOptions options() {
+        if (options == null) {
+            options = new TomlOptions(this);
+        }
+        return options;
+    }
+
+    public void options(TomlOptions options) {
+        this.options = options;
     }
 
 
@@ -118,6 +112,7 @@ public class TomlConfiguration extends FileConfiguration {
                 .configure(MapperFeature.ALLOW_VOID_VALUED_PROPERTIES, options().isAllowVoidValuedProperties())
                 .configure(MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS, options().isCanOverrideAccessModifiers())
                 .configure(MapperFeature.OVERRIDE_PUBLIC_ACCESS_MODIFIERS, options().isOverridePublicAccessModifiers())
+                .configure(MapperFeature.INVERSE_READ_WRITE_ACCESS, options().isInverseReadWriteAccess())
                 .configure(MapperFeature.USE_STATIC_TYPING, options().isUseStaticTyping())
                 .configure(MapperFeature.USE_BASE_TYPE_AS_DEFAULT_IMPL, options().isUseBaseTypeAsDefaultImpl())
                 .configure(MapperFeature.INFER_BUILDER_TYPE_BINDINGS, options().isInferBuilderTypeBindings())
@@ -139,21 +134,30 @@ public class TomlConfiguration extends FileConfiguration {
                 .configure(MapperFeature.BLOCK_UNSAFE_POLYMORPHIC_BASE_TYPES, options().isBlockUnsafePolymorphicBaseTypes())
                 .configure(MapperFeature.APPLY_DEFAULT_VALUES, options().isApplyDefaultValues())
                 .configure(MapperFeature.REQUIRE_HANDLERS_FOR_JAVA8_OPTIONALS, options().isRequireHandlersForJava8Optionals())
+                .configure(SerializationFeature.WRAP_ROOT_VALUE, options().isWrapRootValue())
                 .configure(SerializationFeature.INDENT_OUTPUT, options().isIndentOutput())
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, options().isFailOnEmptyBeans())
                 .configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, options().isFailOnSelfReferences())
                 .configure(SerializationFeature.WRAP_EXCEPTIONS, options().isWrapExceptions())
-                .configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, options().isWriteSelfReferencesAsNull())
                 .configure(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS, options().isFailOnUnwrappedTypeIdentifiers())
+                .configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, options().isWriteSelfReferencesAsNull())
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, options().isCloseCloseable())
+                .configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, options().isFlushAfterWriteValue())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, options().isWriteDatesAsTimestamps())
+                .configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, options().isWriteDateKeysAsTimestamps())
+                .configure(SerializationFeature.WRITE_DATES_WITH_ZONE_ID, options().isWriteDatesWithZoneId())
+                .configure(SerializationFeature.WRITE_DATES_WITH_CONTEXT_TIME_ZONE, options().isWriteDatesWithContextTimeZone())
+                .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, options().isWriteDurationsAsTimestamps())
+                .configure(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS, options().isWriteCharArraysAsJsonArrays())
+                .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, options().isWriteEnumsUsingToString())
+                .configure(SerializationFeature.WRITE_ENUMS_USING_INDEX, options().isWriteEnumsUsingIndex())
+                .configure(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX, options().isWriteEnumKeysUsingIndex())
+                .configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, options().isWriteSingleElemArraysUnwrapped())
+                .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, options().isWriteDateTimestampsAsNanoseconds())
+                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, options().isOrderMapEntriesByKeys())
+                .configure(SerializationFeature.FAIL_ON_ORDER_MAP_BY_INCOMPARABLE_KEY, options().isFailOnOrderMapByIncomparableKey())
+                .configure(SerializationFeature.EAGER_SERIALIZER_FETCH, options().isEagerSerializerFetch())
+                .configure(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID, options().isUseEqualityForObjectId())
                 .build();
-    }
-
-
-    @Override
-    public TomlOptions options() {
-        if (options == null) {
-            options = new TomlOptions(this);
-        }
-        return options;
     }
 }

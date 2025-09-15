@@ -4,21 +4,35 @@ import me.tr.trFiles.Validator;
 
 public enum OSType {
 
-    WINDOWS(new char[]{'\\', '/', ':', '*', '?', '"', '<', '>', '|'}),
-    MAC(new char[]{'/'}),
-    LINUX(new char[]{'/'});
+    WINDOWS(new Character[]{':', '*', '?', '"', '<', '>', '|'}),
+    MAC(new Character[]{}),
+    LINUX(new Character[]{});
 
 
-    private final char[] illegalChars;
+    private final Character[] illegalChars;
 
-    OSType(char[] illegalChars) {
+    OSType(Character[] illegalChars) {
         this.illegalChars = illegalChars;
     }
 
-    public char[] getIllegalChars() {
+    /**
+     * Retrieve the illegal chars that folder/file name
+     * cannot contain based on current OS.
+     *
+     * @return the OS illegal chars in folder/file name.
+     */
+    public Character[] getIllegalChars() {
         return illegalChars;
     }
 
+    /**
+     * Retrieve the {@link OSType} from a string that contains it.
+     * <p>
+     * If the string param is {@code null}, the method will return {@code null}.
+     *
+     * @param str The string to parse the {@link OSType} from.
+     * @return The {@link OSType} parsed from the string if found, otherwise {@code null}.
+     */
     public static OSType fromString(String str) {
         if (Validator.isNull(str, null)) return null;
         for (OSType type : values()) {

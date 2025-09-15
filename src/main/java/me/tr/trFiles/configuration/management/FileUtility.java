@@ -2,10 +2,7 @@ package me.tr.trFiles.configuration.management;
 
 import me.tr.trFiles.os.OSUtility;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -89,7 +86,7 @@ public class FileUtility {
      * <blockquote><pre>
      * getFileNameWithoutExtension("config.yml") returns "config"
      * getFileNameWithoutExtension("messages.json") returns "messages"
-     * getFileNameWithoutExtension("graphics.") returns ""
+     * getFileNameWithoutExtension("graphics.") returns "graphics"
      * </pre></blockquote>
      *
      * @param name File name to get extension from.
@@ -135,10 +132,7 @@ public class FileUtility {
      * otherwise an empty string.
      */
     public static String getExtension(String fileName) {
-        if (!hasFileExtension(fileName))
-            return "";
-        int index = fileName.lastIndexOf('.');
-        return fileName.substring(index + 1);
+        return getExtensionWithPoint(fileName).substring(1);
     }
 
     /**
@@ -150,6 +144,33 @@ public class FileUtility {
      */
     public static String getExtension(File file) {
         return getExtension(file.getName());
+    }
+
+    /**
+     * Retrieve the extension file by splitting the provided
+     * fileName by {@code .} and getting last part.
+     *
+     * @param fileName File name to get extension.
+     * @return If a supported extension is found, return extension (with {@code .} at start),
+     * otherwise an empty string.
+     */
+    public static String getExtensionWithPoint(String fileName) {
+        if (!hasFileExtension(fileName))
+            return "";
+        int index = fileName.lastIndexOf('.');
+        return fileName.substring(index);
+    }
+
+    /**
+     * Retrieve the extension file by splitting the provided
+     * fileName by {@code .} and getting last part.
+     *
+     * @param fileName File name to get extension.
+     * @return If a supported extension is found, return extension (with {@code .} at start),
+     * otherwise an empty string.
+     */
+    public static String getExtensionWithPoint(File fileName) {
+        return getExtensionWithPoint(fileName.getName());
     }
 
     /**
@@ -173,7 +194,7 @@ public class FileUtility {
      * @see #getPathFromString(String)
      */
     public static File getFileFromString(String path) {
-        return new File(OSUtility.removeIllegalChars(path));
+        return new File(OSUtility.validatePath(path));
     }
 
     /**
@@ -196,7 +217,7 @@ public class FileUtility {
      * @return the formatted file path.
      */
     public static String getStringPathFromFile(File file) {
-        return OSUtility.removeIllegalChars(file.toString()).replace('\\', '/');
+        return OSUtility.validatePath(file.toString()).replace('\\', '/');
     }
 
     /**
@@ -209,6 +230,12 @@ public class FileUtility {
         return getStringPathFromFile(path.toFile());
     }
 
+    /**
+     * Checks if the provided file is a jar file.
+     *
+     * @param file The file to check for.
+     * @return {@code true} if the file is jar, otherwise {@code false}.
+     */
     public static boolean isJar(File file) {
         return file.isFile() && getExtension(file).equalsIgnoreCase("jar")
                 && (hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x03, 0x04})
@@ -216,6 +243,12 @@ public class FileUtility {
                 || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x07, 0x08}));
     }
 
+    /**
+     * Checks if the provided file is a zip file.
+     *
+     * @param file The file to check for.
+     * @return {@code true} if the file is zip, otherwise {@code false}.
+     */
     public static boolean isZip(File file) {
         return file.isFile() && getExtension(file).equalsIgnoreCase("zip")
                 && (hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x03, 0x04})
@@ -223,21 +256,107 @@ public class FileUtility {
                 || hasMagicNumber(file, new byte[]{0x50, 0x4B, 0x07, 0x08}));
     }
 
+    /**
+     * Checks if the header of the provided file equals to the provided magic numbers.
+     *
+     * @param file         The file to read the header from.
+     * @param magicNumbers The bytes to compare with.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
     public static boolean hasMagicNumber(File file, byte[] magicNumbers) {
+        return hasMagicNumber(file, magicNumbers, true);
+    }
+
+    /**
+     * Checks if the header of the provided input stream equals to the provided magic numbers.
+     *
+     * @param is           The input stream to read the header from.
+     * @param magicNumbers The bytes to compare with.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
+    public static boolean hasMagicNumber(InputStream is, byte[] magicNumbers) {
+        try {
+            return hasMagicNumber(new ByteArrayInputStream(is.readAllBytes()), magicNumbers, true);
+        } catch (IOException e) {
+            throw new RuntimeException("An error occurs while reading provided input stream", e);
+        }
+    }
+
+    /**
+     * Checks if the header of the provided input stream equals to the provided magic numbers.
+     *
+     * @param bytes        The bytes to read.
+     * @param magicNumbers The bytes to compare with.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
+    public static boolean hasMagicNumber(byte[] bytes, byte[] magicNumbers) {
+        return Arrays.equals(bytes, magicNumbers);
+    }
+
+    /**
+     * Checks if the header of the provided file equals to the provided magic numbers.
+     *
+     * @param file         The file to read the header from.
+     * @param magicNumbers The bytes to compare with.
+     * @param close        if {@code true} close the input stream, otherwise not close the new input stream created.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
+    public static boolean hasMagicNumber(File file, byte[] magicNumbers, boolean close) {
         try (InputStream is = new FileInputStream(file)) {
-            return hasMagicNumber(is, magicNumbers);
+            return hasMagicNumber(is, magicNumbers, close);
         } catch (IOException e) {
             throw new RuntimeException("An error occurs while reading file at " + file.getPath(), e);
         }
     }
 
+    /**
+     * Checks if the header of the provided input stream equals to the provided magic numbers.
+     *
+     * @param is           The input stream to read the header from.
+     * @param magicNumbers The bytes to compare with.
+     * @param close        if {@code true} close the input stream, otherwise not close the new input stream created.
+     * @return {@code true} if the header equals with the provided bytes.
+     */
+    public static boolean hasMagicNumber(InputStream is, byte[] magicNumbers, boolean close) {
+        return Arrays.equals(readHeader(is, magicNumbers.length, close), magicNumbers);
+    }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static boolean hasMagicNumber(InputStream is, byte[] magicNumbers) {
-        byte[] header = new byte[magicNumbers.length];
-        try (is) {
-            is.read(header);
-            return Arrays.equals(header, magicNumbers);
+    /**
+     * Read the bytes of the input stream.
+     *
+     * @param is    The input stream to read the bytes from.
+     * @param len   The len of bytes to read.
+     * @return Array of byte read.
+     */
+    public static byte[] readHeader(InputStream is, int len) {
+        return readHeader(is, len, true);
+    }
+
+    /**
+     * Read the bytes of the input stream.
+     *
+     * @param is    The input stream to read the bytes from.
+     * @param len   The len of bytes to read.
+     * @param close if {@code true} close the input stream, otherwise not close the new input stream created.
+     * @return Array of byte read.
+     */
+    public static byte[] readHeader(InputStream is, int len, boolean close) {
+        /*
+         * If the InputStream has already been read and supports mark/reset,
+         * attempt to reset the stream to avoid compromising the result.
+         */
+        if (is.markSupported()) {
+            try {
+                is.reset();
+            } catch (IOException ignored) {
+            }
+        }
+        try {
+            byte[] header = is.readNBytes(len);
+            if (close) {
+                is.close();
+            }
+            return header;
         } catch (IOException e) {
             throw new RuntimeException("An error occurs while reading provided input stream.", e);
         }

@@ -3,19 +3,21 @@ package me.tr.trFiles.configuration.implementations.properties;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import me.tr.trFiles.configuration.ConfigRegistry;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import me.tr.trFiles.configuration.memory.implementations.MemoryPropertiesConfiguration;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class PropertiesConfiguration extends FileConfiguration {
     private PropertiesOptions options;
+
+    private PropertiesConfiguration() {
+    }
 
     @Override
     public String[] getExtensions() {
@@ -23,80 +25,73 @@ public class PropertiesConfiguration extends FileConfiguration {
     }
 
     @Override
-    protected MemoryPropertiesConfiguration newConfiguration() {
-        return new MemoryPropertiesConfiguration(buildProperties());
+    public PropertiesConfiguration newConfiguration(File file) {
+        return PropertiesConfiguration.emptyProperties(file);
     }
 
-    public PropertiesConfiguration(File file, Map<String, Object> map) {
-        super(file, map);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
+    @Override
+    public MemoryPropertiesConfiguration newMemoryConfiguration() {
+        return MemoryPropertiesConfiguration.emptyProperties(buildProperties());
     }
 
-    public PropertiesConfiguration(File file, Reader reader) {
-        super(file, reader);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
+    @Override
+    public void register() {
+        ConfigRegistry.register(getClass());
     }
 
-    public PropertiesConfiguration(File file, InputStream is) {
-        super(file, is);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
+    @Override
+    public MemoryPropertiesConfiguration getConfiguration() {
+        return (MemoryPropertiesConfiguration) super.getConfiguration();
     }
-
-    public PropertiesConfiguration(File file) {
-        super(file);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
-    }
-
-    public PropertiesConfiguration(Path path) {
-        super(path);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
-    }
-
-    public PropertiesConfiguration(String path) {
-        super(path);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
-    }
-
-    public PropertiesConfiguration(ZipFile archive, File inside, File to) {
-        super(archive, inside, to);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
-    }
-
-    public PropertiesConfiguration(File archive, File inside, File to) {
-        super(archive, inside, to);
-        setConfiguration(new MemoryPropertiesConfiguration(getFile(), buildProperties()));
-    }
-
-    public static PropertiesConfiguration fromMap(File file, Map<String, Object> map) {
-        return new PropertiesConfiguration(file, map);
+    
+    public static PropertiesConfiguration emptyProperties(File file) {
+        return (PropertiesConfiguration) emptyConfig(file, PropertiesConfiguration.class);
     }
 
     public static PropertiesConfiguration fromReader(File file, Reader reader) {
-        return new PropertiesConfiguration(file, reader);
+        return (PropertiesConfiguration) fromReader(file, reader, PropertiesConfiguration.class);
     }
 
+
     public static PropertiesConfiguration fromInputStream(File file, InputStream is) {
-        return new PropertiesConfiguration(file, is);
+        return (PropertiesConfiguration) fromInputStream(file, is, PropertiesConfiguration.class);
     }
 
     public static PropertiesConfiguration fromFile(File file) {
-        return new PropertiesConfiguration(file);
+        return (PropertiesConfiguration) fromFile(file, PropertiesConfiguration.class);
     }
 
     public static PropertiesConfiguration fromPath(Path path) {
-        return new PropertiesConfiguration(path);
+        return (PropertiesConfiguration) fromPath(path, PropertiesConfiguration.class);
     }
 
     public static PropertiesConfiguration fromString(String path) {
-        return new PropertiesConfiguration(path);
+        return (PropertiesConfiguration) fromString(path, PropertiesConfiguration.class);
+    }
+
+    public static PropertiesConfiguration fromContent(File file, String content) {
+        return (PropertiesConfiguration) fromContent(file, content, PropertiesConfiguration.class);
     }
 
     public static PropertiesConfiguration fromArchive(ZipFile archive, File inside, File to) {
-        return new PropertiesConfiguration(archive, inside, to);
+        return (PropertiesConfiguration) fromArchive(archive, inside, to, PropertiesConfiguration.class);
     }
 
-    public static PropertiesConfiguration fromArchive(File archive, File inside, File to) {
-        return new PropertiesConfiguration(archive, inside, to);
+    public static PropertiesConfiguration fromBytes(File file, byte[] bytes) {
+        return (PropertiesConfiguration) fromBytes(file, bytes, PropertiesConfiguration.class);
+    }
+
+
+    @Override
+    public PropertiesOptions options() {
+        if (options == null) {
+            options = new PropertiesOptions(this);
+        }
+        return options;
+    }
+
+    public void options(PropertiesOptions options) {
+        this.options = options;
     }
 
     private JavaPropsMapper buildProperties() {
@@ -138,21 +133,30 @@ public class PropertiesConfiguration extends FileConfiguration {
                 .configure(MapperFeature.BLOCK_UNSAFE_POLYMORPHIC_BASE_TYPES, options().isBlockUnsafePolymorphicBaseTypes())
                 .configure(MapperFeature.APPLY_DEFAULT_VALUES, options().isApplyDefaultValues())
                 .configure(MapperFeature.REQUIRE_HANDLERS_FOR_JAVA8_OPTIONALS, options().isRequireHandlersForJava8Optionals())
+                .configure(SerializationFeature.WRAP_ROOT_VALUE, options().isWrapRootValue())
                 .configure(SerializationFeature.INDENT_OUTPUT, options().isIndentOutput())
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, options().isFailOnEmptyBeans())
                 .configure(SerializationFeature.FAIL_ON_SELF_REFERENCES, options().isFailOnSelfReferences())
                 .configure(SerializationFeature.WRAP_EXCEPTIONS, options().isWrapExceptions())
-                .configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, options().isWriteSelfReferencesAsNull())
                 .configure(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS, options().isFailOnUnwrappedTypeIdentifiers())
+                .configure(SerializationFeature.WRITE_SELF_REFERENCES_AS_NULL, options().isWriteSelfReferencesAsNull())
+                .configure(SerializationFeature.CLOSE_CLOSEABLE, options().isCloseCloseable())
+                .configure(SerializationFeature.FLUSH_AFTER_WRITE_VALUE, options().isFlushAfterWriteValue())
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, options().isWriteDatesAsTimestamps())
+                .configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, options().isWriteDateKeysAsTimestamps())
+                .configure(SerializationFeature.WRITE_DATES_WITH_ZONE_ID, options().isWriteDatesWithZoneId())
+                .configure(SerializationFeature.WRITE_DATES_WITH_CONTEXT_TIME_ZONE, options().isWriteDatesWithContextTimeZone())
+                .configure(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS, options().isWriteDurationsAsTimestamps())
+                .configure(SerializationFeature.WRITE_CHAR_ARRAYS_AS_JSON_ARRAYS, options().isWriteCharArraysAsJsonArrays())
+                .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, options().isWriteEnumsUsingToString())
+                .configure(SerializationFeature.WRITE_ENUMS_USING_INDEX, options().isWriteEnumsUsingIndex())
+                .configure(SerializationFeature.WRITE_ENUM_KEYS_USING_INDEX, options().isWriteEnumKeysUsingIndex())
+                .configure(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED, options().isWriteSingleElemArraysUnwrapped())
+                .configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, options().isWriteDateTimestampsAsNanoseconds())
+                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, options().isOrderMapEntriesByKeys())
+                .configure(SerializationFeature.FAIL_ON_ORDER_MAP_BY_INCOMPARABLE_KEY, options().isFailOnOrderMapByIncomparableKey())
+                .configure(SerializationFeature.EAGER_SERIALIZER_FETCH, options().isEagerSerializerFetch())
+                .configure(SerializationFeature.USE_EQUALITY_FOR_OBJECT_ID, options().isUseEqualityForObjectId())
                 .build();
-    }
-
-
-    @Override
-    public PropertiesOptions options() {
-        if (options == null) {
-            options = new PropertiesOptions(this);
-        }
-        return options;
     }
 }

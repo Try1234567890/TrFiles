@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.tr</groupId>
   <artifactId>TrFiles</artifactId>
-  <version>2.3.9</version>
+  <version>3.0.0</version>
   <build>
     <plugins>
       <plugin>

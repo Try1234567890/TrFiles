@@ -14,16 +14,15 @@ import java.util.Map;
 
 public class MemorySection implements Section {
     protected final Map<String, Object> map = new LinkedHashMap<>();
-    private final Configuration root;
-    private final Section parent;
-    private final String fullPath;
-    private final String currentPath;
-    private final String name;
+    private final Configuration root; // The root (First section) of the current Section
+    private final Section parent; // The parent (The section on top) of the current Section
+    private final String fullPath; // The path divided by separator (def: '.') from root to current section
+    private final String currentPath; // The provided path to constructor.
+    private final String name; // The section name
 
     protected MemorySection(Section parent, String path) {
-        if (parent == null || path == null) {
-            throw new IllegalArgumentException("Cannot construct a root MemorySection when parent or path is null");
-        }
+        Validator.isNull(parent, "Cannot construct a root MemorySection when parent is null");
+        Validator.isNull(path, "Cannot construct a root MemorySection when path is null");
         this.currentPath = path;
         this.parent = parent;
         this.fullPath = createPath(parent, path);
@@ -33,9 +32,7 @@ public class MemorySection implements Section {
 
 
     protected MemorySection() {
-        if (!(this instanceof Configuration)) {
-            throw new IllegalStateException("Cannot construct a root MemorySection when not a Configuration");
-        }
+        Validator.checkIf(this instanceof Configuration, "Cannot construct a root MemorySection when not a Configuration");
         this.currentPath = "";
         this.name = "";
         this.fullPath = "";
@@ -43,34 +40,76 @@ public class MemorySection implements Section {
         this.root = (Configuration) this;
     }
 
-
+    /**
+     * Retrieve the current path of the Section.
+     *
+     * <p>
+     * This corresponds to the path provided at initialization.
+     *
+     * @return The current path of this Section.
+     */
     @Override
     public String getCurrentPath() {
         return currentPath;
     }
 
+    /**
+     * Retrieve the name of the Section.
+     *
+     * <p>
+     * This corresponds to the name of the Section
+     * or to the last part of the current path.
+     *
+     * @return The name of this Section.
+     */
     @Override
     public String getName() {
         return name;
     }
 
+    /**
+     * Retrieve the root of the Section.
+     *
+     * <p>
+     * This corresponds to the root or
+     * to the Configuration that contains
+     * the Section.
+     *
+     * @return The root of this Section.
+     */
     @Override
     public Configuration getRoot() {
         return root;
     }
 
+    /**
+     * Retrieve the parent of the Section.
+     *
+     * <p>
+     * This corresponds to the parent or
+     * to the section on top of the current
+     * Section.
+     *
+     * @return The parent of this Section.
+     */
     @Override
     public Section getParent() {
         return parent;
     }
 
+    /**
+     * Retrieve the full path of the Section.
+     *
+     * <p>
+     * This corresponds to the full path or
+     * to the path from the root to the current
+     * Section.
+     *
+     * @return The full path of this Section.
+     */
     @Override
     public String getFullPath() {
         return fullPath;
-    }
-
-    protected Map<String, Object> getMap() {
-        return map;
     }
 
     @Override
@@ -135,15 +174,25 @@ public class MemorySection implements Section {
             throw new IllegalStateException("Cannot access section without a root");
         }
         final char separator = root.options().getPathSeparator();
-        int separatorIndex = -1, separatorLength;
+        /*
+         * after is the leading (higher) index.
+         * before is the trailing (lower) index.
+         *
+         * In path: 'service.api.enable':
+         *
+         *   -> In cycle 1: the before = 7 and the after = 0: key = 'service'
+         *   -> In cycle 2: the before = 11 and the after = 8: key = 'api'
+         *   -> In cycle 3: the before = 17 and the after = 12: key = 'enable'
+         */
+        int before = -1, after;
         Section section = this;
-        while ((separatorIndex = path.indexOf(separator, separatorLength = separatorIndex + 1)) != -1) {
-            section = section.getSection(path.substring(separatorLength, separatorIndex));
+        while ((before = path.indexOf(separator, after = before + 1)) != -1) {
+            section = section.getSection(path.substring(after, before));
             if (section == null) {
                 return null;
             }
         }
-        String key = path.substring(separatorLength);
+        String key = path.substring(after);
         if (section == this) {
             return map.get(key);
         }
@@ -163,10 +212,10 @@ public class MemorySection implements Section {
             throw new IllegalStateException("Cannot set value without a root");
         }
         final char separator = root.options().getPathSeparator();
-        int separatorIndex = -1, separatorLength;
+        int before = -1, after;
         Section section = this;
-        while ((separatorIndex = path.indexOf(separator, separatorLength = separatorIndex + 1)) != -1) {
-            String node = path.substring(separatorLength, separatorIndex);
+        while ((before = path.indexOf(separator, after = before + 1)) != -1) {
+            String node = path.substring(after, before);
             Section subSection = section.getSection(node);
             if (subSection == null) {
                 section = section.createSection(node);
@@ -174,7 +223,7 @@ public class MemorySection implements Section {
                 section = subSection;
             }
         }
-        String key = path.substring(separatorLength);
+        String key = path.substring(after);
         if (section == this) {
             if (value == null) {
                 map.remove(key);
@@ -189,8 +238,7 @@ public class MemorySection implements Section {
     @Override
     public @Nullable Section getSection(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Section ? (Section) def : null;
+        return val instanceof Section ? (Section) val : null;
     }
 
     @Override
@@ -218,9 +266,9 @@ public class MemorySection implements Section {
         }
         final char separator = root.options().getPathSeparator();
         Section section = this;
-        int separatorIndex = -1, lengthBeforeSeparator;
-        while ((separatorIndex = path.indexOf(separator, lengthBeforeSeparator = separatorIndex + 1)) != -1) {
-            String node = path.substring(lengthBeforeSeparator, separatorIndex);
+        int before = -1, after;
+        while ((before = path.indexOf(separator, after = before + 1)) != -1) {
+            String node = path.substring(after, before);
             Section subSection = section.getSection(node);
             if (subSection == null) {
                 section = section.createSection(node);
@@ -229,7 +277,7 @@ public class MemorySection implements Section {
             }
         }
 
-        String key = path.substring(lengthBeforeSeparator);
+        String key = path.substring(after);
         if (section == this) {
             Section result = new MemorySection(this, key);
             map.put(key, result);
@@ -241,8 +289,7 @@ public class MemorySection implements Section {
     @Override
     public @Nullable String getString(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof String ? (String) def : null;
+        return val instanceof String ? (String) val : null;
     }
 
     @Override
@@ -259,8 +306,7 @@ public class MemorySection implements Section {
     @Override
     public char getChar(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return (def instanceof String defStr && defStr.length() == 1) ? defStr.charAt(0) : (char) -1;
+        return (val instanceof String defStr && defStr.length() == 1) ? defStr.charAt(0) : (char) -1;
     }
 
     @Override
@@ -277,8 +323,7 @@ public class MemorySection implements Section {
     @Override
     public int getInt(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Number ? ((Number) def).intValue() : -1;
+        return val instanceof Number ? ((Number) val).intValue() : -1;
     }
 
     @Override
@@ -296,8 +341,7 @@ public class MemorySection implements Section {
     @Override
     public Number getNumber(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Number ? (Number) def : -1;
+        return val instanceof Number ? (Number) val : -1;
     }
 
     @Override
@@ -315,8 +359,7 @@ public class MemorySection implements Section {
     @Override
     public boolean getBoolean(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Boolean ? (Boolean) def : false;
+        return val instanceof Boolean ? (Boolean) val : false;
     }
 
     @Override
@@ -334,8 +377,7 @@ public class MemorySection implements Section {
     @Override
     public double getDouble(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Double ? (Double) def : -1;
+        return val instanceof Double ? (Double) val : -1;
     }
 
     @Override
@@ -353,8 +395,7 @@ public class MemorySection implements Section {
     @Override
     public float getFloat(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Float ? (Float) def : -1;
+        return val instanceof Float ? (Float) val : -1;
     }
 
     @Override
@@ -372,8 +413,7 @@ public class MemorySection implements Section {
     @Override
     public long getLong(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Long ? (Long) def : -1;
+        return val instanceof Long ? (Long) val : -1;
     }
 
     @Override
@@ -391,8 +431,7 @@ public class MemorySection implements Section {
     @Override
     public short getShort(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof Short ? (Short) def : -1;
+        return val instanceof Short ? (Short) val : -1;
     }
 
     @Override
@@ -410,8 +449,7 @@ public class MemorySection implements Section {
     @Override
     public BigInteger getBigInteger(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof BigInteger ? (BigInteger) def : null;
+        return val instanceof BigInteger ? (BigInteger) val : null;
     }
 
     @Override
@@ -429,8 +467,7 @@ public class MemorySection implements Section {
     @Override
     public BigDecimal getBigDecimal(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof BigDecimal ? (BigDecimal) def : null;
+        return val instanceof BigDecimal ? (BigDecimal) val : null;
     }
 
     @Override
@@ -448,8 +485,7 @@ public class MemorySection implements Section {
     @Override
     public List<?> getList(String path) {
         Object val = get(path);
-        Object def = val != null ? val : getDefault(path);
-        return def instanceof List<?> ? (List<?>) def : null;
+        return val instanceof List<?> ? (List<?>) val : null;
     }
 
     @Override
@@ -480,8 +516,6 @@ public class MemorySection implements Section {
     public List<Section> getSectionList(String path) {
         List<Section> result = new ArrayList<>();
         Section val = getSection(path);
-        Object def = getDefault(path);
-        val = val != null ? val : (def instanceof Section ? (Section) def : null);
         if (val != null) {
             for (String key : val.getKeys(false)) {
                 Section section = val.getSection(key);
@@ -496,7 +530,7 @@ public class MemorySection implements Section {
     @Override
     public List<Object> getObjectList(String path) {
         List<Object> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         result.addAll(val);
@@ -506,7 +540,7 @@ public class MemorySection implements Section {
     @Override
     public List<String> getStringList(String path) {
         List<String> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -520,7 +554,7 @@ public class MemorySection implements Section {
     @Override
     public List<Integer> getIntegerList(String path) {
         List<Integer> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -544,7 +578,7 @@ public class MemorySection implements Section {
     @Override
     public List<Number> getNumberList(String path) {
         List<Number> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -558,7 +592,7 @@ public class MemorySection implements Section {
     @Override
     public List<Boolean> getBooleanList(String path) {
         List<Boolean> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -578,7 +612,7 @@ public class MemorySection implements Section {
     @Override
     public List<Double> getDoubleList(String path) {
         List<Double> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -602,7 +636,7 @@ public class MemorySection implements Section {
     @Override
     public List<Float> getFloatList(String path) {
         List<Float> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -626,7 +660,7 @@ public class MemorySection implements Section {
     @Override
     public List<Long> getLongList(String path) {
         List<Long> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -650,7 +684,7 @@ public class MemorySection implements Section {
     @Override
     public List<Byte> getByteList(String path) {
         List<Byte> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -674,7 +708,7 @@ public class MemorySection implements Section {
     @Override
     public List<Character> getCharacterList(String path) {
         List<Character> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -693,7 +727,7 @@ public class MemorySection implements Section {
     @Override
     public List<Short> getShortList(String path) {
         List<Short> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -717,7 +751,7 @@ public class MemorySection implements Section {
     @Override
     public List<BigInteger> getBigIntegerList(String path) {
         List<BigInteger> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -736,7 +770,7 @@ public class MemorySection implements Section {
     @Override
     public List<BigDecimal> getBigDecimalList(String path) {
         List<BigDecimal> result = new ArrayList<>();
-        List<?> val = getDefList(path);
+        List<?> val = getList(path);
         if (val == null)
             return result;
         for (Object o : val) {
@@ -750,12 +784,6 @@ public class MemorySection implements Section {
             }
         }
         return result;
-    }
-
-    private List<?> getDefList(String path) {
-        List<?> val = getList(path);
-        Object def = getDefault(path);
-        return val != null ? val : (def instanceof List<?> ? (List<?>) def : null);
     }
 
     @Override
@@ -836,7 +864,7 @@ public class MemorySection implements Section {
     @Override
     public int[] getPrimitiveIntegerArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new int[]{};
         int[] result = new int[def.length];
@@ -857,7 +885,7 @@ public class MemorySection implements Section {
     @Override
     public boolean[] getPrimitiveBooleanArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new boolean[]{};
         boolean[] result = new boolean[def.length];
@@ -877,7 +905,7 @@ public class MemorySection implements Section {
     @Override
     public double[] getPrimitiveDoubleArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new double[]{};
         double[] result = new double[def.length];
@@ -898,7 +926,7 @@ public class MemorySection implements Section {
     @Override
     public float[] getPrimitiveFloatArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new float[]{};
         float[] result = new float[def.length];
@@ -919,7 +947,7 @@ public class MemorySection implements Section {
     @Override
     public long[] getPrimitiveLongArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new long[]{};
         long[] result = new long[def.length];
@@ -940,7 +968,7 @@ public class MemorySection implements Section {
     @Override
     public byte[] getPrimitiveByteArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new byte[]{};
         byte[] result = new byte[def.length];
@@ -961,7 +989,7 @@ public class MemorySection implements Section {
     @Override
     public char[] getPrimitiveCharacterArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new char[]{};
         char[] result = new char[def.length];
@@ -981,7 +1009,7 @@ public class MemorySection implements Section {
     @Override
     public short[] getPrimitiveShortArray(String path) {
         Object[] val = getObjectArray(path);
-        Object[] def = val != null ? val : getDefault(path) instanceof Object[] ? (Object[]) getDefault(path) : null;
+        Object[] def = val != null ? val : null instanceof Object[] ? (Object[]) null : null;
         if (def == null)
             return new short[]{};
         short[] result = new short[def.length];
@@ -999,22 +1027,10 @@ public class MemorySection implements Section {
         return result;
     }
 
-
     @Override
-    public void addDefault(String path, Object value) {
-        Configuration root = getRoot();
-        if (root == null) {
-            throw new IllegalStateException("Cannot add default without root");
-        }
-        root.addDefault(createPath(this, path), value);
-    }
-
-
-    @Override
-    public Object getDefault(String path) {
-        Configuration root = getRoot();
-        Configuration defaults = root == null ? null : root.getDefaults();
-        return (defaults == null) ? null : defaults.get(createPath(this, path));
+    public DataType getType(String path) {
+        Object val = get(path);
+        return DataType.getType(val.getClass());
     }
 
     /**
@@ -1038,7 +1054,7 @@ public class MemorySection implements Section {
      * @param relativeTo Section to create the path relative to.
      * @return Full path of the section from its root.
      */
-    public static String createRelativePath(Section section, String key, Section relativeTo) {
+    public static String createRelativePath(Section section, @Nullable String key, Section relativeTo) {
         Configuration root = section.getRoot();
         char separator = root.options().getPathSeparator();
         StringBuilder builder = new StringBuilder();

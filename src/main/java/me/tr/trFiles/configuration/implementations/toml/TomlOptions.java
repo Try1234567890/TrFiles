@@ -3,56 +3,331 @@ package me.tr.trFiles.configuration.implementations.toml;
 import me.tr.trFiles.configuration.implementations.FileOptions;
 
 public class TomlOptions extends FileOptions {
-    private boolean useAnnotations = true;
-    private boolean useGettersAsSetters = true;
-    private boolean propagateTransientMarker = false;
-    private boolean autoDetectCreators = true;
-    private boolean autoDetectFields = true;
-    private boolean autoDetectGetters = true;
-    private boolean autoDetectIsGetters = true;
-    private boolean autoDetectSetters = true;
-    private boolean requireSettersForGetters = false;
-    private boolean allowFinalFieldsAsMutators = true;
-    private boolean inferPropertyMutators = true;
-    private boolean inferCreatorFromConstructorProperties = true;
-    private boolean allowVoidValuedProperties = false;
-    private boolean canOverrideAccessModifiers = true;
-    private boolean overridePublicAccessModifiers = true;
-    private boolean inverseReadWriteAccess = false;
-    private boolean useStaticTyping = false;
-    private boolean useBaseTypeAsDefaultImpl = false;
-    private boolean inferBuilderTypeBindings = true;
-    private boolean requireTypeIdForSubtypes = true;
-    private boolean defaultViewInclusion = true;
-    private boolean sortPropertiesAlphabetically = false;
-    private boolean sortCreatorPropertiesFirst = true;
-    private boolean sortCreatorPropertiesByDeclarationOrder = false;
-    private boolean acceptCaseInsensitiveProperties = false;
-    private boolean acceptCaseInsensitiveEnums = false;
-    private boolean acceptCaseInsensitiveValues = false;
-    private boolean useWrapperNameAsPropertyName = false;
-    private boolean useStdBeanNaming = false;
-    private boolean allowExplicitPropertyRenaming = false;
-    private boolean allowIsGettersForNonBoolean = false;
-    private boolean allowCoercionOfScalars = true;
-    private boolean ignoreDuplicateModuleRegistrations = true;
-    private boolean ignoreMergeForUnmergeable = true;
-    private boolean blockUnsafePolymorphicBaseTypes = false;
-    private boolean applyDefaultValues = true;
-    private boolean requireHandlersForJava8Optionals = true;
+    private boolean wrapRootValue;
+    private boolean indentOutput;
+    private boolean failOnEmptyBeans;
+    private boolean failOnSelfReferences;
+    private boolean wrapExceptions;
+    private boolean failOnUnwrappedTypeIdentifiers;
+    private boolean writeSelfReferencesAsNull;
+    private boolean closeCloseable;
+    private boolean flushAfterWriteValue;
+    private boolean writeDatesAsTimestamps;
+    private boolean writeDateKeysAsTimestamps;
+    private boolean writeDatesWithZoneId;
+    private boolean writeDatesWithContextTimeZone;
+    private boolean writeDurationsAsTimestamps;
+    private boolean writeCharArraysAsJsonArrays;
+    private boolean writeEnumsUsingToString;
+    private boolean writeEnumsUsingIndex;
+    private boolean writeEnumKeysUsingIndex;
+    private boolean writeSingleElemArraysUnwrapped;
+    private boolean writeDateTimestampsAsNanoseconds;
+    private boolean orderMapEntriesByKeys;
+    private boolean failOnOrderMapByIncomparableKey;
+    private boolean eagerSerializerFetch;
+    private boolean useEqualityForObjectId;
 
-    private boolean indentOutput = false;
-    private boolean failOnEmptyBeans = true;
-    private boolean failOnSelfReferences = true;
-    private boolean wrapExceptions = true;
-    private boolean failOnUnwrappedTypeIdentifiers = true;
-    private boolean writeSelfReferencesAsNull = false;
+
+    private boolean useAnnotations;
+    private boolean useGettersAsSetters;
+    private boolean propagateTransientMarker;
+    private boolean autoDetectCreators;
+    private boolean autoDetectFields;
+    private boolean autoDetectGetters;
+    private boolean autoDetectIsGetters;
+    private boolean autoDetectSetters;
+    private boolean requireSettersForGetters;
+    private boolean allowFinalFieldsAsMutators;
+    private boolean inferPropertyMutators;
+    private boolean inferCreatorFromConstructorProperties;
+    private boolean allowVoidValuedProperties;
+    private boolean canOverrideAccessModifiers;
+    private boolean overridePublicAccessModifiers;
+    private boolean inverseReadWriteAccess;
+    private boolean useStaticTyping;
+    private boolean useBaseTypeAsDefaultImpl;
+    private boolean inferBuilderTypeBindings;
+    private boolean requireTypeIdForSubtypes;
+    private boolean defaultViewInclusion;
+    private boolean sortPropertiesAlphabetically;
+    private boolean sortCreatorPropertiesFirst;
+    private boolean sortCreatorPropertiesByDeclarationOrder;
+    private boolean acceptCaseInsensitiveProperties;
+    private boolean acceptCaseInsensitiveEnums;
+    private boolean acceptCaseInsensitiveValues;
+    private boolean useWrapperNameAsPropertyName;
+    private boolean useStdBeanNaming;
+    private boolean allowExplicitPropertyRenaming;
+    private boolean allowIsGettersForNonBoolean;
+    private boolean allowCoercionOfScalars;
+    private boolean ignoreDuplicateModuleRegistrations;
+    private boolean ignoreMergeForUnmergeable;
+    private boolean blockUnsafePolymorphicBaseTypes;
+    private boolean applyDefaultValues;
+    private boolean requireHandlersForJava8Optionals;
 
     protected TomlOptions(TomlConfiguration configuration) {
         super(configuration, "#", "");
+        this.wrapRootValue = false;
+        this.indentOutput = false;
+        this.failOnEmptyBeans = true;
+        this.failOnSelfReferences = true;
+        this.wrapExceptions = true;
+        this.failOnUnwrappedTypeIdentifiers = true;
+        this.writeSelfReferencesAsNull = false;
+        this.closeCloseable = false;
+        this.flushAfterWriteValue = true;
+        this.writeDatesAsTimestamps = true;
+        this.writeDateKeysAsTimestamps = false;
+        this.writeDatesWithZoneId = false;
+        this.writeDatesWithContextTimeZone = true;
+        this.writeDurationsAsTimestamps = true;
+        this.writeCharArraysAsJsonArrays = false;
+        this.writeEnumsUsingToString = false;
+        this.writeEnumsUsingIndex = false;
+        this.writeEnumKeysUsingIndex = false;
+        this.writeSingleElemArraysUnwrapped = false;
+        this.writeDateTimestampsAsNanoseconds = true;
+        this.orderMapEntriesByKeys = false;
+        this.failOnOrderMapByIncomparableKey = true;
+        this.eagerSerializerFetch = true;
+        this.useEqualityForObjectId = false;
+
+
+        this.useAnnotations = true;
+        this.useGettersAsSetters = true;
+        this.propagateTransientMarker = false;
+        this.autoDetectCreators = true;
+        this.autoDetectFields = true;
+        this.autoDetectGetters = true;
+        this.autoDetectIsGetters = true;
+        this.autoDetectSetters = true;
+        this.requireSettersForGetters = false;
+        this.allowFinalFieldsAsMutators = true;
+        this.inferPropertyMutators = true;
+        this.inferCreatorFromConstructorProperties = true;
+        this.allowVoidValuedProperties = false;
+        this.canOverrideAccessModifiers = true;
+        this.overridePublicAccessModifiers = true;
+        this.inverseReadWriteAccess = false;
+        this.useStaticTyping = false;
+        this.useBaseTypeAsDefaultImpl = false;
+        this.inferBuilderTypeBindings = true;
+        this.requireTypeIdForSubtypes = true;
+        this.defaultViewInclusion = true;
+        this.sortPropertiesAlphabetically = false;
+        this.sortCreatorPropertiesFirst = true;
+        this.sortCreatorPropertiesByDeclarationOrder = false;
+        this.acceptCaseInsensitiveProperties = false;
+        this.acceptCaseInsensitiveEnums = false;
+        this.acceptCaseInsensitiveValues = false;
+        this.useWrapperNameAsPropertyName = false;
+        this.useStdBeanNaming = false;
+        this.allowExplicitPropertyRenaming = false;
+        this.allowIsGettersForNonBoolean = false;
+        this.allowCoercionOfScalars = true;
+        this.ignoreDuplicateModuleRegistrations = true;
+        this.ignoreMergeForUnmergeable = true;
+        this.blockUnsafePolymorphicBaseTypes = false;
+        this.applyDefaultValues = true;
+        this.requireHandlersForJava8Optionals = true;
+
     }
 
-    // Getters e setters per tutte le opzioni
+
+    public boolean isWrapRootValue() {
+        return wrapRootValue;
+    }
+
+    public void setWrapRootValue(boolean wrapRootValue) {
+        this.wrapRootValue = wrapRootValue;
+    }
+
+    public boolean isIndentOutput() {
+        return indentOutput;
+    }
+
+    public void setIndentOutput(boolean indentOutput) {
+        this.indentOutput = indentOutput;
+    }
+
+    public boolean isFailOnEmptyBeans() {
+        return failOnEmptyBeans;
+    }
+
+    public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
+        this.failOnEmptyBeans = failOnEmptyBeans;
+    }
+
+    public boolean isFailOnSelfReferences() {
+        return failOnSelfReferences;
+    }
+
+    public void setFailOnSelfReferences(boolean failOnSelfReferences) {
+        this.failOnSelfReferences = failOnSelfReferences;
+    }
+
+    public boolean isWrapExceptions() {
+        return wrapExceptions;
+    }
+
+    public void setWrapExceptions(boolean wrapExceptions) {
+        this.wrapExceptions = wrapExceptions;
+    }
+
+    public boolean isFailOnUnwrappedTypeIdentifiers() {
+        return failOnUnwrappedTypeIdentifiers;
+    }
+
+    public void setFailOnUnwrappedTypeIdentifiers(boolean failOnUnwrappedTypeIdentifiers) {
+        this.failOnUnwrappedTypeIdentifiers = failOnUnwrappedTypeIdentifiers;
+    }
+
+    public boolean isWriteSelfReferencesAsNull() {
+        return writeSelfReferencesAsNull;
+    }
+
+    public void setWriteSelfReferencesAsNull(boolean writeSelfReferencesAsNull) {
+        this.writeSelfReferencesAsNull = writeSelfReferencesAsNull;
+    }
+
+    public boolean isCloseCloseable() {
+        return closeCloseable;
+    }
+
+    public void setCloseCloseable(boolean closeCloseable) {
+        this.closeCloseable = closeCloseable;
+    }
+
+    public boolean isFlushAfterWriteValue() {
+        return flushAfterWriteValue;
+    }
+
+    public void setFlushAfterWriteValue(boolean flushAfterWriteValue) {
+        this.flushAfterWriteValue = flushAfterWriteValue;
+    }
+
+    public boolean isWriteDatesAsTimestamps() {
+        return writeDatesAsTimestamps;
+    }
+
+    public void setWriteDatesAsTimestamps(boolean writeDatesAsTimestamps) {
+        this.writeDatesAsTimestamps = writeDatesAsTimestamps;
+    }
+
+    public boolean isWriteDateKeysAsTimestamps() {
+        return writeDateKeysAsTimestamps;
+    }
+
+    public void setWriteDateKeysAsTimestamps(boolean writeDateKeysAsTimestamps) {
+        this.writeDateKeysAsTimestamps = writeDateKeysAsTimestamps;
+    }
+
+    public boolean isWriteDatesWithZoneId() {
+        return writeDatesWithZoneId;
+    }
+
+    public void setWriteDatesWithZoneId(boolean writeDatesWithZoneId) {
+        this.writeDatesWithZoneId = writeDatesWithZoneId;
+    }
+
+    public boolean isWriteDatesWithContextTimeZone() {
+        return writeDatesWithContextTimeZone;
+    }
+
+    public void setWriteDatesWithContextTimeZone(boolean writeDatesWithContextTimeZone) {
+        this.writeDatesWithContextTimeZone = writeDatesWithContextTimeZone;
+    }
+
+    public boolean isWriteDurationsAsTimestamps() {
+        return writeDurationsAsTimestamps;
+    }
+
+    public void setWriteDurationsAsTimestamps(boolean writeDurationsAsTimestamps) {
+        this.writeDurationsAsTimestamps = writeDurationsAsTimestamps;
+    }
+
+    public boolean isWriteCharArraysAsJsonArrays() {
+        return writeCharArraysAsJsonArrays;
+    }
+
+    public void setWriteCharArraysAsJsonArrays(boolean writeCharArraysAsJsonArrays) {
+        this.writeCharArraysAsJsonArrays = writeCharArraysAsJsonArrays;
+    }
+
+    public boolean isWriteEnumsUsingToString() {
+        return writeEnumsUsingToString;
+    }
+
+    public void setWriteEnumsUsingToString(boolean writeEnumsUsingToString) {
+        this.writeEnumsUsingToString = writeEnumsUsingToString;
+    }
+
+    public boolean isWriteEnumsUsingIndex() {
+        return writeEnumsUsingIndex;
+    }
+
+    public void setWriteEnumsUsingIndex(boolean writeEnumsUsingIndex) {
+        this.writeEnumsUsingIndex = writeEnumsUsingIndex;
+    }
+
+    public boolean isWriteEnumKeysUsingIndex() {
+        return writeEnumKeysUsingIndex;
+    }
+
+    public void setWriteEnumKeysUsingIndex(boolean writeEnumKeysUsingIndex) {
+        this.writeEnumKeysUsingIndex = writeEnumKeysUsingIndex;
+    }
+
+    public boolean isWriteSingleElemArraysUnwrapped() {
+        return writeSingleElemArraysUnwrapped;
+    }
+
+    public void setWriteSingleElemArraysUnwrapped(boolean writeSingleElemArraysUnwrapped) {
+        this.writeSingleElemArraysUnwrapped = writeSingleElemArraysUnwrapped;
+    }
+
+    public boolean isWriteDateTimestampsAsNanoseconds() {
+        return writeDateTimestampsAsNanoseconds;
+    }
+
+    public void setWriteDateTimestampsAsNanoseconds(boolean writeDateTimestampsAsNanoseconds) {
+        this.writeDateTimestampsAsNanoseconds = writeDateTimestampsAsNanoseconds;
+    }
+
+    public boolean isOrderMapEntriesByKeys() {
+        return orderMapEntriesByKeys;
+    }
+
+    public void setOrderMapEntriesByKeys(boolean orderMapEntriesByKeys) {
+        this.orderMapEntriesByKeys = orderMapEntriesByKeys;
+    }
+
+    public boolean isFailOnOrderMapByIncomparableKey() {
+        return failOnOrderMapByIncomparableKey;
+    }
+
+    public void setFailOnOrderMapByIncomparableKey(boolean failOnOrderMapByIncomparableKey) {
+        this.failOnOrderMapByIncomparableKey = failOnOrderMapByIncomparableKey;
+    }
+
+    public boolean isEagerSerializerFetch() {
+        return eagerSerializerFetch;
+    }
+
+    public void setEagerSerializerFetch(boolean eagerSerializerFetch) {
+        this.eagerSerializerFetch = eagerSerializerFetch;
+    }
+
+    public boolean isUseEqualityForObjectId() {
+        return useEqualityForObjectId;
+    }
+
+    public void setUseEqualityForObjectId(boolean useEqualityForObjectId) {
+        this.useEqualityForObjectId = useEqualityForObjectId;
+    }
+
     public boolean isUseAnnotations() {
         return useAnnotations;
     }
@@ -349,51 +624,74 @@ public class TomlOptions extends FileOptions {
         this.requireHandlersForJava8Optionals = requireHandlersForJava8Optionals;
     }
 
-    public boolean isIndentOutput() {
-        return indentOutput;
-    }
-
-    public void setIndentOutput(boolean indentOutput) {
-        this.indentOutput = indentOutput;
-    }
-
-    public boolean isFailOnEmptyBeans() {
-        return failOnEmptyBeans;
-    }
-
-    public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
-        this.failOnEmptyBeans = failOnEmptyBeans;
-    }
-
-    public boolean isFailOnSelfReferences() {
-        return failOnSelfReferences;
-    }
-
-    public void setFailOnSelfReferences(boolean failOnSelfReferences) {
-        this.failOnSelfReferences = failOnSelfReferences;
-    }
-
-    public boolean isWrapExceptions() {
-        return wrapExceptions;
-    }
-
-    public void setWrapExceptions(boolean wrapExceptions) {
-        this.wrapExceptions = wrapExceptions;
-    }
-
-    public boolean isFailOnUnwrappedTypeIdentifiers() {
-        return failOnUnwrappedTypeIdentifiers;
-    }
-
-    public void setFailOnUnwrappedTypeIdentifiers(boolean failOnUnwrappedTypeIdentifiers) {
-        this.failOnUnwrappedTypeIdentifiers = failOnUnwrappedTypeIdentifiers;
-    }
-
-    public boolean isWriteSelfReferencesAsNull() {
-        return writeSelfReferencesAsNull;
-    }
-
-    public void setWriteSelfReferencesAsNull(boolean writeSelfReferencesAsNull) {
-        this.writeSelfReferencesAsNull = writeSelfReferencesAsNull;
+    @Override
+    public String toString() {
+        return "TomlOptions{" +
+                "wrapRootValue=" + wrapRootValue +
+                ", indentOutput=" + indentOutput +
+                ", failOnEmptyBeans=" + failOnEmptyBeans +
+                ", failOnSelfReferences=" + failOnSelfReferences +
+                ", wrapExceptions=" + wrapExceptions +
+                ", failOnUnwrappedTypeIdentifiers=" + failOnUnwrappedTypeIdentifiers +
+                ", writeSelfReferencesAsNull=" + writeSelfReferencesAsNull +
+                ", closeCloseable=" + closeCloseable +
+                ", flushAfterWriteValue=" + flushAfterWriteValue +
+                ", writeDatesAsTimestamps=" + writeDatesAsTimestamps +
+                ", writeDateKeysAsTimestamps=" + writeDateKeysAsTimestamps +
+                ", writeDatesWithZoneId=" + writeDatesWithZoneId +
+                ", writeDatesWithContextTimeZone=" + writeDatesWithContextTimeZone +
+                ", writeDurationsAsTimestamps=" + writeDurationsAsTimestamps +
+                ", writeCharArraysAsJsonArrays=" + writeCharArraysAsJsonArrays +
+                ", writeEnumsUsingToString=" + writeEnumsUsingToString +
+                ", writeEnumsUsingIndex=" + writeEnumsUsingIndex +
+                ", writeEnumKeysUsingIndex=" + writeEnumKeysUsingIndex +
+                ", writeSingleElemArraysUnwrapped=" + writeSingleElemArraysUnwrapped +
+                ", writeDateTimestampsAsNanoseconds=" + writeDateTimestampsAsNanoseconds +
+                ", orderMapEntriesByKeys=" + orderMapEntriesByKeys +
+                ", failOnOrderMapByIncomparableKey=" + failOnOrderMapByIncomparableKey +
+                ", eagerSerializerFetch=" + eagerSerializerFetch +
+                ", useEqualityForObjectId=" + useEqualityForObjectId +
+                ", useAnnotations=" + useAnnotations +
+                ", useGettersAsSetters=" + useGettersAsSetters +
+                ", propagateTransientMarker=" + propagateTransientMarker +
+                ", autoDetectCreators=" + autoDetectCreators +
+                ", autoDetectFields=" + autoDetectFields +
+                ", autoDetectGetters=" + autoDetectGetters +
+                ", autoDetectIsGetters=" + autoDetectIsGetters +
+                ", autoDetectSetters=" + autoDetectSetters +
+                ", requireSettersForGetters=" + requireSettersForGetters +
+                ", allowFinalFieldsAsMutators=" + allowFinalFieldsAsMutators +
+                ", inferPropertyMutators=" + inferPropertyMutators +
+                ", inferCreatorFromConstructorProperties=" + inferCreatorFromConstructorProperties +
+                ", allowVoidValuedProperties=" + allowVoidValuedProperties +
+                ", canOverrideAccessModifiers=" + canOverrideAccessModifiers +
+                ", overridePublicAccessModifiers=" + overridePublicAccessModifiers +
+                ", inverseReadWriteAccess=" + inverseReadWriteAccess +
+                ", useStaticTyping=" + useStaticTyping +
+                ", useBaseTypeAsDefaultImpl=" + useBaseTypeAsDefaultImpl +
+                ", inferBuilderTypeBindings=" + inferBuilderTypeBindings +
+                ", requireTypeIdForSubtypes=" + requireTypeIdForSubtypes +
+                ", defaultViewInclusion=" + defaultViewInclusion +
+                ", sortPropertiesAlphabetically=" + sortPropertiesAlphabetically +
+                ", sortCreatorPropertiesFirst=" + sortCreatorPropertiesFirst +
+                ", sortCreatorPropertiesByDeclarationOrder=" + sortCreatorPropertiesByDeclarationOrder +
+                ", acceptCaseInsensitiveProperties=" + acceptCaseInsensitiveProperties +
+                ", acceptCaseInsensitiveEnums=" + acceptCaseInsensitiveEnums +
+                ", acceptCaseInsensitiveValues=" + acceptCaseInsensitiveValues +
+                ", useWrapperNameAsPropertyName=" + useWrapperNameAsPropertyName +
+                ", useStdBeanNaming=" + useStdBeanNaming +
+                ", allowExplicitPropertyRenaming=" + allowExplicitPropertyRenaming +
+                ", allowIsGettersForNonBoolean=" + allowIsGettersForNonBoolean +
+                ", allowCoercionOfScalars=" + allowCoercionOfScalars +
+                ", ignoreDuplicateModuleRegistrations=" + ignoreDuplicateModuleRegistrations +
+                ", ignoreMergeForUnmergeable=" + ignoreMergeForUnmergeable +
+                ", blockUnsafePolymorphicBaseTypes=" + blockUnsafePolymorphicBaseTypes +
+                ", applyDefaultValues=" + applyDefaultValues +
+                ", requireHandlersForJava8Optionals=" + requireHandlersForJava8Optionals +
+                ", commentPrefix='" + super.getCommentPrefix() + '\'' +
+                ", commentSuffix='" + super.getCommentSuffix() + '\'' +
+                ", header='" + super.getHeader() + '\'' +
+                ", footer='" + super.getFooter() + '\'' +
+                '}';
     }
 }

@@ -2,6 +2,7 @@ package me.tr.trFiles.configuration.implementations.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import me.tr.trFiles.configuration.ConfigRegistry;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
 import me.tr.trFiles.configuration.memory.implementations.MemoryJsonConfiguration;
 
@@ -9,12 +10,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class JsonConfiguration extends FileConfiguration {
     private JsonOptions options;
 
+    private JsonConfiguration() {
+    }
 
     @Override
     public String[] getExtensions() {
@@ -22,83 +24,76 @@ public class JsonConfiguration extends FileConfiguration {
     }
 
     @Override
-    protected MemoryJsonConfiguration newConfiguration() {
-        return new MemoryJsonConfiguration(buildGson());
+    public JsonConfiguration newConfiguration(File file) {
+        return JsonConfiguration.emptyJson(file);
     }
 
-    public JsonConfiguration(File file, Map<String, Object> map) {
-        super(file, map);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
+    @Override
+    public MemoryJsonConfiguration newMemoryConfiguration() {
+        return MemoryJsonConfiguration.emptyJson(buildGson(options()));
     }
 
-    public JsonConfiguration(File file, Reader reader) {
-        super(file, reader);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
+    @Override
+    public void register() {
+        ConfigRegistry.register(getClass());
     }
 
-    public JsonConfiguration(File file, InputStream is) {
-        super(file, is);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
+    @Override
+    public MemoryJsonConfiguration getConfiguration() {
+        return (MemoryJsonConfiguration) super.getConfiguration();
     }
 
-    public JsonConfiguration(File file) {
-        super(file);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
-    }
-
-    public JsonConfiguration(Path path) {
-        super(path);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
-    }
-
-    public JsonConfiguration(String path) {
-        super(path);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
-    }
-
-    public JsonConfiguration(ZipFile archive, File inside, File to) {
-        super(archive, inside, to);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
-    }
-
-    public JsonConfiguration(File archive, File inside, File to) {
-        super(archive, inside, to);
-        setConfiguration(new MemoryJsonConfiguration(getFile(), buildGson()));
-    }
-
-    public static JsonConfiguration fromMap(File file, Map<String, Object> map) {
-        return new JsonConfiguration(file, map);
+    public static JsonConfiguration emptyJson(File file) {
+        return (JsonConfiguration) emptyConfig(file, JsonConfiguration.class);
     }
 
     public static JsonConfiguration fromReader(File file, Reader reader) {
-        return new JsonConfiguration(file, reader);
+        return (JsonConfiguration) fromReader(file, reader, JsonConfiguration.class);
     }
 
+
     public static JsonConfiguration fromInputStream(File file, InputStream is) {
-        return new JsonConfiguration(file, is);
+        return (JsonConfiguration) fromInputStream(file, is, JsonConfiguration.class);
     }
 
     public static JsonConfiguration fromFile(File file) {
-        return new JsonConfiguration(file);
+        return (JsonConfiguration) fromFile(file, JsonConfiguration.class);
     }
 
     public static JsonConfiguration fromPath(Path path) {
-        return new JsonConfiguration(path);
+        return (JsonConfiguration) fromPath(path, JsonConfiguration.class);
     }
 
     public static JsonConfiguration fromString(String path) {
-        return new JsonConfiguration(path);
+        return (JsonConfiguration) fromString(path, JsonConfiguration.class);
+    }
+
+    public static JsonConfiguration fromContent(File file, String content) {
+        return (JsonConfiguration) fromContent(file, content, JsonConfiguration.class);
     }
 
     public static JsonConfiguration fromArchive(ZipFile archive, File inside, File to) {
-        return new JsonConfiguration(archive, inside, to);
+        return (JsonConfiguration) fromArchive(archive, inside, to, JsonConfiguration.class);
     }
 
-    public static JsonConfiguration fromArchive(File archive, File inside, File to) {
-        return new JsonConfiguration(archive, inside, to);
+    public static JsonConfiguration fromBytes(File file, byte[] bytes) {
+        return (JsonConfiguration) fromBytes(file, bytes, JsonConfiguration.class);
     }
 
-    private Gson buildGson() {
+    @Override
+    public JsonOptions options() {
+        if (options == null) {
+            options = new JsonOptions(this);
+        }
+        return options;
+    }
+
+    public JsonConfiguration options(JsonOptions options) {
+        this.options = options;
+        return this;
+    }
+
+    private Gson buildGson(JsonOptions options) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         if (options().isPrettyPrinting()) gsonBuilder.setPrettyPrinting();
         if (options().isSerializeNulls()) gsonBuilder.serializeNulls();
@@ -114,13 +109,5 @@ public class JsonConfiguration extends FileConfiguration {
         gsonBuilder.setLongSerializationPolicy(options().getLongSerializationPolicy());
         gsonBuilder.setStrictness(options().getStrictness());
         return gsonBuilder.create();
-    }
-
-    @Override
-    public JsonOptions options() {
-        if (options == null) {
-            options = new JsonOptions(this);
-        }
-        return options;
     }
 }

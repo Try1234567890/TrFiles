@@ -1,8 +1,7 @@
 package me.tr.trFiles.configuration.implementations.yaml;
 
+import me.tr.trFiles.configuration.ConfigRegistry;
 import me.tr.trFiles.configuration.implementations.FileConfiguration;
-import me.tr.trFiles.configuration.memory.MemoryConfiguration;
-import me.tr.trFiles.configuration.memory.implementations.MemoryXmlConfiguration;
 import me.tr.trFiles.configuration.memory.implementations.MemoryYamlConfiguration;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -12,86 +11,74 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.zip.ZipFile;
 
 public class YamlConfiguration extends FileConfiguration {
     private YamlOptions options;
 
+    private YamlConfiguration() {
+    }
 
     public String[] getExtensions() {
         return new String[]{".yml", ".yaml"};
     }
 
     @Override
-    protected MemoryYamlConfiguration newConfiguration() {
-        return new MemoryYamlConfiguration(buildYaml());
+    public YamlConfiguration newConfiguration(File file) {
+        return YamlConfiguration.emptyYaml(file);
     }
 
-    public YamlConfiguration(File file, Map<String, Object> map) {
-        super(file, map);
+    @Override
+    public MemoryYamlConfiguration newMemoryConfiguration() {
+        return MemoryYamlConfiguration.emptyYaml(buildYaml());
     }
 
-    public YamlConfiguration(File file, Reader reader) {
-        super(file, reader);
+    @Override
+    public void register() {
+        ConfigRegistry.register(getClass());
     }
 
-    public YamlConfiguration(File file, InputStream is) {
-        super(file, is);
+    @Override
+    public MemoryYamlConfiguration getConfiguration() {
+        return (MemoryYamlConfiguration) super.getConfiguration();
     }
 
-    public YamlConfiguration(File file) {
-        super(file);
-    }
-
-    public YamlConfiguration(Path path) {
-        super(path);
-    }
-
-    public YamlConfiguration(String path) {
-        super(path);
-    }
-
-    public YamlConfiguration(ZipFile archive, File inside, File to) {
-        super(archive, inside, to);
-    }
-
-    public YamlConfiguration(File archive, File inside, File to) {
-        super(archive, inside, to);
-    }
-
-    public static YamlConfiguration fromMap(File file, Map<String, Object> map) {
-        return new YamlConfiguration(file, map);
+    public static YamlConfiguration emptyYaml(File file) {
+        return (YamlConfiguration) emptyConfig(file, YamlConfiguration.class);
     }
 
     public static YamlConfiguration fromReader(File file, Reader reader) {
-        return new YamlConfiguration(file, reader);
+        return (YamlConfiguration) fromReader(file, reader, YamlConfiguration.class);
     }
 
+
     public static YamlConfiguration fromInputStream(File file, InputStream is) {
-        return new YamlConfiguration(file, is);
+        return (YamlConfiguration) fromInputStream(file, is, YamlConfiguration.class);
     }
 
     public static YamlConfiguration fromFile(File file) {
-        return new YamlConfiguration(file);
+        return (YamlConfiguration) fromFile(file, YamlConfiguration.class);
     }
 
     public static YamlConfiguration fromPath(Path path) {
-        return new YamlConfiguration(path);
+        return (YamlConfiguration) fromPath(path, YamlConfiguration.class);
     }
 
     public static YamlConfiguration fromString(String path) {
-        return new YamlConfiguration(path);
+        return (YamlConfiguration) fromString(path, YamlConfiguration.class);
+    }
+
+    public static YamlConfiguration fromContent(File file, String content) {
+        return (YamlConfiguration) fromContent(file, content, YamlConfiguration.class);
     }
 
     public static YamlConfiguration fromArchive(ZipFile archive, File inside, File to) {
-        return new YamlConfiguration(archive, inside, to);
+        return (YamlConfiguration) fromArchive(archive, inside, to, YamlConfiguration.class);
     }
 
-    public static YamlConfiguration fromArchive(File archive, File inside, File to) {
-        return new YamlConfiguration(archive, inside, to);
+    public static YamlConfiguration fromBytes(File file, byte[] bytes) {
+        return (YamlConfiguration) fromBytes(file, bytes, YamlConfiguration.class);
     }
-
 
     @Override
     public YamlOptions options() {
@@ -101,28 +88,48 @@ public class YamlConfiguration extends FileConfiguration {
         return options;
     }
 
+    public void options(YamlOptions options) {
+        this.options = options;
+    }
+
     private Yaml buildYaml() {
         LoaderOptions loaderOptions = new LoaderOptions();
+
         loaderOptions.setAllowDuplicateKeys(options().isAllowDuplicateKeys());
+        loaderOptions.setWrappedToRootException(options().isWrappedToRootException());
+        loaderOptions.setMaxAliasesForCollections(options().getMaxAliasesForCollections());
         loaderOptions.setAllowRecursiveKeys(options().isAllowRecursiveKeys());
-        loaderOptions.setProcessComments(options().isProcessComments());
         loaderOptions.setEnumCaseSensitive(options().isEnumCaseSensitive());
+        loaderOptions.setNestingDepthLimit(options().getNestingDepthLimit());
+        loaderOptions.setCodePointLimit(options().getCodePointLimit());
+        loaderOptions.setMergeOnCompose(options().isMergeOnCompose());
+        loaderOptions.setTagInspector(options().getTagInspector());
 
         DumperOptions dumperOptions = new DumperOptions();
+
         dumperOptions.setDefaultScalarStyle(options().getDefaultStyle());
-        dumperOptions.setDefaultFlowStyle(options().getDefaultFlowStyle());
-        dumperOptions.setCanonical(options().isCanonical());
         dumperOptions.setAllowUnicode(options().isAllowUnicode());
-        dumperOptions.setAllowReadOnlyProperties(options().isAllowReadOnlyProperties());
         dumperOptions.setIndent(options().getIndent());
+        dumperOptions.setIndicatorIndent(options().getIndicatorIndent());
+        dumperOptions.setIndentWithIndicator(options().isIndentWithIndicator());
+        dumperOptions.setVersion(options().getVersion());
+        dumperOptions.setCanonical(options().isCanonical());
+        dumperOptions.setPrettyFlow(options().getPrettyFlow());
+        dumperOptions.setWidth(options().getWidth());
         dumperOptions.setSplitLines(options().isSplitLines());
+        dumperOptions.setDefaultFlowStyle(options().getDefaultFlowStyle());
         dumperOptions.setLineBreak(options().getLineBreak());
         dumperOptions.setExplicitStart(options().isExplicitStart());
         dumperOptions.setExplicitEnd(options().isExplicitEnd());
+        dumperOptions.setTags(options().getTags());
+        dumperOptions.setAllowReadOnlyProperties(options().isAllowReadOnlyProperties());
         dumperOptions.setTimeZone(options().getTimeZone());
+        dumperOptions.setAnchorGenerator(options().getAnchorGenerator());
+        dumperOptions.setMaxSimpleKeyLength(options().getMaxSimpleKeyLength());
+        dumperOptions.setProcessComments(options().isProcessComments());
         dumperOptions.setNonPrintableStyle(options().getNonPrintableStyle());
-        dumperOptions.setVersion(options().getVersion());
-        dumperOptions.setPrettyFlow(options().isPrettyFlow());
+        dumperOptions.setDereferenceAliases(options().isDereferenceAliases());
+
         return new Yaml(loaderOptions, dumperOptions);
     }
 }

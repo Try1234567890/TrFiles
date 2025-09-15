@@ -2,63 +2,135 @@ package me.tr.trFiles.configuration.memory.implementations;
 
 import com.fasterxml.jackson.dataformat.toml.TomlMapper;
 import me.tr.trFiles.Validator;
+import me.tr.trFiles.configuration.implementations.toml.TomlConfiguration;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class MemoryTomlConfiguration extends MemoryConfiguration {
-    private TomlMapper mapper;
+    private @NotNull TomlMapper tomlMapper;
 
-    public MemoryTomlConfiguration() {
-        this.mapper = new TomlMapper();
+    private MemoryTomlConfiguration(@NotNull TomlMapper tomlMapper) {
+        this.tomlMapper = tomlMapper;
     }
 
-    public MemoryTomlConfiguration(Reader reader) {
-        super(reader);
-        this.mapper = new TomlMapper();
+    private MemoryTomlConfiguration() {
+        this.tomlMapper = new TomlMapper();
     }
 
-    public MemoryTomlConfiguration(InputStream is) {
-        super(is);
-        this.mapper = new TomlMapper();
+    @Override
+    public @NotNull MemoryTomlConfiguration newMemoryConfiguration() {
+        return new MemoryTomlConfiguration();
     }
 
-    public MemoryTomlConfiguration(Map<String, Object> map) {
-        super(map);
-        this.mapper = new TomlMapper();
+    @Override
+    public @NotNull TomlConfiguration newConfiguration(File file) {
+        return TomlConfiguration.emptyToml(file);
     }
 
-    public MemoryTomlConfiguration(File file) {
-        super(file);
-        this.mapper = new TomlMapper();
+    @Override
+    public boolean hasFileConfiguration() {
+        return true;
     }
 
-    public MemoryTomlConfiguration(TomlMapper mapper) {
-        this.mapper = mapper;
+    @Override
+    public @NotNull Class<TomlConfiguration> getConfigurationReference() {
+        return TomlConfiguration.class;
     }
 
-    public MemoryTomlConfiguration(Reader reader, TomlMapper mapper) {
-        super(reader);
-        this.mapper = mapper;
+    public static MemoryTomlConfiguration emptyToml(TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).empty();
     }
 
-    public MemoryTomlConfiguration(InputStream is, TomlMapper mapper) {
-        super(is);
-        this.mapper = mapper;
+    public static MemoryTomlConfiguration fromMemory(MemoryConfiguration memoryConfiguration, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).copy(memoryConfiguration);
     }
 
-    public MemoryTomlConfiguration(Map<String, Object> map, TomlMapper mapper) {
-        super(map);
-        this.mapper = mapper;
+    public static MemoryTomlConfiguration fromReader(Reader reader, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(reader);
     }
 
-    public MemoryTomlConfiguration(File file, TomlMapper mapper) {
-        super(file);
-        this.mapper = mapper;
+    public static MemoryTomlConfiguration fromInputStream(InputStream is, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(is);
+    }
+
+    public static MemoryTomlConfiguration fromMap(Map<String, Object> map, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(map);
+    }
+
+    public static MemoryTomlConfiguration fromFile(File file, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(file);
+    }
+
+    public static MemoryTomlConfiguration fromPath(Path path, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(path);
+    }
+
+    public static MemoryTomlConfiguration fromString(String path, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(path);
+    }
+
+    public static MemoryTomlConfiguration fromContent(String content, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).fromC(content);
+    }
+
+    public static MemoryTomlConfiguration fromArchive(ZipFile archive, File inside, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(archive, inside);
+    }
+
+    public static MemoryTomlConfiguration fromBytes(byte[] bytes, TomlMapper tomlMapper) {
+        return (MemoryTomlConfiguration) new MemoryTomlConfiguration(tomlMapper != null ? tomlMapper : new TomlMapper()).from(bytes);
+    }
+
+    public static MemoryTomlConfiguration emptyToml() {
+        return emptyToml(new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromMemory(MemoryConfiguration memoryConfiguration) {
+        return fromMemory(memoryConfiguration, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromReader(Reader reader) {
+        return fromReader(reader, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromInputStream(InputStream is) {
+        return fromInputStream(is, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromMap(Map<String, Object> map) {
+        return fromMap(map, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromFile(File file) {
+        return fromFile(file, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromPath(Path path) {
+        return fromPath(path, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromString(String path) {
+        return fromString(path, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromContent(String content) {
+        return fromContent(content, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromArchive(ZipFile archive, File inside) {
+        return fromArchive(archive, inside, new TomlMapper());
+    }
+
+    public static MemoryTomlConfiguration fromBytes(byte[] bytes) {
+        return fromBytes(bytes, new TomlMapper());
     }
 
     @Override
@@ -68,7 +140,7 @@ public class MemoryTomlConfiguration extends MemoryConfiguration {
 
         Map<?, ?> input;
         try {
-            input = mapper.readValue(contents, Map.class);
+            input = tomlMapper.readValue(contents, Map.class);
         } catch (IOException e) {
             throw new RuntimeException("An error occurs while loading Toml configuration. ", e);
         }
@@ -79,14 +151,14 @@ public class MemoryTomlConfiguration extends MemoryConfiguration {
     public String saveToString() {
         String contents;
         try {
-            contents = mapper.writeValueAsString(getValues(true));
+            contents = tomlMapper.writeValueAsString(getValues(true));
         } catch (IOException e) {
             throw new RuntimeException("An error occurs while saving Toml configuration. ", e);
         }
         return contents;
     }
 
-    public void setTomlMapper(TomlMapper mapper) {
-        this.mapper = mapper;
+    public void setTomlMapper(@NotNull TomlMapper tomlMapper) {
+        this.tomlMapper = tomlMapper;
     }
 }

@@ -1,5 +1,8 @@
 package me.tr.trFiles.configuration.implementations;
 
+/**
+ * This class contains the FileConfiguration options.
+ */
 public class FileOptions {
     private FileConfiguration configuration;
     private String commentPrefix;
@@ -63,4 +66,13 @@ public class FileOptions {
         this.footer = footer;
     }
 
+    @Override
+    public String toString() {
+        return "FileOptions{" +
+                "commentPrefix='" + commentPrefix + '\'' +
+                ", commentSuffix='" + commentSuffix + '\'' +
+                ", header='" + header + '\'' +
+                ", footer='" + footer + '\'' +
+                '}';
+    }
 }

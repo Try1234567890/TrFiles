@@ -6,6 +6,7 @@ import com.google.gson.Strictness;
 import me.tr.trFiles.configuration.implementations.FileOptions;
 
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 
 public class JsonOptions extends FileOptions {
     private boolean prettyPrinting;
@@ -141,5 +142,28 @@ public class JsonOptions extends FileOptions {
 
     public void setStrictness(Strictness strictness) {
         this.strictness = strictness;
+    }
+
+    @Override
+    public String toString() {
+        return "JsonOptions{" +
+                "prettyPrinting=" + prettyPrinting +
+                ", serializeNulls=" + serializeNulls +
+                ", datePattern='" + datePattern + '\'' +
+                ", version=" + version +
+                ", excludeFieldsWithModifiers=" + Arrays.toString(excludeFieldsWithModifiers) +
+                ", excludeFieldsWithoutExposeAnnotation=" + excludeFieldsWithoutExposeAnnotation +
+                ", exclusionStrategies=" + Arrays.toString(exclusionStrategies) +
+                ", disableHtmlEscaping=" + disableHtmlEscaping +
+                ", generateNonExecutableJson=" + generateNonExecutableJson +
+                ", enableComplexMapKeySerialization=" + enableComplexMapKeySerialization +
+                ", serializeSpecialFloatingPointValues=" + serializeSpecialFloatingPointValues +
+                ", longSerializationPolicy=" + longSerializationPolicy +
+                ", strictness=" + strictness +
+                ", commentPrefix='" + super.getCommentPrefix() + '\'' +
+                ", commentSuffix='" + super.getCommentSuffix() + '\'' +
+                ", header='" + super.getHeader() + '\'' +
+                ", footer='" + super.getFooter() + '\'' +
+                '}';
     }
 }

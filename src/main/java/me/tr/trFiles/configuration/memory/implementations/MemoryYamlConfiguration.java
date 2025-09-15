@@ -1,6 +1,7 @@
 package me.tr.trFiles.configuration.memory.implementations;
 
 import me.tr.trFiles.Validator;
+import me.tr.trFiles.configuration.implementations.yaml.YamlConfiguration;
 import me.tr.trFiles.configuration.memory.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
@@ -9,59 +10,133 @@ import org.yaml.snakeyaml.error.YAMLException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
 public class MemoryYamlConfiguration extends MemoryConfiguration {
     private @NotNull Yaml yaml;
 
-    public MemoryYamlConfiguration() {
-        this.yaml = new Yaml();
-    }
-
-    public MemoryYamlConfiguration(Reader reader) {
-        super(reader);
-        this.yaml = new Yaml();
-    }
-
-    public MemoryYamlConfiguration(InputStream is) {
-        super(is);
-        this.yaml = new Yaml();
-    }
-
-    public MemoryYamlConfiguration(Map<String, Object> map) {
-        super(map);
-        this.yaml = new Yaml();
-    }
-
-    public MemoryYamlConfiguration(File file) {
-        super(file);
-        this.yaml = new Yaml();
-    }
-
-    public MemoryYamlConfiguration(@NotNull Yaml yaml) {
+    private MemoryYamlConfiguration(@NotNull Yaml yaml) {
         this.yaml = yaml;
     }
 
-    public MemoryYamlConfiguration(Reader reader, @NotNull Yaml yaml) {
-        super(reader);
-        this.yaml = yaml;
+    private MemoryYamlConfiguration() {
+        this.yaml = new Yaml();
     }
 
-    public MemoryYamlConfiguration(InputStream is, @NotNull Yaml yaml) {
-        super(is);
-        this.yaml = yaml;
+    @Override
+    public @NotNull MemoryYamlConfiguration newMemoryConfiguration() {
+        return new MemoryYamlConfiguration();
     }
 
-    public MemoryYamlConfiguration(Map<String, Object> map, @NotNull Yaml yaml) {
-        super(map);
-        this.yaml = yaml;
+    @Override
+    public @NotNull YamlConfiguration newConfiguration(File file) {
+        return YamlConfiguration.emptyYaml(file);
     }
 
-    public MemoryYamlConfiguration(File file, @NotNull Yaml yaml) {
-        super(file);
-        this.yaml = yaml;
+    @Override
+    public @NotNull Class<YamlConfiguration> getConfigurationReference() {
+        return YamlConfiguration.class;
     }
 
+    @Override
+    public boolean hasFileConfiguration() {
+        return true;
+    }
+
+    @Override
+    public String getEmptyConfig() {
+        return "{}\n";
+    }
+
+    public static MemoryYamlConfiguration emptyYaml(Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).empty();
+    }
+
+    public static MemoryYamlConfiguration fromMemory(MemoryConfiguration memoryConfiguration, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).copy(memoryConfiguration);
+    }
+
+    public static MemoryYamlConfiguration fromReader(Reader reader, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(reader);
+    }
+
+    public static MemoryYamlConfiguration fromInputStream(InputStream is, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(is);
+    }
+
+    public static MemoryYamlConfiguration fromMap(Map<String, Object> map, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(map);
+    }
+
+    public static MemoryYamlConfiguration fromFile(File file, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(file);
+    }
+
+    public static MemoryYamlConfiguration fromPath(Path path, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(path);
+    }
+
+    public static MemoryYamlConfiguration fromString(String path, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(path);
+    }
+
+    public static MemoryYamlConfiguration fromContent(String content, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).fromC(content);
+    }
+
+    public static MemoryYamlConfiguration fromArchive(ZipFile archive, File inside, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(archive, inside);
+    }
+
+    public static MemoryYamlConfiguration fromBytes(byte[] bytes, Yaml yaml) {
+        return (MemoryYamlConfiguration) new MemoryYamlConfiguration(yaml != null ? yaml : new Yaml()).from(bytes);
+    }
+
+    public static MemoryYamlConfiguration emptyYaml() {
+        return emptyYaml(new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromMemory(MemoryConfiguration memoryConfiguration) {
+        return fromMemory(memoryConfiguration, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromReader(Reader reader) {
+        return fromReader(reader, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromInputStream(InputStream is) {
+        return fromInputStream(is, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromMap(Map<String, Object> map) {
+        return fromMap(map, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromFile(File file) {
+        return fromFile(file, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromPath(Path path) {
+        return fromPath(path, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromString(String path) {
+        return fromString(path, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromContent(String content) {
+        return fromContent(content, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromArchive(ZipFile archive, File inside) {
+        return fromArchive(archive, inside, new Yaml());
+    }
+
+    public static MemoryYamlConfiguration fromBytes(byte[] bytes) {
+        return fromBytes(bytes, new Yaml());
+    }
 
     @Override
     public void loadFromString(String contents) {
