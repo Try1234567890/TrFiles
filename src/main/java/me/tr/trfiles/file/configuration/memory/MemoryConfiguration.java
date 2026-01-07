@@ -9,7 +9,6 @@ import me.tr.trfiles.file.management.FileManager;
 import me.tr.trfiles.file.management.reader.file.FilesReader;
 import me.tr.trfiles.file.management.writer.file.FilesWriter;
 import me.tr.trfiles.registries.MemoryRegistry;
-import me.tr.trformatter.TrValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -104,7 +103,7 @@ public abstract class MemoryConfiguration extends MemorySection implements Confi
      */
 
     public MemoryConfiguration fillContent(String content) {
-        if (TrValidator.isNull(content))
+        if (Validator.isNull(content))
             content = getEntry().getAsEmpty();
 
         Map<?, ?> configMap = loadFromString(content);
