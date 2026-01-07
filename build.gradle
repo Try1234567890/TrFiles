@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'me.tr'
-version = '3.0.4'
+version = '3.0.6'
 
 publishing {
     publications {
@@ -29,4 +29,5 @@ dependencies {
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.17.1')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties:2.15.0-rc1')
     implementation('dev.toonformat:jtoon:1.0.7')
+
 }
