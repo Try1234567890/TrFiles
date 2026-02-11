@@ -7,3 +7,4 @@
 
 rootProject.name = 'files'
 
+include("image", "file", "common")
