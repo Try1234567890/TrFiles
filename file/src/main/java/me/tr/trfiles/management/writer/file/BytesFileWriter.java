@@ -1,7 +1,7 @@
-package me.tr.trfiles.file.management.writer.file;
+package me.tr.trfiles.management.writer.file;
 
 import me.tr.trfiles.Validator;
-import me.tr.trfiles.file.management.FileManager;
+import me.tr.trfiles.management.FileManager;
 
 import java.io.File;
 import java.io.IOException;

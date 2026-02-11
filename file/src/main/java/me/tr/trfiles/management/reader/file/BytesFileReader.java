@@ -1,4 +1,4 @@
-package me.tr.trfiles.file.management.reader.file;
+package me.tr.trfiles.management.reader.file;
 
 import me.tr.trfiles.Validator;
 
@@ -8,15 +8,22 @@ import java.io.IOException;
 public class BytesFileReader implements FileReader<byte[]> {
 
     @Override
-    public byte[] readOrThrown(File file) throws IOException {
+    public byte[] readOrThrown(File file, long from, long to) throws IOException {
         Validator.checkIf(file.isFile(), "is not a file");
         Validator.checkIf(file.exists(), "not exists");
         Validator.checkIf(file.canRead(), "not readable");
 
-        try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
-            byte[] data = new byte[(int) file.length()];
 
-            int bytesRead = fis.read(data);
+        from = Math.max(from, 0);
+        to = Math.min(to, file.length());
+
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+            int len = Math.toIntExact(to - from);
+
+            fis.skip(from);
+
+            byte[] data = new byte[len];
+            int bytesRead = fis.read(data, 0, len);
 
             if (bytesRead != data.length) {
                 throw new java.io.IOException("Cannot read all content of " + file.getPath());

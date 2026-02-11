@@ -1,7 +1,6 @@
-package me.tr.trfiles.file.management.writer.stream;
+package me.tr.trfiles.management.writer.stream;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 public class BytesStreamWriter implements OSWriter<byte[]> {

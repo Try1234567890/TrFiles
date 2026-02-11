@@ -1,9 +1,9 @@
-package me.tr.trfiles.file.management.writer.stream;
+package me.tr.trfiles.management.writer.stream;
 
 import java.io.*;
 import java.util.List;
 
-public class StringListStreamReader implements OSWriter<List<String>> {
+public class StringListStreamWriter implements OSWriter<List<String>> {
 
     @Override
     public void writeOrThrown(OutputStream out, List<String> value) throws IOException {

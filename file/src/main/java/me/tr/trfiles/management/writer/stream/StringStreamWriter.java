@@ -1,11 +1,8 @@
-package me.tr.trfiles.file.management.writer.stream;
-
-import me.tr.trfiles.Validator;
-import me.tr.trfiles.file.management.reader.file.FileReader;
+package me.tr.trfiles.management.writer.stream;
 
 import java.io.*;
 
-public class StringStreamReader implements OSWriter<String> {
+public class StringStreamWriter implements OSWriter<String> {
 
     @Override
     public void writeOrThrown(OutputStream out, String value) throws IOException {
