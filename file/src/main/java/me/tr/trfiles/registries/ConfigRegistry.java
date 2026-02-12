@@ -12,10 +12,7 @@ import me.tr.trfiles.configuration.implementations.yaml.YamlConfiguration;
 import me.tr.trfiles.management.FileUtility;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ConfigRegistry extends Registry<Class<? extends FileConfiguration>, ConfigEntry> {
     private static ConfigRegistry instance;
@@ -46,6 +43,10 @@ public class ConfigRegistry extends Registry<Class<? extends FileConfiguration>,
         return registry;
     }
 
+    public Collection<ConfigEntry> values() {
+        return getRegistry().values();
+    }
+
     public Optional<ConfigEntry> getConfigEntry(Class<? extends FileConfiguration> clazz) {
         Validator.isNull(clazz, "The provided class is null.");
         return Optional.ofNullable(getRegistry().get(clazz));
@@ -53,6 +54,9 @@ public class ConfigRegistry extends Registry<Class<? extends FileConfiguration>,
 
     public Optional<ConfigEntry> getConfigEntry(File file) {
         String ext = FileUtility.getExtensionWithPoint(file.getName());
+
+        if (ext.isEmpty())
+            return Optional.empty();
 
         return getRegistry().values()
                 .stream()

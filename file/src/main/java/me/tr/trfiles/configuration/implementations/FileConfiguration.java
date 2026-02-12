@@ -38,13 +38,13 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T empty(File file, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
 
         return (T) getConfig(file, reference);
     }
 
     public static <T extends FileConfiguration> T fromReader(File file, Reader r, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
 
         FileConfiguration configuration = getConfig(file, reference);
         configuration.getMemory().fillReader(r);
@@ -53,7 +53,7 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T fromInputStream(File file, InputStream is, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
 
         FileConfiguration configuration = getConfig(file, reference);
         configuration.getMemory().fillInputStream(is);
@@ -62,7 +62,7 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T fromMap(File file, Map<?, ?> map, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
 
         FileConfiguration configuration = getConfig(file, reference);
         configuration.getMemory().fillMap(map);
@@ -71,7 +71,7 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T fromContent(File file, String content, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
 
         FileConfiguration configuration = getConfig(file, reference);
         configuration.getMemory().fillContent(content);
@@ -81,7 +81,7 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T fromBytes(File file, byte[] bytes, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
 
         FileConfiguration configuration = getConfig(file, reference);
         configuration.getMemory().fillBytes(bytes);
@@ -90,7 +90,7 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T fromFile(File file, Class<T> reference) {
-        checkFile(file);
+        file = checkFile(file);
         FileConfiguration configuration = getConfig(file, reference);
         configuration.getMemory().fillFile(file);
         return (T) configuration;
@@ -105,7 +105,7 @@ public abstract class FileConfiguration implements Section {
     }
 
     public static <T extends FileConfiguration> T fromFile(File file) {
-        checkFile(file);
+        file = checkFile(file);
         FileConfiguration configuration = getConfig(file);
         configuration.getMemory().fillFile(file);
 
@@ -213,12 +213,33 @@ public abstract class FileConfiguration implements Section {
         getMemory().delete(getFile());
     }
 
-    private static void checkFile(File file) {
+    private static File checkFile(File file) {
         Validator.isNull(file, "The provided file is null.");
+
+        if (!file.exists()) {
+            Optional<File> maybeFile = tryToFindFile(file.getParentFile(), file.getName());
+            if (maybeFile.isPresent()) {
+                return maybeFile.get();
+            }
+        }
+
         Validator.checkIf(file.exists(), "The provided file does not exist.");
         Validator.checkIf(file.isFile(), "The provided file is not a file.");
         Validator.checkIf(file.canRead(), "The provided file is not readable.");
         Validator.checkIf(file.canWrite(), "The provided file is not writable.");
+        return file;
+    }
+
+    private static Optional<File> tryToFindFile(File folder, String name) {
+        for (ConfigEntry entry : ConfigRegistry.getInstance().values()) {
+            String[] extensions = entry.getExtensions();
+            for (String extension : extensions) {
+                File current = new File(folder, name + extension);
+                if (current.exists())
+                    return Optional.of(current);
+            }
+        }
+        return Optional.empty();
     }
 
     private static FileConfiguration getConfig(File file, Class<? extends FileConfiguration> reference) {
