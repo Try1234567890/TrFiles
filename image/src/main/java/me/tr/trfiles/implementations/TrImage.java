@@ -1,7 +1,7 @@
 package me.tr.trfiles.implementations;
 
 import me.tr.trfiles.Validator;
-import me.tr.trfiles.file.management.FileUtility;
+import me.tr.trfiles.management.FileUtility;
 import me.tr.trfiles.helper.TrImageInputStream;
 import me.tr.trfiles.management.ImageUtility;
 import me.tr.trfiles.memory.MemoryImage;

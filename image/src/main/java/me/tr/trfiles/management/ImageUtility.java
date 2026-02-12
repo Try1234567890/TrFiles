@@ -1,7 +1,6 @@
 package me.tr.trfiles.management;
 
 import me.tr.trfiles.Validator;
-import me.tr.trfiles.file.management.FileUtility;
 import me.tr.trfiles.helper.Format;
 
 import java.io.*;
@@ -13,117 +12,68 @@ public class ImageUtility {
     public static boolean isImage(InputStream is) {
         try (BufferedInputStream bis = is instanceof BufferedInputStream ? (BufferedInputStream) is : new BufferedInputStream(is)) {
             bis.mark(Integer.MAX_VALUE);
-            return isGIF(bis, false) ||
-                    isPNG(bis, false) ||
-                    isJPG(bis, false) ||
-                    isBMP(bis, false) ||
-                    isTIFF(bis, false) ||
-                    isWEBP(bis, false) ||
-                    isICO(bis, false) ||
-                    isSVG(bis, false) ||
-                    isEPS(bis, false) ||
-                    isPDF(bis, false);
+            return isGIF(bis) ||
+                    isPNG(bis) ||
+                    isJPG(bis) ||
+                    isBMP(bis) ||
+                    isTIFF(bis) ||
+                    isWEBP(bis) ||
+                    isICO(bis) ||
+                    isSVG(bis) ||
+                    isEPS(bis) ||
+                    isPDF(bis);
         } catch (IOException e) {
             throw new RuntimeException("An error occurs while closing the input stream.", e);
         }
     }
 
     public static boolean isPNG(InputStream is) {
-        return isPNG(is, true);
+        return FileUtility.hasMagicNumber(is, Format.PNG.getMagicNumbers());
     }
 
 
     public static boolean isJPG(InputStream is) {
-        return isJPG(is, true);
+        return FileUtility.hasMagicNumber(is, Format.JPG.getMagicNumbers());
     }
 
 
     public static boolean isGIF(InputStream is) {
-        return isGIF(is, true);
+        return FileUtility.hasMagicNumber(is, Format.GIF.getMagicNumbers());
     }
 
 
     public static boolean isBMP(InputStream is) {
-        return isBMP(is, true);
+        return FileUtility.hasMagicNumber(is, Format.BMP.getMagicNumbers());
     }
 
 
     public static boolean isTIFF(InputStream is) {
-        return isTIFF(is, true);
+        return FileUtility.hasMagicNumber(is, Format.TIFF.getMagicNumbers());
     }
 
 
     public static boolean isWEBP(InputStream is) {
-        return isWEBP(is, true);
+        return FileUtility.hasMagicNumber(is, Format.WEBP.getMagicNumbers());
     }
 
 
     public static boolean isICO(InputStream is) {
-        return isICO(is, true);
+        return FileUtility.hasMagicNumber(is, Format.ICO.getMagicNumbers());
     }
 
 
     public static boolean isSVG(InputStream is) {
-        return isSVG(is, true);
+        return FileUtility.hasMagicNumber(is, Format.SVG.getMagicNumbers());
     }
 
 
     public static boolean isEPS(InputStream is) {
-        return isEPS(is, true);
+        return FileUtility.hasMagicNumber(is, Format.EPS.getMagicNumbers());
     }
 
 
     public static boolean isPDF(InputStream is) {
-        return isPDF(is, true);
-    }
-
-    public static boolean isPNG(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.PNG.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isJPG(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.JPG.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isGIF(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.GIF.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isBMP(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.BMP.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isTIFF(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.TIFF.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isWEBP(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.WEBP.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isICO(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.ICO.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isSVG(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.SVG.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isEPS(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.EPS.getMagicNumbers(), close);
-    }
-
-
-    public static boolean isPDF(InputStream is, boolean close) {
-        return FileUtility.hasMagicNumber(is, Format.PDF.getMagicNumbers(), close);
+        return FileUtility.hasMagicNumber(is, Format.PDF.getMagicNumbers());
     }
 
     public static boolean isImage(File file) {
