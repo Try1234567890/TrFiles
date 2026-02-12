@@ -4,10 +4,11 @@ plugins {
     id 'com.gradleup.shadow' version '9.3.1'
 }
 
-group = 'me.tr'
-version = '4.0.0'
+group = 'me.tr.trfiles'
+version = '4.0.1'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -20,22 +21,15 @@ publishing {
     }
 }
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
 dependencies {
-    implementation(project(":common"))
+    implementation("me.tr.trfiles:common:0.0.1")
     implementation('org.yaml:snakeyaml:2.2')
     implementation('com.google.code.gson:gson:2.13.2')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.1')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.17.1')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties:2.15.0-rc1')
     implementation('dev.toonformat:jtoon:1.0.7')
-}
 
-dependencies {
     testImplementation(platform('org.junit:junit-bom:5.10.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
