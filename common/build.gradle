@@ -1,3 +1,21 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'me.tr.trfiles'
+version = '0.0.1'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+publishing {
+    publications {
+        mavenLocal(MavenPublication) {
+            from components.java
+            artifactId = 'common'
+        }
+    }
 }

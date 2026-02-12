@@ -1,7 +1,5 @@
 package me.tr.trfiles.management.reader.stream;
 
-import me.tr.trfiles.Validator;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
