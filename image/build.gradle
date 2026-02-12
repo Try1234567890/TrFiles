@@ -4,11 +4,12 @@ plugins {
     id 'com.gradleup.shadow' version '9.3.1'
 }
 
-group = 'me.tr'
+group = 'me.tr.trfiles'
 version = '1.0.0'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 publishing {
@@ -21,7 +22,7 @@ publishing {
 }
 
 dependencies {
-    implementation(project(":common"))
+    implementation("me.tr.trfiles:common:0.0.1")
     testImplementation(platform('org.junit:junit-bom:5.10.0'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
