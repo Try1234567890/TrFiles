@@ -5,7 +5,6 @@ plugins {
 }
 
 group = 'me.tr.trfiles'
-version = '4.0.1'
 
 repositories {
     mavenLocal()
@@ -17,12 +16,14 @@ publishing {
         mavenLocal(MavenPublication) {
             from components.java
             artifactId = 'files'
+
+            version = '4.0.2'
         }
     }
 }
 
 dependencies {
-    implementation("me.tr.trfiles:common:0.0.1")
+    implementation("me.tr.trfiles:common:0.0.4")
     implementation('org.yaml:snakeyaml:2.2')
     implementation('com.google.code.gson:gson:2.13.2')
     implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.1')
