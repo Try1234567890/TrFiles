@@ -1,7 +1,10 @@
 package me.tr.trfiles.registries;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public abstract class Registry<K, V> {
 
@@ -63,6 +66,29 @@ public abstract class Registry<K, V> {
         return Optional.ofNullable(getRegistry().get(key));
     }
 
+    public Set<Map.Entry<K, V>> entries() {
+        return getRegistry().entrySet();
+    }
+
+    public Set<K> keys() {
+        return getRegistry().keySet();
+    }
+
+    public Collection<V> values() {
+        return getRegistry().values();
+    }
+
+    public Stream<Map.Entry<K, V>> streamEntries() {
+        return entries().stream();
+    }
+
+    public Stream<K> streamKeys() {
+        return keys().stream();
+    }
+
+    public Stream<V> streamValues() {
+        return values().stream();
+    }
 
     protected abstract Map<K, V> getRegistry();
 

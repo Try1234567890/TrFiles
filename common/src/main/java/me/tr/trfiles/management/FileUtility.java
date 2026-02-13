@@ -4,9 +4,9 @@ import me.tr.trfiles.management.reader.file.FilesReader;
 import me.tr.trfiles.management.reader.stream.StreamsReader;
 import me.tr.trfiles.os.OSUtility;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Arrays;
 
 /**
  * Utility file class for files
@@ -295,7 +295,8 @@ public class FileUtility {
      * @return {@code true} if the header equals with the provided bytes.
      */
     public static boolean hasMagicNumber(File file, byte[] magicNumbers) {
-        return Arrays.equals(FilesReader.readAsBytesOrDefault(file, 0, magicNumbers.length, new byte[0]), magicNumbers);
+        byte[] readBytes = FilesReader.readAsBytesOrDefault(file, 0, 32, new byte[0]);
+        return matchesMagic(readBytes, magicNumbers);
     }
 
     /**
@@ -306,6 +307,16 @@ public class FileUtility {
      * @return {@code true} if the header equals with the provided bytes.
      */
     public static boolean hasMagicNumber(InputStream is, byte[] magicNumbers) {
-        return Arrays.equals(StreamsReader.readAsBytesOrDefault(is, 0, magicNumbers.length, new byte[0]), magicNumbers);
+        byte[] readBytes = StreamsReader.readAsBytesOrDefault(is, 0, 32, new byte[0]);
+        return matchesMagic(readBytes, magicNumbers);
     }
+
+    public static boolean matchesMagic(byte[] header, byte[] magic) {
+        if (header.length < magic.length) return false;
+        for (int i = 0; i < magic.length; i++) {
+            if (header[i] != magic[i]) return false;
+        }
+        return true;
+    }
+
 }

@@ -4,7 +4,6 @@ plugins {
 }
 
 group = 'me.tr.trfiles'
-version = '0.0.1'
 
 repositories {
     mavenLocal()
@@ -16,6 +15,8 @@ publishing {
         mavenLocal(MavenPublication) {
             from components.java
             artifactId = 'common'
+
+            version = '0.0.4'
         }
     }
 }

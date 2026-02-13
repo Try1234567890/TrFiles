@@ -1,35 +1,39 @@
 package me.tr.trfiles.memory;
 
-import me.tr.trfiles.Validator;
 import me.tr.trfiles.Image;
-import me.tr.trfiles.helper.Direction;
-import me.tr.trfiles.helper.Format;
-import me.tr.trfiles.helper.colors.Color;
-import me.tr.trfiles.helper.colors.ColorUtility;
-import me.tr.trfiles.helper.shapes.Shape;
+import me.tr.trfiles.ImageEntry;
+import me.tr.trfiles.Validator;
+import me.tr.trfiles.exceptions.UnknownImplementationException;
+import me.tr.trfiles.properties.Direction;
+import me.tr.trfiles.properties.colors.Color;
+import me.tr.trfiles.properties.colors.ColorUtility;
+import me.tr.trfiles.properties.shapes.Shape;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
 
 public class MemoryImage implements Image {
     private int[][] pixels;
-    private MemoryOptions options;
+    private MemoryImageOptions options;
+    private final ImageEntry entry;
 
-    protected MemoryImage() {
-    }
-
-    public MemoryImage(int[][] pixels, MemoryOptions options) {
+    protected MemoryImage(ImageEntry entry, int[][] pixels, MemoryImageOptions options) {
+        this.entry = entry;
         this.pixels = pixels;
         this.options = options;
     }
 
-    public MemoryImage(int[][] pixels) {
-        this.pixels = pixels;
+    public MemoryImage(InputStream is, MemoryImageOptions options) {
+        ImageEntry entry = ImageEntry.of(is).orElseThrow(() -> new UnknownImplementationException("The implementation of provided image is not recognized or not supported."));
+        int[][] pixels = readPixels(is).orElseThrow(() -> new RuntimeException("An error occurs while reading the provided image."));
+        this(entry, pixels, options);
     }
 
-    public static MemoryImage of(int[][] pixels, MemoryOptions options) {
-        return new MemoryImage(pixels, options);
-    }
-
-    public static MemoryImage of(int[][] pixels) {
-        return new MemoryImage(pixels);
+    public MemoryImage(InputStream is) {
+        this(is, null);
     }
 
     @Override
@@ -71,6 +75,11 @@ public class MemoryImage implements Image {
     @Override
     public int getHeight() {
         return getPixels().length > 1 ? getPixels()[0].length : 0;
+    }
+
+    @Override
+    public ImageEntry getEntry() {
+        return entry;
     }
 
     @Override
@@ -178,7 +187,7 @@ public class MemoryImage implements Image {
     }
 
     @Override
-    public void convert(Format format) {
+    public void convert(Class<? extends Image> to) {
 
     }
 
@@ -189,10 +198,31 @@ public class MemoryImage implements Image {
     }
 
     @Override
-    public MemoryOptions options() {
+    public MemoryImageOptions options() {
         if (options == null) {
-            options = new MemoryOptions(this);
+            options = new MemoryImageOptions(this);
         }
         return options;
+    }
+
+    private static Optional<int[][]> readPixels(InputStream is) {
+        try {
+            BufferedImage image = ImageIO.read(is);
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+            int[][] pixels = new int[width][height];
+
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    int pixel = image.getRGB(x, y);
+                    pixels[x][y] = pixel;
+                }
+            }
+
+            return Optional.of(pixels);
+        } catch (IOException ignored) {
+        }
+        return Optional.empty();
     }
 }

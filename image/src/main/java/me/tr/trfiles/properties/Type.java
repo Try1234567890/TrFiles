@@ -1,4 +1,4 @@
-package me.tr.trfiles.helper;
+package me.tr.trfiles.properties;
 
 import java.io.File;
 

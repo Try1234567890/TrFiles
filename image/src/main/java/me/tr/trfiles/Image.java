@@ -1,9 +1,11 @@
-package me.tr.trfiles;
+package me.tr.trfiles.memory;
 
-import me.tr.trfiles.helper.Direction;
-import me.tr.trfiles.helper.Format;
-import me.tr.trfiles.helper.colors.Color;
-import me.tr.trfiles.helper.shapes.Shape;
+import me.tr.trfiles.properties.Direction;
+import me.tr.trfiles.properties.Type;
+import me.tr.trfiles.properties.colors.Color;
+import me.tr.trfiles.properties.shapes.Shape;
+
+import java.io.File;
 
 public interface Image {
 
@@ -23,7 +25,7 @@ public interface Image {
 
     void addText(int x, int y, String text);
 
-    void convert(Format format);
+    void convert(Class<? extends Image> to);
 
     void flip(Direction direction);
 
@@ -41,6 +43,24 @@ public interface Image {
 
     int getHeight();
 
+    ImageEntry getEntry();
+
     ImageOptions options();
+
+    default byte[] getMagicNumbers() {
+        return getEntry().getMagicNumbers();
+    }
+
+    default String[] getExtensions() {
+        return getEntry().getExtensions();
+    }
+
+    default Type getType() {
+        return getEntry().getType();
+    }
+
+    default boolean isValid(File file) {
+        return getEntry().isValid(file);
+    }
 }
 

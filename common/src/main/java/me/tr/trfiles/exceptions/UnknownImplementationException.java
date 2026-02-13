@@ -1,4 +1,4 @@
-package me.tr.trfiles.configuration.implementations;
+package me.tr.trfiles.exceptions;
 
 import me.tr.trfiles.management.FileUtility;
 

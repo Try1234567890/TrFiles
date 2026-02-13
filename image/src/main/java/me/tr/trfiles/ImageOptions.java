@@ -1,20 +1,17 @@
-package me.tr.trfiles;
+package me.tr.trfiles.memory;
 
-import me.tr.trfiles.helper.Direction;
-import me.tr.trfiles.helper.Format;
-import me.tr.trfiles.helper.Flags;
+import me.tr.trfiles.properties.Direction;
+import me.tr.trfiles.properties.Flags;
 
 public class ImageOptions {
     private final Image image;
     private Flags[] flags;
-    private Format format;
     private Direction direction;
 
 
     public ImageOptions(Image image) {
         this.image = image;
         this.flags = new Flags[0];
-        this.format = Format.PNG;
         this.direction = Direction.UP;
     }
 
@@ -45,15 +42,6 @@ public class ImageOptions {
         System.arraycopy(flags, 0, newFlags, currentFlags.length, flags.length);
 
         this.flags = newFlags;
-    }
-
-
-    public Format getFormat() {
-        return format;
-    }
-
-    public void setFormat(Format format) {
-        this.format = format;
     }
 
     public Direction getDirection() {
