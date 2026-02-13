@@ -1,5 +1,6 @@
 package me.tr.trfiles.configuration.implementations;
 
+import me.tr.trfiles.exceptions.UnknownImplementationException;
 import me.tr.trfiles.Validator;
 import me.tr.trfiles.configuration.Config;
 import me.tr.trfiles.configuration.Section;
