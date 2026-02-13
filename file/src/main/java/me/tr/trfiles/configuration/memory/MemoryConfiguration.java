@@ -4,7 +4,7 @@ import me.tr.trfiles.Validator;
 import me.tr.trfiles.configuration.Config;
 import me.tr.trfiles.configuration.Section;
 import me.tr.trfiles.configuration.implementations.FileConfiguration;
-import me.tr.trfiles.configuration.implementations.UnknownImplementationException;
+import me.tr.trfiles.exceptions.UnknownImplementationException;
 import me.tr.trfiles.management.FileManager;
 import me.tr.trfiles.management.reader.file.FilesReader;
 import me.tr.trfiles.management.writer.file.FilesWriter;
@@ -237,6 +237,7 @@ public abstract class MemoryConfiguration extends MemorySection implements Confi
      */
     @Override
     public void save(File file) {
+        FileManager.createAsFile(file);
         FilesWriter.writerString(file, saveAsString());
     }
 
