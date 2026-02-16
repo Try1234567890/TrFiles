@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation("me.tr.trfiles:common:0.0.6")
+    implementation("me.tr.trfiles:common:0.1.1")
 
     implementation('org.yaml:snakeyaml:2.3')
     implementation('com.google.code.gson:gson:2.11.0')
@@ -43,7 +43,7 @@ publishing {
 
             artifactId = 'files'
 
-            group = 'me.tr.trfiles'
+            groupId = 'me.tr.trfiles'
             version = '4.0.3'
         }
     }

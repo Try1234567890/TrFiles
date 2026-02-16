@@ -14,8 +14,8 @@ publishing {
             from components.java
             artifactId = 'common'
 
-            group = 'me.tr.trfiles'
-            version = '0.1.0'
+            groupId = 'me.tr.trfiles'
+            version = '0.1.1'
         }
     }
 }
