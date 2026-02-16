@@ -16,7 +16,6 @@ import java.util.*;
 
 public class ConfigRegistry extends Registry<Class<? extends FileConfiguration>, ConfigEntry> {
     private static ConfigRegistry instance;
-    private static final Map<Class<? extends FileConfiguration>, ConfigEntry> registry = new HashMap<>();
 
     private ConfigRegistry() {
     }
@@ -36,15 +35,6 @@ public class ConfigRegistry extends Registry<Class<? extends FileConfiguration>,
             );
         }
         return instance;
-    }
-
-    @Override
-    protected Map<Class<? extends FileConfiguration>, ConfigEntry> getRegistry() {
-        return registry;
-    }
-
-    public Collection<ConfigEntry> values() {
-        return getRegistry().values();
     }
 
     public Optional<ConfigEntry> getConfigEntry(Class<? extends FileConfiguration> clazz) {

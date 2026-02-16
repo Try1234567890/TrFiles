@@ -45,22 +45,6 @@ public interface Config extends Section {
     void delete(File file);
 
     /**
-     * Zip a file.
-     *
-     * @param zip  the destination zip file
-     * @param file the file to zip
-     */
-    //void zip(File zip, File file);
-
-    /**
-     * Convert the current configuration to another memory configuration.
-     *
-     * @param to the memory configuration to convert to
-     * @return the converted memory configuration
-     */
-    //MemoryConfiguration convert(MemoryConfiguration to);
-
-    /**
      * Get the configuration options.
      *
      * @return the configuration options

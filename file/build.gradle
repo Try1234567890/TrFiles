@@ -4,36 +4,49 @@ plugins {
     id 'com.gradleup.shadow' version '9.3.1'
 }
 
-group = 'me.tr.trfiles'
-
 repositories {
     mavenLocal()
     mavenCentral()
 }
 
+dependencies {
+    implementation("me.tr.trfiles:common:0.0.6")
+
+    implementation('org.yaml:snakeyaml:2.3')
+    implementation('com.google.code.gson:gson:2.11.0')
+    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.2')
+    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.18.2')
+    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties:2.18.2')
+    implementation('dev.toonformat:jtoon:1.0.8')
+
+    testImplementation(platform('org.junit:junit-bom:5.11.0'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+
+    relocate 'org.yaml.snakeyaml', 'me.tr.trfiles.libs.snakeyaml'
+    relocate 'com.google.gson', 'me.tr.trfiles.libs.gson'
+    relocate 'com.fasterxml.jackson', 'me.tr.trfiles.libs.jackson'
+    relocate 'dev.toonformat.jtoon', 'me.tr.trfiles.libs.jtoon'
+
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/LICENSE*'
+}
+
 publishing {
     publications {
         mavenLocal(MavenPublication) {
-            from components.java
+            from components.shadow
+
             artifactId = 'files'
 
-            version = '4.0.2'
+            group = 'me.tr.trfiles'
+            version = '4.0.3'
         }
     }
-}
-
-dependencies {
-    implementation("me.tr.trfiles:common:0.0.4")
-    implementation('org.yaml:snakeyaml:2.2')
-    implementation('com.google.code.gson:gson:2.13.2')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.18.1')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.17.1')
-    implementation('com.fasterxml.jackson.dataformat:jackson-dataformat-properties:2.15.0-rc1')
-    implementation('dev.toonformat:jtoon:1.0.7')
-
-    testImplementation(platform('org.junit:junit-bom:5.10.0'))
-    testImplementation('org.junit.jupiter:junit-jupiter')
-    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 test {

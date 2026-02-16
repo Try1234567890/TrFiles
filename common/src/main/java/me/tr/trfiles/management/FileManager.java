@@ -14,7 +14,7 @@ public class FileManager {
 
         CreatingResult result = createAsFolder(file.getParentFile());
 
-        if (!result.equals(CreatingResult.SUCCESS))
+        if (result.ordinal() >= 2)
             return result;
 
         //noinspection ResultOfMethodCallIgnored
@@ -68,11 +68,12 @@ public class FileManager {
 
     public enum CreatingResult {
 
+        SUCCESS,
         ALREADY_EXISTS,
         DIFFERENT_TYPE,
+
         ERROR_OCCURS,
-        FAILED,
-        SUCCESS
+        FAILED
 
     }
 

@@ -1,12 +1,11 @@
 package me.tr.trfiles.registries;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
-public abstract class Registry<K, V> {
+public class Registry<K, V> {
+    private final Map<K, V> registry = new HashMap<>();
+
 
     public boolean register(K key, V value) {
         if (getRegistry().containsKey(key))
@@ -90,6 +89,8 @@ public abstract class Registry<K, V> {
         return values().stream();
     }
 
-    protected abstract Map<K, V> getRegistry();
+    protected Map<K, V> getRegistry() {
+        return registry;
+    }
 
 }

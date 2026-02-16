@@ -11,7 +11,6 @@ import java.util.Optional;
 
 public class MemoryRegistry extends Registry<Class<? extends MemoryConfiguration>, MemoryEntry> {
     private static MemoryRegistry instance;
-    private static final Map<Class<? extends MemoryConfiguration>, MemoryEntry> registry = new HashMap<>();
 
     private MemoryRegistry() {
     }
@@ -31,11 +30,6 @@ public class MemoryRegistry extends Registry<Class<? extends MemoryConfiguration
             );
         }
         return instance;
-    }
-
-    @Override
-    protected Map<Class<? extends MemoryConfiguration>, MemoryEntry> getRegistry() {
-        return registry;
     }
 
     public Optional<MemoryEntry> getMemoryEntry(Class<? extends MemoryConfiguration> clazz) {

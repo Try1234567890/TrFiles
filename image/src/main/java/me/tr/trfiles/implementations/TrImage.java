@@ -1,115 +1,185 @@
 package me.tr.trfiles.implementations;
 
+import me.tr.trfiles.Image;
 import me.tr.trfiles.Validator;
-import me.tr.trfiles.management.FileUtility;
-import me.tr.trfiles.helper.TrImageInputStream;
-import me.tr.trfiles.management.ImageUtility;
+import me.tr.trfiles.exceptions.UnknownImplementationException;
 import me.tr.trfiles.memory.MemoryImage;
-import me.tr.trfiles.memory.MemoryOptions;
+import me.tr.trfiles.registries.ImagesRegistry;
+import me.tr.trformatter.color.Color;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Optional;
 
-public abstract class TrImage extends MemoryImage {
+public class TrImage implements Image {
     private final File file;
-    private BufferedImage image;
-    private TrImageOptions options;
+    private final MemoryImage memory;
+    private final TrImageEntry entry;
 
-    public TrImage(String path) {
-        this(FileUtility.getFileFromString(path));
+    protected TrImage(TrImageEntry entry, File file, MemoryImage memory) {
+        Validator.isNull(memory, "Memory cannot be null.");
+        this.file = file;
+        this.memory = memory;
+        this.entry = entry;
     }
 
-    public TrImage(File file) {
-        Validator.checkIf(file != null, "File cannot be null.");
-        Validator.checkIf(ImageUtility.isImage(file), "File not exists.");
-        try (InputStream is = new FileInputStream(file)) {
-            Validator.checkIf(is.available() > 0, "InputStream cannot be empty.");
-            this.file = file;
-            this.image = ImageIO.read(is);
-            int width = image.getWidth();
-            int height = image.getHeight();
+    public static TrImage fromOrThrown(File file) throws IOException {
+        TrImageEntry entry = ImagesRegistry.getImage(file).orElseThrow(() -> new UnknownImplementationException(file));
+        return entry.newInstance(file);
+    }
 
-            int[][] pixels = new int[width][height];
+    public static TrImage fromOrThrown(String file) throws IOException {
+        return fromOrThrown(new File(file));
+    }
 
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    pixels[x][y] = image.getRGB(x, y);
-                }
-            }
-
-            setPixels(pixels);
+    public static Optional<? extends TrImage> from(File file) {
+        try {
+            return Optional.of(fromOrThrown(file));
         } catch (IOException e) {
-            throw new RuntimeException("An error occurs while creating a new TrImage", e);
+            return Optional.empty();
         }
     }
 
-    public TrImage(TrImageInputStream is) {
-        Validator.checkIf(is != null, "File cannot be null.");
-        Validator.checkIf(ImageUtility.isImage(is), "File not exists.");
-        try (is) {
-            Validator.checkIf(is.available() > 0, "InputStream cannot be empty.");
-            this.file = is.getFile();
-            this.image = ImageIO.read(is);
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-            int[][] pixels = new int[width][height];
-
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    pixels[x][y] = image.getRGB(x, y);
-                }
-            }
-
-            setPixels(pixels);
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurs while creating a new TrImage", e);
-        }
+    public static Optional<? extends TrImage> from(String file) {
+        return from(new File(file));
     }
 
-    public void save() throws IOException {
-        BufferedImage image = new BufferedImage(getPixels().length, getPixels()[0].length, BufferedImage.TYPE_INT_ARGB);
-
-        for (int x = 0; x < getPixels().length; x++) {
-            for (int y = 0; y < getPixels()[0].length; y++) {
-                image.setRGB(x, y, getPixel(x, y));
-            }
-        }
-
-        ImageIO.write(image, options().getFormat().getExtensions()[0], file);
-
+    public static TrImage fromOrNull(File file) {
+        return from(file).orElse(null);
     }
 
-    public TrImageOptions getOptions() {
-        return options;
+    public static TrImage fromOrNull(String file) {
+        return from(file).orElse(null);
     }
 
     public File getFile() {
         return file;
     }
 
-    public BufferedImage getImage() {
-        return image;
+    public MemoryImage getMemory() {
+        return memory;
     }
 
-    public void setOptions(TrImageOptions options) {
-        this.options = options;
-    }
-
+    /**
+     * Retrieve the 2D array of image pixels.
+     *
+     * @return the image pixels.
+     */
     @Override
-    public MemoryOptions options() {
-        if (options == null) {
-            options = new TrImageOptions(this);
-        }
-        return options;
+    public int[][] getPixels() {
+        return getMemory().getPixels();
     }
 
-    protected abstract MemoryImage toPng(int[][] pixels);
+    /**
+     * Get the pixel at the provided coordinate.
+     *
+     * @param x the x coordinate.
+     * @param y the y coordinate.
+     * @return the pixel at the provided coordinate.
+     * @throws ArrayIndexOutOfBoundsException if one of the coordinate is bigger than image size.
+     */
+    @Override
+    public int getPixel(int x, int y) {
+        return getMemory().getPixel(x, y);
+    }
 
-    protected abstract MemoryImage fromPng(int[][] pixels);
+    /**
+     * Set the pixel color at the provided coordinate.
+     *
+     * @param x     the x coordinate.
+     * @param y     the y coordinate.
+     * @param color the new pixel color.
+     */
+    @Override
+    public void setPixel(int x, int y, Color color) {
+        getMemory().setPixel(x, y, color);
+    }
 
+    /**
+     * Set the pixel color at the provided coordinate.
+     *
+     * @param x the x coordinate.
+     * @param y the y coordinate.
+     * @return the pixel color at the provided coordinate.
+     * @throws ArrayIndexOutOfBoundsException if one of the coordinate is bigger than image size.
+     */
+    @Override
+    public Color getColor(int x, int y) {
+        return getMemory().getColor(x, y);
+    }
+
+    /**
+     * @return the image width. (or {@code getPixels().length}).
+     */
+    @Override
+    public int getWidth() {
+        return getMemory().getWidth();
+    }
+
+    /**
+     * @return the image height. (or {@code getPixels()[0].length})
+     */
+    @Override
+    public int getHeight() {
+        return getMemory().getHeight();
+    }
+
+    /**
+     * Write the current image to file.
+     *
+     * @param file the file to write to.
+     */
+    @Override
+    public void save(File file) throws IOException {
+        getMemory().save(file);
+    }
+
+    /**
+     * Reload the image from image.
+     *
+     * @param image the image to reload from.
+     */
+    @Override
+    public void reload(BufferedImage image) {
+        getMemory().reload(image);
+    }
+
+    /**
+     * Write to disk the current image and ignore any errors.
+     */
+    public void saveOrIgnore() {
+        try {
+            save(getFile());
+        } catch (IOException ignore) {
+        }
+    }
+
+    /**
+     * Reload the image from disk and ignore any errors.
+     */
+    public void reloadOrIgnore() {
+        try {
+            reload(getFile());
+        } catch (IOException ignore) {
+        }
+    }
+
+    /**
+     * Write to disk the current image.
+     */
+    public void save() throws IOException {
+        save(getFile());
+    }
+
+    /**
+     * Reload the image from disk.
+     */
+    public void reload() throws IOException {
+        reload(getFile());
+    }
+
+    public TrImageEntry getEntry() {
+        return entry;
+    }
 }

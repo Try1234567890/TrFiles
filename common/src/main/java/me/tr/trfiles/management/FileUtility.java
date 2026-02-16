@@ -1,7 +1,7 @@
 package me.tr.trfiles.management;
 
-import me.tr.trfiles.management.reader.file.FilesReader;
-import me.tr.trfiles.management.reader.stream.StreamsReader;
+import me.tr.trfiles.management.io.reader.file.FilesReader;
+import me.tr.trfiles.management.io.reader.stream.StreamsReader;
 import me.tr.trfiles.os.OSUtility;
 
 import java.io.File;
