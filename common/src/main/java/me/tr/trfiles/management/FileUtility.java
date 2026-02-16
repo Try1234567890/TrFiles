@@ -291,7 +291,6 @@ public class FileUtility {
      *
      * @param file         The file to read the header from.
      * @param magicNumbers The bytes to compare with.
-     * @param close        if {@code true} close the input stream, otherwise not close the new input stream created.
      * @return {@code true} if the header equals with the provided bytes.
      */
     public static boolean hasMagicNumber(File file, byte[] magicNumbers) {
