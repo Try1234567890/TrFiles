@@ -1,4 +1,4 @@
-package me.tr.trfiles.configuration.size;
+package me.tr.trfiles.size;
 
 import java.util.Arrays;
 
