@@ -6,10 +6,9 @@ import me.tr.trfiles.configuration.Config;
 import me.tr.trfiles.configuration.Section;
 import me.tr.trfiles.configuration.memory.DataType;
 import me.tr.trfiles.configuration.memory.MemoryConfiguration;
-import me.tr.trfiles.configuration.size.Size;
-import me.tr.trfiles.configuration.size.SizeUnit;
 import me.tr.trfiles.management.FileUtility;
 import me.tr.trfiles.registries.ConfigRegistry;
+import me.tr.trfiles.size.Size;
 
 import java.io.File;
 import java.io.InputStream;
@@ -255,7 +254,7 @@ public abstract class FileConfiguration implements Section {
         FileConfiguration configuration = entry.get().newInstance(file);
 
         configuration.setFile(file);
-        configuration.setSize(new Size(file.length(), SizeUnit.BYTE));
+        configuration.setSize(Size.file(file));
 
         return configuration;
     }
@@ -270,7 +269,7 @@ public abstract class FileConfiguration implements Section {
         FileConfiguration configuration = entry.get().newInstance(file);
 
         configuration.setFile(file);
-        configuration.setSize(new Size(file.length(), SizeUnit.BYTE));
+        configuration.setSize(Size.file(file));
 
         return configuration;
     }

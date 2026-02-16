@@ -6,8 +6,8 @@ import me.tr.trfiles.configuration.Section;
 import me.tr.trfiles.configuration.implementations.FileConfiguration;
 import me.tr.trfiles.exceptions.UnknownImplementationException;
 import me.tr.trfiles.management.FileManager;
-import me.tr.trfiles.management.reader.file.FilesReader;
-import me.tr.trfiles.management.writer.file.FilesWriter;
+import me.tr.trfiles.management.io.reader.file.FilesReader;
+import me.tr.trfiles.management.io.writer.file.FilesWriter;
 import me.tr.trfiles.registries.MemoryRegistry;
 
 import java.io.*;
