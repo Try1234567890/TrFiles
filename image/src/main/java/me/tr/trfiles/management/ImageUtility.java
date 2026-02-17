@@ -16,18 +16,24 @@ public class ImageUtility {
 
     public static boolean isImage(InputStream is) {
         try {
+            if (!is.markSupported()) {
+                is = new BufferedInputStream(is);
+            }
+
+            is.mark(32);
             byte[] header = is.readNBytes(32);
+            is.reset();
 
             return //isGIF(header) ||
                     isPNG(header) ||
-                    isJPG(header) ||
-                    //isBMP(header) ||
-                    //isTIFF(header) ||
-                    //isWEBP(header) ||
-                    isICO(header);
-                    //isSVG(header) ||
-                    //isEPS(header) ||
-                    //isPDF(header);
+                            isJPG(header) ||
+                            //isBMP(header) ||
+                            //isTIFF(header) ||
+                            //isWEBP(header) ||
+                            isICO(header);
+            //isSVG(header) ||
+            //isEPS(header) ||
+            //isPDF(header);
 
         } catch (IOException e) {
             throw new RuntimeException("Error while reading stream.", e);
@@ -47,7 +53,6 @@ public class ImageUtility {
     public static boolean isICO(byte[] bytes) {
         return FileUtility.matchesMagic(bytes, MemoryICO.ENTRY.getSignature());
     }
-
 
 
     //public static boolean isGIF(byte[] bytes) {
@@ -96,7 +101,6 @@ public class ImageUtility {
     public static boolean isICO(InputStream is) {
         return FileUtility.hasMagicNumber(is, MemoryICO.ENTRY.getSignature());
     }
-
 
 
     //public static boolean isGIF(InputStream is) {
